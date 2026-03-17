@@ -1,144 +1,200 @@
-# Guild Agent - TODO Roadmap
+# Guild Agent - Prioritized Roadmap
 
-This backlog translates the approved game direction into implementation milestones.
+This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer agency sim.
 
-## 0. Current Prototype Baseline
-- [x] Desk-centered UI shell with left/right panels and bottom operations console
-- [x] Hybrid console: typed commands + contextual action buttons
-- [x] Modes scaffolded, with active flow for PLANNING -> MISSION_REVIEW -> MISSION_RESULT
-- [x] Mission simulation with weighted stats, risk, and injury outcomes
+## 0. Current Playable Baseline
+- [x] Desk-centered UI shell with bottom operations console and action wheel
+- [x] Patron -> contract -> party -> launch drill-down flow
+- [x] Recruit desk -> scout -> candidate -> offer -> counter -> sign drill-down flow
+- [x] Mission travel / return lifecycle with field reports
+- [x] Rival pressure, time pulse, and day progression
+- [x] Adventurer purse tracking, kit basics, and file view
 
-## 1. Immediate UX Fixes (Next)
-- [ ] Replace instant mission completion with a mission lifecycle system
-- [ ] Add in-UI mission timers (eta shown as days/hours)
-- [ ] Add clear queue/status section for: preparing, in_progress, returning, completed
-- [ ] Improve command vocabulary to use "START" language as primary and keep aliases for compatibility
+## 1. Client Contracts and Relationship Depth
+- [ ] Add represented-adventurer client contracts with:
+- [ ] Day rate
+- [ ] Agency commission
+- [ ] Contract term length
+- [ ] Exclusivity / representation type
+- [ ] Minimum activity expectations
+- [ ] Add trust and morale as separate values for each represented adventurer
+- [ ] Add client priorities such as:
+- [ ] Wants steady work
+- [ ] Wants prestige jobs
+- [ ] Avoids high-risk work
+- [ ] Wants larger personal payouts
+- [ ] Add relationship changes from:
+- [ ] Idle time
+- [ ] Mission success/failure
+- [ ] Injury outcomes
+- [ ] Pay quality
+- [ ] Patron fit
+- [ ] Add renegotiation flow for existing clients
+- [ ] Medieval fantasy dressing:
+- [ ] Guild charters
+- [ ] Sworn retainerships
+- [ ] Temple service oaths
+- [ ] Mercenary letters
+- [ ] Bardic sponsorship agreements
 
-## 2. Time Simulation Core (Priority)
-### 2.1 World Clock
-- [ ] Implement world time struct: year, season, day, hour
-- [ ] Support variable mission durations (hours to weeks)
-- [ ] Time advancement methods:
-- [ ] Advance by 1 hour
-- [ ] Advance to end of day
-- [ ] Advance to next event completion
+## 2. Morale, Usage Pressure, and Defection Risk
+- [ ] Expand idle-time complaints into escalating client pressure
+- [ ] Add "poachable star" behavior for famous or powerful clients
+- [ ] Add rival offers from lords, towers, temples, mercenary bands, and trade houses
+- [ ] Add burnout from overuse and resentment from repeated benching
+- [ ] Add departure warnings before a client leaves
 
-### 2.2 Day-End / Overnight Loop
-- [ ] Add explicit "End Day" flow
-- [ ] Simulate agent off-hours (office closed state)
-- [ ] Run overnight maintenance pipeline:
-- [ ] Injury recovery rolls
-- [ ] Contract board refresh
-- [ ] Rival activity updates
-- [ ] Pending mission progress ticks
-- [ ] Start-of-day summary report in console (overnight events digest)
+## 3. Equipment, Kit, and Magic Inventory
+- [ ] Separate agency-owned gear from client-owned gear
+- [ ] Add consumables:
+- [ ] Salves
+- [ ] Rations
+- [ ] Lockpicks
+- [ ] Ward scrolls
+- [ ] Healing kits
+- [ ] Add relic and magic-find categories
+- [ ] Add repair, replacement, and upgrade loops
+- [ ] Add equipment impact on mission scoring and injury reduction
+- [ ] Medieval fantasy dressing:
+- [ ] Rune-etched shields
+- [ ] Abbey relics
+- [ ] Hedge charms
+- [ ] Dwarf-forged arms
+- [ ] Noble travel attire
 
-### 2.3 Mission Lifecycle
-- [ ] Add mission states: available, assigned, traveling, active, returning, resolved
-- [ ] On "Start Mission", lock party members as on_mission
-- [ ] Resolve mission only when ETA completes, not instantly
-- [ ] Deliver result as inbound report/event on completion tick
+## 4. Party Chemistry and Personality Synergy
+- [ ] Add pair and party chemistry modifiers
+- [ ] Add personality conflict rules
+- [ ] Add shared-history bonuses from prior successful jobs
+- [ ] Add mentor/protege relationships
+- [ ] Add role-combo synergy notes in roster and staffing views
 
-## 3. Calendar, Seasons, and World Atmosphere
-### 3.1 Calendar Systems
-- [ ] Define calendar constants (days/season, seasons/year)
-- [ ] Track seasonal tags and expose in mission generation
-- [ ] Add seasonal contracts (harvest escort, winter supply, thaw road patrol, etc.)
+## 5. Patron Depth and Patron Negotiation
+- [ ] Add patron satisfaction tracking
+- [ ] Add patron payment reliability and dispute likelihood
+- [ ] Add pre-launch negotiation for:
+- [ ] Hazard premium
+- [ ] Urgency premium
+- [ ] Secrecy premium
+- [ ] Staffing cap flexibility
+- [ ] Add patron memory of prior wins, failures, and late deliveries
+- [ ] Expand patron classes:
+- [ ] Abbots
+- [ ] Castellans
+- [ ] Guild factors
+- [ ] Harbor masters
+- [ ] Frontier wardens
+- [ ] Arcane colleges
 
-### 3.2 Visual Atmosphere Layer (Placeholder-First)
-- [ ] Add background ambience state: clear, cloudy, rain, fog, snow
-- [ ] Daylight gradient transitions (sunrise/day/sunset/night)
-- [ ] Subtle non-intrusive effects behind panels (no readability loss)
+## 6. Injury, Recovery, and Care
+- [ ] Add injury tiers:
+- [ ] Minor
+- [ ] Serious
+- [ ] Lingering
+- [ ] Cursed
+- [ ] Add treatment options:
+- [ ] Temple healing
+- [ ] Herbal care
+- [ ] Costly magical restoration
+- [ ] Rest and rehab
+- [ ] Add long-term scars, stat penalties, or early retirement risks
 
-## 4. Roster Expansion and Personnel Systems
-### 4.1 Large Adventurer Pool
-- [ ] Move from fixed sample roster to generated + persistent roster entries
-- [ ] Add hiring pipeline and candidate market
-- [ ] Add roster pagination/filtering/sorting in UI
-- [ ] Add naming pools and archetype templates for high variety
+## 7. Rival Agencies with Distinct Identities
+- [ ] Add named rival agencies with strategy profiles
+- [ ] Add rival specialties:
+- [ ] Elite magical talent
+- [ ] Noble patronage
+- [ ] High-risk mercenary work
+- [ ] Cheap underbidding
+- [ ] Add direct competition on patrons and recruits
+- [ ] Add rumor, sabotage, and reputation warfare
 
-### 4.2 Adventurer Contract Pressure
-- [ ] Track satisfaction/loyalty/contract terms
-- [ ] Add events where rivals attempt poaching
-- [ ] Add counter-offer mechanic and "let them go" branch
+## 8. Fame, Prestige, and Marketability
+- [ ] Add client fame and agency brand prestige
+- [ ] Add bardic rumor / tavern song / herald notice events
+- [ ] Add fame-driven patron offers and increased client demands
+- [ ] Add endorsements, sponsorships, and ceremonial invitations
 
-## 5. Rival Agent System (Core Strategy Layer)
-### 5.1 Rival Models
-- [ ] Add 1-3 rival agencies with simple strategy profiles
-- [ ] Rival actions per cycle: underbid, poach attempt, sabotage rumor, patron pitch
-- [ ] Add intel visibility (known vs unknown rival actions)
+## 9. Apprentice and Academy Pipeline
+- [ ] Add low-cost prospects and trainees
+- [ ] Add in-house development track for squires, acolytes, hedge apprentices, and wardens-in-training
+- [ ] Add training focus areas and growth paths
+- [ ] Add graduation into represented clients
 
-### 5.2 Player Responses
-- [ ] Counteroffer flow
-- [ ] Reputation defense actions
-- [ ] Contract defense options
-- [ ] Long-term rival relationship state (escalating competition)
+## 10. Regional and Seasonal World Structure
+- [ ] Add regions with different danger, patron, and gear profiles
+- [ ] Add seasonal content gates:
+- [ ] Winter pass escorts
+- [ ] Spring goblin raids
+- [ ] Harvest protection
+- [ ] Dry-season ruin delves
+- [ ] Add regional reputation and travel flavor
 
-## 6. Contracts and Market Dynamics
-- [ ] Expand contract attributes: urgency, patron quality, legal risk, visibility
-- [ ] Add contract expiry timers
-- [ ] Add economy pressure on rewards and wages
-- [ ] Add consequence chains for partial/failure outcomes
+## 11. Expanded Adventure Debriefs and Post-Contract Fallout
+- [ ] Add post-mission debrief choices
+- [ ] Add defend-team / blame-conditions / accept-loss / dispute-outcome branches
+- [ ] Add patron reaction consequences after debriefs
+- [ ] Add client reaction consequences after debriefs
 
-## 7. Mode Implementation Plan
-Current placeholder modes should receive incremental functionality:
-- [ ] BUYING: equipment, supplies, operational upgrades
-- [ ] SELLING: excess gear, artifacts, captured intel
-- [ ] CONTRACTING: hire/fire/negotiate adventurer terms
-- [ ] PITCHING: secure patrons/contracts through persuasion
-- [ ] ARGUING: dispute outcomes/penalties, legal negotiation minigame
-- [ ] SABOTAGE: covert rival disruption (high risk/high consequence)
+## 12. Agency Operations and Staff
+- [ ] Add hireable agency staff:
+- [ ] Clerks
+- [ ] Scouts
+- [ ] Quartermasters
+- [ ] Healers
+- [ ] Negotiators
+- [ ] Add office upgrade effects on recruitment, recovery, and patron trust
 
-## 8. Data and Content Architecture
-- [ ] Move sample data into datafiles/json for maintainability
-- [ ] Define stable structs for save/load compatibility
-- [ ] Introduce event log categories (mission, rival, finance, personnel, world)
-- [ ] Add deterministic seed mode for balancing/debug
+## 13. Law, Guild, and Politics
+- [ ] Add guild license systems, dues, and inspections
+- [ ] Add contract disputes and arbitration
+- [ ] Add blacklisting, sanctions, and noble favoritism
+- [ ] Add civic / church / guild political factions
 
-## 9. Save/Load and Persistence
-- [ ] Add save slots and autosave at day-end
-- [ ] Persist clock, missions, roster, rivals, finances, and logs
-- [ ] Add migration/version tag for save schema updates
+## 14. World Customization and XML Content Packs
+- [ ] Add XML-driven content packs for:
+- [ ] Adventurer names
+- [ ] Patron names and titles
+- [ ] Place names
+- [ ] Weapons
+- [ ] Outfits
+- [ ] Relics and spell names
+- [ ] Mission flavor text
+- [ ] Rival agency names
+- [ ] Support base world + optional theme packs
+- [ ] Add example packs:
+- [ ] Generic medieval fantasy
+- [ ] Tolkien-esque inspired naming and place flavor
+- [ ] Grim mercenary variant
+- [ ] Keep simulation math in code while externalizing flavor/content data
 
-## 10. UI/UX Quality Passes
-- [ ] Adaptive layout constraints so no action controls overlap input/log areas
-- [ ] Replace bottom action paging with a mobile-friendly vertical action wheel/stack at bottom-right
-- [ ] Add context label/header for action wheel and conditional up/down arrows when overflowing
-- [ ] Support wheel/swipe-like scrolling behavior for action stack on desktop/mobile
-- [ ] Tooltip/help glossary for stats and outcomes
-- [ ] History browser for old reports and rival events
-- [ ] Input command history and tab completion for console commands
+## 15. Save/Load and Content Versioning
+- [ ] Save roster contracts, morale, trust, client assets, and world content pack choice
+- [ ] Save active missions, patron state, rival state, and logs
+- [ ] Add schema versioning / migration support
 
-## 11. Balancing and Telemetry
-- [ ] Add debug panel with mission power breakdown and risk math
-- [ ] Capture outcome rates by mission difficulty and party composition
-- [ ] Tune economy, injury rates, and reliability impact with data
+## 16. UI/UX Refinement
+- [ ] Add summary panes for:
+- [ ] Current client morale/trust
+- [ ] Patron satisfaction
+- [ ] Rival threat
+- [ ] Agency finances
+- [ ] Add history browser for contracts, client changes, and rival incidents
+- [ ] Add tooltips / glossary for morale, trust, and contract terms
 
-## 12. Test Checklist
-- [ ] Mission assignment never resolves immediately
-- [ ] Day-end correctly advances all active timers
-- [ ] On-mission adventurers cannot be reassigned
-- [ ] Acknowledge events are one-time and stateful
-- [ ] Button panels remain bounded in all supported resolutions
-- [ ] Rival poach/counteroffer flow works end-to-end
+## 17. Balancing and Debugging
+- [ ] Add debug overlays for mission scoring and negotiation scoring
+- [ ] Add telemetry for:
+- [ ] Retention rates
+- [ ] Average client earnings
+- [ ] Patron satisfaction distribution
+- [ ] Injury rate by mission type
+- [ ] Tune economy, morale decay, and rival pressure with data
 
-## Suggested Build Order (Practical)
-1. Time Simulation Core + Mission Lifecycle (Sections 2.1 to 2.3)
-2. Day-End Loop + Start-of-Day Reports (Section 2.2)
-3. Large Roster Foundations + Rival Poaching v1 (Sections 4 and 5)
-4. Seasonal/Calendar Content Gates (Section 3)
-5. Expand placeholder modes one by one (Section 7)
-
-## 13. Flavor and Narrative Messaging (New)
-- [ ] Expand field communications system (pigeons, scrying, enchanted letters, dream-voice alerts)
-- [ ] Add mission-leg reports: outbound, objective reached, return-leg incidents
-- [ ] Introduce delay incidents pool (broken wagons, lame horses, weather, supply loss, rival interference)
-- [ ] Ensure delays modify odds/timing without forcing deterministic auto-fail
-- [ ] Add patron-funding economics: unused funded slots become agent margin (risk/reward pressure)
-- [ ] Add clearer mission contract text for patron staffing cap and payout structure
-
-## 14. Free-Agent Negotiation Refinements
-- [ ] Add temperament chips and leverage hints directly in market UI (beyond log text)
-- [ ] Add deeper personality dialogue variants and conditional bluff/intimidation beats
-- [ ] Add multi-round offer memory so repeat lowballing changes candidate behavior
-- [ ] Add rival named agents in negotiations with visible competing bid tiers
+## Immediate Build Order
+1. Client contracts and relationship depth
+2. Morale / usage pressure / defection risk
+3. Equipment / kit / magic inventory
+4. Party chemistry and personality synergy
+5. Patron depth and patron-side negotiation
+6. XML content pack scaffold and first externalized flavor pools

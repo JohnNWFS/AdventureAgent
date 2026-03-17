@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_time_world",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_time_world",
+  "parent":{
+    "name":"AdventureAgent",
+    "path":"AdventureAgent.yyp",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

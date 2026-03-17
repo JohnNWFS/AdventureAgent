@@ -19,8 +19,11 @@
   },
   "name":"AdventureAgent",
   "resources":[
+    {"id":{"name":"fnt_ui_console","path":"fonts/fnt_ui_console/fnt_ui_console.yy",},},
     {"id":{"name":"obj_heartbeat","path":"objects/obj_heartbeat/obj_heartbeat.yy",},},
     {"id":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
+    {"id":{"name":"scr_game_house","path":"scripts/scr_game_house/scr_game_house.yy",},},
+    {"id":{"name":"scr_time_world","path":"scripts/scr_time_world/scr_time_world.yy",},},
   ],
   "resourceType":"GMProject",
   "resourceVersion":"2.0",

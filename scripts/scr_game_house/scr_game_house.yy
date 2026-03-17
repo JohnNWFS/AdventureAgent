@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_game_house",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_game_house",
+  "parent":{
+    "name":"AdventureAgent",
+    "path":"AdventureAgent.yyp",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

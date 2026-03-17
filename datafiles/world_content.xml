@@ -1,0 +1,65 @@
+<world>
+  <names>
+    <adventurer_first>Kael</adventurer_first>
+    <adventurer_first>Iris</adventurer_first>
+    <adventurer_first>Brom</adventurer_first>
+    <adventurer_first>Nessa</adventurer_first>
+    <adventurer_first>Varric</adventurer_first>
+    <adventurer_first>Liora</adventurer_first>
+    <adventurer_first>Fen</adventurer_first>
+    <adventurer_first>Orin</adventurer_first>
+    <adventurer_first>Mara</adventurer_first>
+    <adventurer_first>Galen</adventurer_first>
+
+    <adventurer_last>Dawnmere</adventurer_last>
+    <adventurer_last>Blackfen</adventurer_last>
+    <adventurer_last>Ashvale</adventurer_last>
+    <adventurer_last>Runehart</adventurer_last>
+    <adventurer_last>Thornfield</adventurer_last>
+    <adventurer_last>Ironwill</adventurer_last>
+    <adventurer_last>Mistbrook</adventurer_last>
+    <adventurer_last>Crowley</adventurer_last>
+  </names>
+
+  <patrons>
+    <patron_title_noble>Lady</patron_title_noble>
+    <patron_title_noble>Lord</patron_title_noble>
+    <patron_title_noble>Dame</patron_title_noble>
+    <patron_title_civic>Magistrate</patron_title_civic>
+    <patron_title_civic>Warden</patron_title_civic>
+    <patron_title_civic>Harbor Master</patron_title_civic>
+    <patron_title_religious>Prior</patron_title_religious>
+    <patron_title_religious>Abbess</patron_title_religious>
+    <patron_title_religious>Canon</patron_title_religious>
+  </patrons>
+
+  <locations>
+    <location_ruin>Blackbriar Vault</location_ruin>
+    <location_ruin>Saint Caldur Archive</location_ruin>
+    <location_ruin>Moonfen Barrow</location_ruin>
+    <location_road>Eastmarch Trade Road</location_road>
+    <location_road>Old Kingway</location_road>
+    <location_road>Harrow Pass</location_road>
+    <location_forest>Ashenwood</location_forest>
+    <location_forest>Myr Fen</location_forest>
+    <location_forest>Briar Hollow</location_forest>
+  </locations>
+
+  <gear>
+    <gear_weapon>iron longsword</gear_weapon>
+    <gear_weapon>ash bow</gear_weapon>
+    <gear_weapon>tempered spear</gear_weapon>
+    <gear_weapon>rune knife</gear_weapon>
+    <gear_outfit>court cloak</gear_outfit>
+    <gear_outfit>mail coat</gear_outfit>
+    <gear_outfit>travel robes</gear_outfit>
+    <gear_outfit>field leathers</gear_outfit>
+  </gear>
+
+  <magic>
+    <magic_name>spark ward</magic_name>
+    <magic_name>ember sigil</magic_name>
+    <magic_name>echo charm</magic_name>
+    <magic_name>minor blessing</magic_name>
+  </magic>
+</world>

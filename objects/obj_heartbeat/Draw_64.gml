@@ -1,7 +1,10 @@
 /// Polished UI shell + mission panels + hybrid console
-
+draw_set_font(fnt_ui_console);
 var _gw = display_get_gui_width();
 var _gh = display_get_gui_height();
+
+var _ui_font = asset_get_index("fnt_ui_console");
+if (_ui_font != -1) draw_set_font(_ui_font);
 
 var _pad = layout.pad;
 var _header_h = layout.header_h;
@@ -116,35 +119,46 @@ if (state.mode == MODE.BUYING) {
     }
 } else if (state.mode == MODE.GAME_HOUSE) {
     draw_text(_center_x1 + 30, _content_y1 + 100, "Gilded Griffin Game House");
-    draw_text_ext(_center_x1 + 30, _content_y1 + 122,
-        "The house is loud, smoky, and expensive. Every move burns time while missions, patrons, and rivals continue to evolve.",
-        18, _center_x2 - _center_x1 - 60);
-    draw_text(_center_x1 + 30, _content_y1 + 170, "Table: " + state.game_house_game + "    Wager: " + string(state.game_house_wager) + "g");
-
-    if (state.game_house_game == "CRAPS") {
-        var _cr_phase = (state.game_house.craps_phase == "idle") ? "Come-out" : ("Point " + string(state.game_house.craps_point));
-        draw_text(_center_x1 + 30, _content_y1 + 198, "Street Craps");
-        draw_text(_center_x1 + 30, _content_y1 + 220, "Phase: " + _cr_phase);
-        draw_text(_center_x1 + 30, _content_y1 + 242, "Last roll: " + string(state.game_house.craps_last_roll));
-        draw_text_ext(_center_x1 + 30, _content_y1 + 266, "Natural (7/11) wins on come-out. 2/3/12 loses. Point repeats to win; 7 before point loses.", 18, _center_x2 - _center_x1 - 60);
-    } else if (state.game_house_game == "WHEEL") {
-        draw_text(_center_x1 + 30, _content_y1 + 198, "Wyrm Wheel");
-        draw_text(_center_x1 + 30, _content_y1 + 220, "Current bet: " + state.game_house.wheel_bet);
-        draw_text(_center_x1 + 30, _content_y1 + 242, "Last spin: " + string(state.game_house.wheel_last_number) + " (" + state.game_house.wheel_last_color + ")");
-        draw_text_ext(_center_x1 + 30, _content_y1 + 266, "Color/parity bets pay 1:1. Dozens (1-12, 13-24, 25-36) pay 2:1.", 18, _center_x2 - _center_x1 - 60);
+    if (state.game_house_view == "lobby") {
+        draw_text_ext(_center_x1 + 30, _content_y1 + 122,
+            "Pick a table to sit down. While you are here, missions keep moving and rivals keep negotiating in the background.",
+            18, _center_x2 - _center_x1 - 60);
+        draw_text(_center_x1 + 30, _content_y1 + 170, "Available tables");
+        draw_text(_center_x1 + 30, _content_y1 + 194, "1) Street Craps");
+        draw_text(_center_x1 + 30, _content_y1 + 216, "2) Wyrm Wheel");
+        draw_text(_center_x1 + 30, _content_y1 + 238, "3) Dragon 21");
+        draw_text(_center_x1 + 30, _content_y1 + 272, "Current default wager: " + string(state.game_house_wager) + "g");
     } else {
-        var _pt = card_hand_total(state.game_house.cards_player);
-        var _dt = card_hand_total(state.game_house.cards_dealer);
-        draw_text(_center_x1 + 30, _content_y1 + 198, "Dragon 21");
-        draw_text(_center_x1 + 30, _content_y1 + 220, "Player: " + card_hand_text(state.game_house.cards_player) + " (" + string(_pt) + ")");
-        draw_text(_center_x1 + 30, _content_y1 + 242, "Dealer: " + card_hand_text(state.game_house.cards_dealer) + " (" + string(_dt) + ")");
-        if (state.game_house.cards_in_round) {
-            draw_text(_center_x1 + 30, _content_y1 + 264, "Round active: choose HIT or STAND.");
+        draw_text_ext(_center_x1 + 30, _content_y1 + 122,
+            "The house is loud, smoky, and expensive. Every move burns time while missions, patrons, and rivals continue to evolve.",
+            18, _center_x2 - _center_x1 - 60);
+        draw_text(_center_x1 + 30, _content_y1 + 170, "Table: " + state.game_house_game + "    Wager: " + string(state.game_house_wager) + "g");
+
+        if (state.game_house_game == "CRAPS") {
+            var _cr_phase = (state.game_house.craps_phase == "idle") ? "Come-out" : ("Point " + string(state.game_house.craps_point));
+            draw_text(_center_x1 + 30, _content_y1 + 198, "Street Craps");
+            draw_text(_center_x1 + 30, _content_y1 + 220, "Phase: " + _cr_phase);
+            draw_text(_center_x1 + 30, _content_y1 + 242, "Last roll: " + string(state.game_house.craps_last_roll));
+            draw_text_ext(_center_x1 + 30, _content_y1 + 266, "Natural (7/11) wins on come-out. 2/3/12 loses. Point repeats to win; 7 before point loses.", 18, _center_x2 - _center_x1 - 60);
+        } else if (state.game_house_game == "WHEEL") {
+            draw_text(_center_x1 + 30, _content_y1 + 198, "Wyrm Wheel");
+            draw_text(_center_x1 + 30, _content_y1 + 220, "Current bet: " + state.game_house.wheel_bet);
+            draw_text(_center_x1 + 30, _content_y1 + 242, "Last spin: " + string(state.game_house.wheel_last_number) + " (" + state.game_house.wheel_last_color + ")");
+            draw_text_ext(_center_x1 + 30, _content_y1 + 266, "Color/parity bets pay 1:1. Dozens (1-12, 13-24, 25-36) pay 2:1.", 18, _center_x2 - _center_x1 - 60);
         } else {
-            draw_text(_center_x1 + 30, _content_y1 + 264, "Round inactive: deal a new hand.");
-        }
-        if (state.game_house.cards_last_outcome != "") {
-            draw_text(_center_x1 + 30, _content_y1 + 286, "Last outcome: " + state.game_house.cards_last_outcome);
+            var _pt = card_hand_total(state.game_house.cards_player);
+            var _dt = card_hand_total(state.game_house.cards_dealer);
+            draw_text(_center_x1 + 30, _content_y1 + 198, "Dragon 21");
+            draw_text(_center_x1 + 30, _content_y1 + 220, "Player: " + card_hand_text(state.game_house.cards_player) + " (" + string(_pt) + ")");
+            draw_text(_center_x1 + 30, _content_y1 + 242, "Dealer: " + card_hand_text(state.game_house.cards_dealer) + " (" + string(_dt) + ")");
+            if (state.game_house.cards_in_round) {
+                draw_text(_center_x1 + 30, _content_y1 + 264, "Round active: choose HIT or STAND.");
+            } else {
+                draw_text(_center_x1 + 30, _content_y1 + 264, "Round inactive: deal a new hand.");
+            }
+            if (state.game_house.cards_last_outcome != "") {
+                draw_text(_center_x1 + 30, _content_y1 + 286, "Last outcome: " + state.game_house.cards_last_outcome);
+            }
         }
     }
 } else {
@@ -272,6 +286,19 @@ draw_text_ext(_right_x1 + 12, _content_y2 - 74, state.rival_activity, 18, _right
 // Console
 draw_panel(_console_x1, _console_y1, _console_x2, _console_y2, "Operations Console", make_color_rgb(21, 27, 39), make_color_rgb(15, 19, 29));
 
+var log_category_style = function(_category) {
+    switch (_category) {
+        case "mission": return { color: make_color_rgb(255, 255, 255), alpha: 0.13 };
+        case "patron": return { color: make_color_rgb(232, 242, 255), alpha: 0.11 };
+        case "market": return { color: make_color_rgb(228, 255, 240), alpha: 0.11 };
+        case "finance": return { color: make_color_rgb(255, 245, 212), alpha: 0.12 };
+        case "rival": return { color: make_color_rgb(255, 225, 225), alpha: 0.12 };
+        case "roster": return { color: make_color_rgb(239, 232, 255), alpha: 0.10 };
+        case "game": return { color: make_color_rgb(225, 245, 245), alpha: 0.10 };
+        default: return { color: make_color_rgb(255, 255, 255), alpha: 0.06 };
+    }
+};
+
 var _log_top = _console_y1 + 30;
 var _log_bottom = _console_y2 - 54;
 var _line_h = 18;
@@ -283,8 +310,16 @@ var _start = max(0, array_length(state.logs) - _visible_lines - state.log_scroll
 var _end = min(array_length(state.logs), _start + _visible_lines);
 var _ly = _log_top;
 for (var _line_index = _start; _line_index < _end; _line_index++) {
+    var _entry = state.logs[_line_index];
+    var _entry_text = is_struct(_entry) ? _entry.text : string(_entry);
+    var _entry_category = is_struct(_entry) && variable_struct_exists(_entry, "category") ? _entry.category : "general";
+    var _style = log_category_style(_entry_category);
+    draw_set_alpha(_style.alpha);
+    draw_set_color(_style.color);
+    draw_rectangle(_console_x1 + 10, _ly - 1, _console_x2 - 10, _ly + _line_h - 1, false);
+    draw_set_alpha(1);
     draw_set_color(make_color_rgb(220, 232, 245));
-    draw_text(_console_x1 + 12, _ly, state.logs[_line_index]);
+    draw_text(_console_x1 + 12, _ly, _entry_text);
     _ly += _line_h;
 }
 
@@ -354,7 +389,6 @@ for (var b = 0; b < array_length(state.buttons); b++) {
     draw_text_ext(_btn.x1 + 6, _btn.y1 + 5, _btn.label, 16, _btn.x2 - _btn.x1 - 10);
 }
 draw_set_halign(fa_left);
-
 
 
 

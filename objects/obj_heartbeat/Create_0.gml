@@ -12,7 +12,8 @@ MODE = {
     SABOTAGE: 6,
     MISSION_REVIEW: 7,
     MISSION_RESULT: 8,
-    GAME_HOUSE: 9
+    GAME_HOUSE: 9,
+    ADVENTURERS: 10
 };
 
 SEASONS = ["Spring", "Summer", "Autumn", "Winter"];
@@ -47,8 +48,14 @@ state = {
     patrons: [],
     contracts: [],
     selected_patron_index: -1,
+    selected_contract_index: -1,
+    contracting_stage: "patrons",
 
     selected_mission_index: -1,
+    mission_review_stage: "missions",
+    adventurer_view_stage: "list",
+    selected_adventurer_index: -1,
+    adventurer_view_return_mode: MODE.PLANNING,
     selected_party_ids: [],
     show_intro: true,
 
@@ -70,6 +77,7 @@ state = {
     next_adv_id: 5,
     free_agents: [],
     selected_free_agent_index: -1,
+    market_stage: "hub",
     offer_bonus: 0,
     offer_rate_delta: 0,
     offer_commission: 0.22,
@@ -78,8 +86,11 @@ state = {
     world_pulse_last_hour: -1,
     realtime_step_accum: 0,
     realtime_hour_interval_steps: 0,
+    world_content: undefined,
 
     game_house_game: "CRAPS",
+    game_house_view: "lobby",
+    game_house_table_fresh: true,
     game_house_wager: 10,
     game_house: {
         craps_phase: "idle",
@@ -110,6 +121,7 @@ mode_to_string = function(_mode) {
         case MODE.MISSION_REVIEW: return "MISSION_REVIEW";
         case MODE.MISSION_RESULT: return "MISSION_RESULT";
         case MODE.GAME_HOUSE: return "GAME_HOUSE";
+        case MODE.ADVENTURERS: return "ADVENTURERS";
     }
     return "UNKNOWN";
 };
@@ -129,24 +141,79 @@ format_duration_hours = function(_hours) {
     return string(_h) + "h";
 };
 
-update_clock_from_absolute = function() {
-    var _total_days_elapsed = floor(state.absolute_hour / HOURS_PER_DAY);
+classify_log_category = function(_msg) {
+    var _u = string_upper(string(_msg));
 
-    state.day = _total_days_elapsed + 1;
-    state.hour = state.absolute_hour mod HOURS_PER_DAY;
+    if (string_pos("WORLD PULSE:", _u) > 0 || string_pos("RIVAL", _u) > 0) return "rival";
+    if (string_pos("FIELD REPORT", _u) > 0 || string_pos("MISSION", _u) > 0 || string_pos("OUTCOME:", _u) > 0) return "mission";
+    if (string_pos("PATRON", _u) > 0 || string_pos("CONTRACT", _u) > 0 || string_pos("ASK:", _u) > 0) return "patron";
+    if (string_pos("FREE-AGENT", _u) > 0 || string_pos("OFFER", _u) > 0 || string_pos("COUNTER", _u) > 0 ||
+        string_pos("SIGNING", _u) > 0 || string_pos("NEGOTIATION", _u) > 0 || string_pos("CANDIDATE", _u) > 0) return "market";
+    if (string_pos("GOLD", _u) > 0 || string_pos("PAYOUT", _u) > 0 || string_pos("BONUS", _u) > 0 ||
+        string_pos("RATE ", _u) > 0 || string_pos("COMMISSION", _u) > 0 || string_pos("COST", _u) > 0) return "finance";
+    if (string_pos("RESTLESS", _u) > 0 || string_pos("ADVENTURER", _u) > 0 || string_pos("ROSTER", _u) > 0 ||
+        string_pos("RECOVERED", _u) > 0 || string_pos("RETIRED", _u) > 0) return "roster";
+    if (string_pos("CRAPS", _u) > 0 || string_pos("WHEEL", _u) > 0 || string_pos("DRAGON 21", _u) > 0 ||
+        string_pos("TABLE", _u) > 0 || string_pos("WAGER", _u) > 0) return "game";
 
-    var _days_per_year = DAYS_PER_SEASON * SEASONS_PER_YEAR;
-    state.year = floor(_total_days_elapsed / _days_per_year) + 1;
-    state.month = ((_total_days_elapsed mod (DAYS_PER_MONTH * MONTHS_PER_YEAR)) div DAYS_PER_MONTH) + 1;
+    return "general";
+};
 
-    var _day_in_year = _total_days_elapsed mod _days_per_year;
-    var _season_index = floor(_day_in_year / DAYS_PER_SEASON);
-    state.season = SEASONS[_season_index];
+make_log_entry = function(_text, _category) {
+    return {
+        text: _text,
+        category: _category
+    };
 };
 
 add_log = function(_msg) {
-    var _line = "[Y" + string(state.year) + " D" + string(state.day) + " " + format_hh00(state.hour) + "] " + string(_msg);
-    array_push(state.logs, _line);
+    var _prefix = "[Y" + string(state.year) + " D" + string(state.day) + " " + format_hh00(state.hour) + "] ";
+    var _text = string(_msg);
+    var _category = classify_log_category(_text);
+
+    var _max_px = 900;
+    if (variable_instance_exists(id, "layout")) {
+        var _gw = display_get_gui_width();
+        var _action_w = 220;
+        var _console_x1 = layout.pad;
+        var _console_x2 = _gw - layout.pad - _action_w;
+        _max_px = max(140, (_console_x2 - _console_x1) - 28);
+    }
+
+    var _old_font = draw_get_font();
+    var _font_idx = asset_get_index("fnt_ui_console");
+    if (_font_idx != -1) draw_set_font(_font_idx);
+
+    while (string_length(_text) > 0) {
+        if (string_width(_prefix + _text) <= _max_px) {
+            array_push(state.logs, make_log_entry(_prefix + _text, _category));
+            break;
+        }
+
+        var _split = 0;
+        var _last_space = 0;
+        var _len = string_length(_text);
+        for (var _scan = 1; _scan <= _len; _scan++) {
+            var _c = string_char_at(_text, _scan);
+            if (_c == " ") _last_space = _scan;
+            if (string_width(_prefix + string_copy(_text, 1, _scan)) > _max_px) {
+                _split = _scan - 1;
+                break;
+            }
+        }
+
+        if (_split <= 0) _split = max(1, min(_len, 16));
+        if (_last_space > 0 && _last_space < _split) _split = _last_space;
+
+        var _chunk = string_trim(string_copy(_text, 1, _split));
+        array_push(state.logs, make_log_entry(_prefix + _chunk, _category));
+
+        var _next = _split + 1;
+        while (_next <= _len && string_char_at(_text, _next) == " ") _next += 1;
+        _text = string_copy(_text, _next, _len - _next + 1);
+    }
+
+    draw_set_font(_old_font);
     while (array_length(state.logs) > state.logs_cap) {
         array_delete(state.logs, 0, 1);
     }
@@ -180,31 +247,206 @@ spend_gold = function(_amount, _reason) {
     check_game_over();
 };
 
+default_world_content = function() {
+    return {
+        adventurer_first: ["Kael", "Iris", "Brom", "Nessa", "Varric", "Liora", "Fen", "Orin", "Mara", "Galen"],
+        adventurer_last: ["Dawnmere", "Blackfen", "Ashvale", "Runehart", "Thornfield", "Ironwill", "Mistbrook", "Crowley"],
+        patron_titles_noble: ["Lady", "Lord", "Dame"],
+        patron_titles_civic: ["Magistrate", "Warden", "Harbor Master"],
+        patron_titles_religious: ["Prior", "Abbess", "Canon"],
+        locations_ruin: ["Blackbriar Vault", "Saint Caldur Archive", "Moonfen Barrow"],
+        locations_road: ["Eastmarch Trade Road", "Old Kingway", "Harrow Pass"],
+        locations_forest: ["Ashenwood", "Myr Fen", "Briar Hollow"],
+        gear_weapons: ["iron longsword", "ash bow", "tempered spear", "rune knife"],
+        gear_outfits: ["court cloak", "mail coat", "travel robes", "field leathers"],
+        magic_names: ["spark ward", "ember sigil", "echo charm", "minor blessing"]
+    };
+};
+
+read_text_file = function(_path) {
+    if (!file_exists(_path)) return "";
+    var _fh = file_text_open_read(_path);
+    var _txt = "";
+    while (!file_text_eof(_fh)) {
+        _txt += file_text_read_string(_fh);
+        if (!file_text_eof(_fh)) file_text_readln(_fh);
+        if (!file_text_eof(_fh)) _txt += "\n";
+    }
+    file_text_close(_fh);
+    return _txt;
+};
+
+string_pos_from = function(_needle, _haystack, _start_index) {
+    var _needle_len = string_length(_needle);
+    var _hay_len = string_length(_haystack);
+    if (_needle_len <= 0) return 0;
+
+    for (var i = max(1, _start_index); i <= (_hay_len - _needle_len + 1); i++) {
+        if (string_copy(_haystack, i, _needle_len) == _needle) return i;
+    }
+    return 0;
+};
+
+xml_extract_tag_values = function(_text, _tag) {
+    var _values = [];
+    var _open = "<" + _tag + ">";
+    var _close = "</" + _tag + ">";
+    var _cursor = 1;
+
+    while (true) {
+        var _start = string_pos_from(_open, _text, _cursor);
+        if (_start <= 0) break;
+        var _value_start = _start + string_length(_open);
+        var _end = string_pos_from(_close, _text, _value_start);
+        if (_end <= 0) break;
+
+        var _value = string_trim(string_copy(_text, _value_start, _end - _value_start));
+        if (_value != "") array_push(_values, _value);
+        _cursor = _end + string_length(_close);
+    }
+
+    return _values;
+};
+
+apply_world_content_xml = function(_text) {
+    if (_text == "") return;
+
+    var _map = [
+        ["adventurer_first", "adventurer_first"],
+        ["adventurer_last", "adventurer_last"],
+        ["patron_title_noble", "patron_titles_noble"],
+        ["patron_title_civic", "patron_titles_civic"],
+        ["patron_title_religious", "patron_titles_religious"],
+        ["location_ruin", "locations_ruin"],
+        ["location_road", "locations_road"],
+        ["location_forest", "locations_forest"],
+        ["gear_weapon", "gear_weapons"],
+        ["gear_outfit", "gear_outfits"],
+        ["magic_name", "magic_names"]
+    ];
+
+    for (var i = 0; i < array_length(_map); i++) {
+        var _tag = _map[i][0];
+        var _field = _map[i][1];
+        var _values = xml_extract_tag_values(_text, _tag);
+        if (array_length(_values) > 0) {
+            variable_struct_set(state.world_content, _field, _values);
+        }
+    }
+};
+
+load_world_content_xml = function() {
+    state.world_content = default_world_content();
+
+    var _paths = [
+        working_directory + "datafiles/world_content.xml",
+        "datafiles/world_content.xml"
+    ];
+
+    for (var i = 0; i < array_length(_paths); i++) {
+        var _txt = read_text_file(_paths[i]);
+        if (_txt != "") {
+            apply_world_content_xml(_txt);
+            add_log("World content pack loaded from XML.");
+            return;
+        }
+    }
+
+    add_log("Using built-in world content defaults.");
+};
+
 random_free_agent_name = function() {
-    var _first = choose("Kael", "Iris", "Brom", "Nessa", "Varric", "Liora", "Fen", "Orin", "Mara", "Galen");
-    var _last = choose("Dawnmere", "Blackfen", "Ashvale", "Runehart", "Thornfield", "Ironwill", "Mistbrook", "Crowley");
+    var _first_pool = state.world_content.adventurer_first;
+    var _last_pool = state.world_content.adventurer_last;
+    var _first = _first_pool[irandom(array_length(_first_pool) - 1)];
+    var _last = _last_pool[irandom(array_length(_last_pool) - 1)];
     return _first + " " + _last;
+};
+
+default_adventurer_kit = function(_role) {
+    switch (_role) {
+        case "Warrior": return ["mail shirt", "shield", "camp blade"];
+        case "Mage": return ["spell satchel", "focus rod", "field notes"];
+        case "Rogue": return ["lock picks", "soft boots", "throwing knives"];
+        case "Bard": return ["travel lute", "court attire", "letter case"];
+        case "Cleric": return ["travel icon", "healer kit", "blessed wraps"];
+        case "Ranger": return ["longbow", "trail cloak", "snare kit"];
+    }
+    return ["bedroll", "travel pack"];
+};
+
+default_adventurer_arcana = function(_role) {
+    switch (_role) {
+        case "Mage": return ["spark ward"];
+        case "Cleric": return ["minor blessing"];
+        case "Bard": return ["echo charm"];
+    }
+    return [];
+};
+
+build_adventurer_profile = function(_name, _role, _combat, _magic, _stealth, _diplomacy, _reliability, _age, _rate, _commission, _starting_gold, _id) {
+    if (is_undefined(_starting_gold)) _starting_gold = irandom_range(18, 70);
+    if (is_undefined(_id)) _id = -1;
+    var _term = choose(20, 30, 45);
+    return {
+        id: _id,
+        name: _name,
+        role: _role,
+        combat: _combat,
+        magic: _magic,
+        stealth: _stealth,
+        diplomacy: _diplomacy,
+        reliability: _reliability,
+        age: _age,
+        adventure_rate: _rate,
+        commission_rate: _commission,
+        status: "available",
+        idle_days: 0,
+        last_contract_day: 0,
+        last_idle_notice_day: 0,
+        purse_gold: _starting_gold,
+        lifetime_earnings: 0,
+        last_mission_payout: 0,
+        morale: irandom_range(64, 82),
+        trust: irandom_range(58, 76),
+        representation_type: choose("exclusive charter", "guild retainer", "sworn representation"),
+        contract_term_days: _term,
+        contract_days_remaining: _term,
+        activity_expectation_days: choose(2, 3, 4),
+        risk_preference: choose("careful", "balanced", "bold"),
+        ambition: choose("steady work", "prestige jobs", "higher pay", "glory"),
+        kit: default_adventurer_kit(_role),
+        found_magic: default_adventurer_arcana(_role),
+        notable_finds: []
+    };
+};
+
+array_join_text = function(_arr) {
+    if (array_length(_arr) <= 0) return "- none -";
+    var _txt = "";
+    for (var i = 0; i < array_length(_arr); i++) {
+        _txt += string(_arr[i]);
+        if (i < array_length(_arr) - 1) _txt += ", ";
+    }
+    return _txt;
 };
 
 generate_free_agent = function() {
     var _roles = ["Warrior", "Mage", "Rogue", "Bard", "Cleric", "Ranger"];
     var _r = _roles[irandom(array_length(_roles) - 1)];
     var _base = irandom_range(3, 7);
-
-    return {
-        id: state.next_adv_id,
-        name: random_free_agent_name(),
-        role: _r,
-        combat: _base + choose(-1, 0, 1, 2),
-        magic: _base + choose(-1, 0, 1, 2),
-        stealth: _base + choose(-1, 0, 1, 2),
-        diplomacy: _base + choose(-1, 0, 1, 2),
-        reliability: irandom_range(60, 88),
-        age: irandom_range(18, 34),
-        adventure_rate: irandom_range(20, 42),
-        commission_rate: 0.22,
-        status: "available"
-    };
+    return build_adventurer_profile(
+        random_free_agent_name(),
+        _r,
+        _base + choose(-1, 0, 1, 2),
+        _base + choose(-1, 0, 1, 2),
+        _base + choose(-1, 0, 1, 2),
+        _base + choose(-1, 0, 1, 2),
+        irandom_range(60, 88),
+        irandom_range(18, 34),
+        irandom_range(20, 42),
+        0.22
+    );
 };
 
 dismiss_intro = function() {
@@ -216,11 +458,11 @@ dismiss_intro = function() {
 
 init_adventurers = function() {
     return [
-        { id: 0, name: "Mira Ashwind", role: "Mage", combat: 4, magic: 9, stealth: 3, diplomacy: 5, reliability: 78, age: 24, adventure_rate: 34, commission_rate: 0.22, status: "available" },
-        { id: 1, name: "Bran Ironhook", role: "Warrior", combat: 9, magic: 1, stealth: 3, diplomacy: 4, reliability: 71, age: 31, adventure_rate: 30, commission_rate: 0.20, status: "available" },
-        { id: 2, name: "Sable Quickstep", role: "Rogue", combat: 5, magic: 2, stealth: 9, diplomacy: 6, reliability: 64, age: 22, adventure_rate: 28, commission_rate: 0.24, status: "available" },
-        { id: 3, name: "Tovin Reed", role: "Bard", combat: 3, magic: 4, stealth: 5, diplomacy: 9, reliability: 82, age: 27, adventure_rate: 26, commission_rate: 0.19, status: "available" },
-        { id: 4, name: "Edda Stoneward", role: "Cleric", combat: 6, magic: 7, stealth: 2, diplomacy: 6, reliability: 88, age: 33, adventure_rate: 32, commission_rate: 0.18, status: "available" }
+        build_adventurer_profile("Mira Ashwind", "Mage", 4, 9, 3, 5, 78, 24, 34, 0.22, 56, 0),
+        build_adventurer_profile("Bran Ironhook", "Warrior", 9, 1, 3, 4, 71, 31, 30, 0.20, 44, 1),
+        build_adventurer_profile("Sable Quickstep", "Rogue", 5, 2, 9, 6, 64, 22, 28, 0.24, 31, 2),
+        build_adventurer_profile("Tovin Reed", "Bard", 3, 4, 5, 9, 82, 27, 26, 0.19, 39, 3),
+        build_adventurer_profile("Edda Stoneward", "Cleric", 6, 7, 2, 6, 88, 33, 32, 0.18, 62, 4)
     ];
 };
 
@@ -267,16 +509,16 @@ init_missions = function() {
 
 init_patrons = function() {
     return [
-        { id: 0, name: "Lady Merrow Vale", personality: "courteous", contact: "sealed letter" },
-        { id: 1, name: "Quartermaster Halden Pike", personality: "practical", contact: "guild messenger" },
-        { id: 2, name: "Archivist Ilyra Quill", personality: "scholarly", contact: "arcane correspondence" },
-        { id: 3, name: "Magistrate Doran Flint", personality: "stern", contact: "official courier" },
-        { id: 4, name: "Captain Roen Blackwake", personality: "brisk", contact: "dock runner" },
-        { id: 5, name: "Matron Ysabet Thorn", personality: "demanding", contact: "house steward" },
-        { id: 6, name: "Prior Cedric Vale", personality: "calm", contact: "monastery letter" },
-        { id: 7, name: "Guildmaster Olin Brass", personality: "transactional", contact: "clerk dispatch" },
-        { id: 8, name: "Envoy Seris Dawn", personality: "polished", contact: "embassy aide" },
-        { id: 9, name: "Warden Petra Stone", personality: "direct", contact: "watch courier" }
+        { id: 0, name: "Lady Merrow Vale", personality: "courteous", contact: "sealed letter", pay_profile: "high", bonus_profile: "sometimes", risk_profile: "measured", temperament_note: "Usually gracious, but expects polished results.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 },
+        { id: 1, name: "Quartermaster Halden Pike", personality: "practical", contact: "guild messenger", pay_profile: "steady", bonus_profile: "rare", risk_profile: "moderate", temperament_note: "Values reliability, logistics, and no-nonsense briefings.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 },
+        { id: 2, name: "Archivist Ilyra Quill", personality: "scholarly", contact: "arcane correspondence", pay_profile: "modest", bonus_profile: "rare", risk_profile: "low", temperament_note: "Prefers careful handling and detailed reports over speed.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 },
+        { id: 3, name: "Magistrate Doran Flint", personality: "stern", contact: "official courier", pay_profile: "steady", bonus_profile: "rare", risk_profile: "high", temperament_note: "Formal and demanding. Tolerates little improvisation.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 },
+        { id: 4, name: "Captain Roen Blackwake", personality: "brisk", contact: "dock runner", pay_profile: "high", bonus_profile: "often", risk_profile: "high", temperament_note: "Moves fast, pays for urgency, and accepts rough conditions.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 },
+        { id: 5, name: "Matron Ysabet Thorn", personality: "demanding", contact: "house steward", pay_profile: "high", bonus_profile: "sometimes", risk_profile: "moderate", temperament_note: "Generous when satisfied, difficult when crossed.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 },
+        { id: 6, name: "Prior Cedric Vale", personality: "calm", contact: "monastery letter", pay_profile: "modest", bonus_profile: "sometimes", risk_profile: "low", temperament_note: "Patient and fair. Usually prefers safer, service-minded work.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 },
+        { id: 7, name: "Guildmaster Olin Brass", personality: "transactional", contact: "clerk dispatch", pay_profile: "steady", bonus_profile: "rare", risk_profile: "moderate", temperament_note: "Treats every arrangement like a ledger entry.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 },
+        { id: 8, name: "Envoy Seris Dawn", personality: "polished", contact: "embassy aide", pay_profile: "high", bonus_profile: "often", risk_profile: "measured", temperament_note: "Refined, image-conscious, and willing to pay for discretion.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 },
+        { id: 9, name: "Warden Petra Stone", personality: "direct", contact: "watch courier", pay_profile: "steady", bonus_profile: "rare", risk_profile: "high", temperament_note: "Blunt, dependable, and more concerned with results than manners.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 }
     ];
 };
 
@@ -365,6 +607,348 @@ get_patron_index = function(_patron_id) {
     return -1;
 };
 
+count_patron_seen_contracts = function(_patron_index) {
+    if (_patron_index < 0 || _patron_index >= array_length(state.patrons)) return 0;
+
+    var _count = 0;
+    var _patron_id = state.patrons[_patron_index].id;
+    for (var i = 0; i < array_length(state.contracts); i++) {
+        if (state.contracts[i].patron_id == _patron_id && state.contracts[i].unlocked) {
+            _count += 1;
+        }
+    }
+    return _count;
+};
+
+count_patron_open_requests = function(_patron_index) {
+    if (_patron_index < 0 || _patron_index >= array_length(state.patrons)) return 0;
+
+    var _count = 0;
+    var _patron_id = state.patrons[_patron_index].id;
+    for (var i = 0; i < array_length(state.contracts); i++) {
+        var _c = state.contracts[i];
+        if (_c.patron_id == _patron_id && _c.unlocked && !_c.accepted && !_c.expired && state.absolute_hour < _c.expires_hour) {
+            _count += 1;
+        }
+    }
+    return _count;
+};
+
+patron_average_offer_reward = function(_patron_index) {
+    if (_patron_index < 0 || _patron_index >= array_length(state.patrons)) return 0;
+
+    var _sum = 0;
+    var _count = 0;
+    var _patron_id = state.patrons[_patron_index].id;
+    for (var i = 0; i < array_length(state.contracts); i++) {
+        if (state.contracts[i].patron_id == _patron_id) {
+            _sum += state.contracts[i].mission.reward;
+            _count += 1;
+        }
+    }
+
+    if (_count <= 0) return 0;
+    return floor(_sum / _count);
+};
+
+patron_average_offer_risk = function(_patron_index) {
+    if (_patron_index < 0 || _patron_index >= array_length(state.patrons)) return 0;
+
+    var _sum = 0;
+    var _count = 0;
+    var _patron_id = state.patrons[_patron_index].id;
+    for (var i = 0; i < array_length(state.contracts); i++) {
+        if (state.contracts[i].patron_id == _patron_id) {
+            _sum += state.contracts[i].mission.risk;
+            _count += 1;
+        }
+    }
+
+    if (_count <= 0) return 0;
+    return floor(_sum / _count);
+};
+
+record_patron_job_result = function(_contract_index, _result, _gross_patron_pay) {
+    if (_contract_index < 0 || _contract_index >= array_length(state.contracts)) return;
+
+    var _pidx = get_patron_index(state.contracts[_contract_index].patron_id);
+    if (_pidx < 0) return;
+
+    var _patron = state.patrons[_pidx];
+    _patron.total_patron_pay += _gross_patron_pay;
+
+    switch (_result.outcome) {
+        case "success": _patron.jobs_completed += 1; break;
+        case "partial": _patron.jobs_partial += 1; break;
+        default: _patron.jobs_failed += 1; break;
+    }
+};
+
+award_adventurer_mission_find = function(_adv_id, _mission, _outcome) {
+    var _idx = get_adv_index(_adv_id);
+    if (_idx < 0) return;
+
+    var _find_roll = irandom(99);
+    if (_outcome == "failure" || _find_roll > 38) return;
+
+    var _a = state.adventurers[_idx];
+    var _item = "";
+
+    if ((_a.role == "Mage" || _a.role == "Cleric" || _a.role == "Bard") && _find_roll < 18) {
+        switch (_mission.type) {
+            case "Recovery": _item = choose("cipher sigil", "ember cantrip", "restoration verse"); break;
+            case "Diplomatic": _item = choose("binding phrase", "court glamour", "oath charm"); break;
+            default: _item = choose("spark diagram", "warded chant", "field invocation"); break;
+        }
+        if (array_length(_a.found_magic) < 8) {
+            array_push(_a.found_magic, _item);
+            add_log(_a.name + " picked up new magic: " + _item + ".");
+        }
+        return;
+    }
+
+    switch (_mission.type) {
+        case "Security": _item = choose("reinforced buckler", "tempered spearhead", "bandit map case"); break;
+        case "Recovery": _item = choose("relic satchel", "archive charm", "dust-proof field kit"); break;
+        case "Diplomatic": _item = choose("signet ribbon", "negotiator's ledger", "silk envoy gloves"); break;
+        default: _item = choose("well-made rope", "traveler's charm", "fine field tools"); break;
+    }
+
+    if (array_length(_a.notable_finds) < 8) {
+        array_push(_a.notable_finds, _item);
+        add_log(_a.name + " kept a notable find: " + _item + ".");
+    }
+};
+
+log_patron_research_report = function(_patron_index) {
+    if (_patron_index < 0 || _patron_index >= array_length(state.patrons)) return;
+
+    var _p = state.patrons[_patron_index];
+    _p.research_hits += 1;
+    _p.contracts_seen = max(_p.contracts_seen, count_patron_seen_contracts(_patron_index));
+
+    var _worked = _p.jobs_completed + _p.jobs_partial + _p.jobs_failed;
+    var _open_requests = count_patron_open_requests(_patron_index);
+    var _avg_offer_pay = patron_average_offer_reward(_patron_index);
+    var _avg_offer_risk = patron_average_offer_risk(_patron_index);
+    var _avg_paid = (_worked > 0) ? floor(_p.total_patron_pay / _worked) : 0;
+
+    add_log("Patron research file updated: " + _p.name + ".");
+    add_log("Profile: " + string_upper(_p.personality) + " | Contact usually via " + _p.contact + ".");
+    add_log("Intel: pay tends " + _p.pay_profile + ", bonuses " + _p.bonus_profile + ", assignments trend " + _p.risk_profile + " risk.");
+    add_log("Temperament: " + _p.temperament_note);
+
+    if (_worked > 0) {
+        add_log("Agency history: worked " + string(_worked) + " contract(s) | success " + string(_p.jobs_completed) + ", partial " + string(_p.jobs_partial) + ", failed " + string(_p.jobs_failed) + ".");
+        add_log("Observed patron pay: avg " + string(_avg_paid) + "g across completed work.");
+    } else {
+        add_log("Agency history: no completed contracts with this patron yet.");
+    }
+
+    add_log("Known requests on file: " + string(_p.contracts_seen) + " seen so far, " + string(_open_requests) + " currently visible from View Patron Requests.");
+    add_log("Offer pattern: average listed pay " + string(_avg_offer_pay) + "g, average listed risk " + string(_avg_offer_risk) + ".");
+};
+
+reset_market_offer_terms = function() {
+    state.offer_bonus = 0;
+    state.offer_rate_delta = 0;
+    state.offer_commission = 0.22;
+};
+
+open_market_hub = function() {
+    if (array_length(state.free_agents) <= 0) {
+        refresh_free_agent_market();
+    }
+
+    state.mode = MODE.BUYING;
+    state.market_stage = "hub";
+    state.status_line = "Recruitment desk open. Scout or negotiate.";
+};
+
+open_market_board = function() {
+    if (array_length(state.free_agents) <= 0) {
+        refresh_free_agent_market();
+    }
+
+    state.mode = MODE.BUYING;
+    state.market_stage = "board";
+    state.status_line = "Scouting free-agent candidates.";
+    add_log("Market board open. Review candidates before making an approach.");
+};
+
+open_market_candidate = function(_idx) {
+    if (array_length(state.free_agents) <= 0) {
+        add_log("No free agents on the board. Refresh market.");
+        return;
+    }
+
+    state.selected_free_agent_index = clamp(_idx, 0, array_length(state.free_agents) - 1);
+    state.mode = MODE.BUYING;
+    state.market_stage = "candidate";
+    state.status_line = "Reviewing candidate profile.";
+
+    var _fa = state.free_agents[state.selected_free_agent_index];
+    var _cand_score = adventurer_market_score(_fa);
+    var _roster_score = average_roster_market_score();
+    var _score_delta = _cand_score - _roster_score;
+    var _roster_rate = average_roster_day_rate();
+    var _rate_delta = _fa.ask_rate - _roster_rate;
+    add_log("Candidate reviewed: " + _fa.name + " | " + _fa.role + " | profile " + string(_fa.profile_score) + ".");
+    add_log("Stats: C" + string(_fa.combat) + " M" + string(_fa.magic) + " S" + string(_fa.stealth) + " D" + string(_fa.diplomacy) + " R" + string(_fa.reliability) + " | Age " + string(_fa.age) + ".");
+    add_log("Roster comparison: score " + string(_cand_score) + " vs roster avg " + string(_roster_score) + " (" + market_score_label(_score_delta) + ", " + ((_score_delta >= 0) ? "+" : "") + string(_score_delta) + ").");
+    add_log("Cost comparison: ask rate " + string(_fa.ask_rate) + "g/day vs roster avg " + string(_roster_rate) + "g/day (" + ((_rate_delta >= 0) ? "+" : "") + string(_rate_delta) + "g/day).");
+    add_log("Ask bonus " + string(_fa.ask_bonus) + "g | Ask rate " + string(_fa.ask_rate) + "g/day | Minimum commission " + string(round(_fa.min_commission * 100)) + "%.");
+    add_log("Negotiation style: " + string_upper(_fa.negotiation_style) + ". " + _fa.style_blurb);
+    add_log("Why representation: " + market_representation_reason(_fa));
+    add_log(_fa.name + ": " + market_style_line(_fa.negotiation_style, "target"));
+};
+
+open_market_offer_stage = function() {
+    if (array_length(state.free_agents) <= 0 || state.selected_free_agent_index < 0) {
+        add_log("Select a free agent first.");
+        return;
+    }
+
+    reset_market_offer_terms();
+    state.market_stage = "offer";
+    state.status_line = "Drafting recruitment offer.";
+    add_log("Adjust bonus, rate, and commission, then submit your proposal.");
+};
+
+process_idle_adventurer_pressure = function() {
+    for (var i = 0; i < array_length(state.adventurers); i++) {
+        var _a = state.adventurers[i];
+
+        if (_a.status == "available") {
+            _a.idle_days += 1;
+
+            var _should_notice = (_a.idle_days >= 3) && ((_a.idle_days == 3) || ((_a.idle_days mod 2) == 1));
+            if (_should_notice && _a.last_idle_notice_day != state.day) {
+                _a.last_idle_notice_day = state.day;
+                add_log(_a.name + " is getting restless after " + string(_a.idle_days) + " idle day(s) without a contract.");
+            }
+        } else {
+            _a.idle_days = 0;
+        }
+    }
+};
+
+adventurer_market_score = function(_a) {
+    var _core = (_a.combat + _a.magic + _a.stealth + _a.diplomacy) / 4;
+    return round(_core * 10 + _a.reliability * 0.3);
+};
+
+average_roster_market_score = function() {
+    var _sum = 0;
+    var _count = 0;
+    for (var i = 0; i < array_length(state.adventurers); i++) {
+        if (state.adventurers[i].status != "retired") {
+            _sum += adventurer_market_score(state.adventurers[i]);
+            _count += 1;
+        }
+    }
+
+    if (_count <= 0) return 0;
+    return round(_sum / _count);
+};
+
+average_roster_day_rate = function() {
+    var _sum = 0;
+    var _count = 0;
+    for (var i = 0; i < array_length(state.adventurers); i++) {
+        if (state.adventurers[i].status != "retired") {
+            _sum += state.adventurers[i].adventure_rate;
+            _count += 1;
+        }
+    }
+
+    if (_count <= 0) return 0;
+    return round(_sum / _count);
+};
+
+market_score_label = function(_delta) {
+    if (_delta >= 12) return "well above roster average";
+    if (_delta >= 5) return "above roster average";
+    if (_delta <= -12) return "well below roster average";
+    if (_delta <= -5) return "below roster average";
+    return "roughly on roster average";
+};
+
+change_adventurer_morale = function(_adv_id, _delta, _reason) {
+    var _idx = get_adv_index(_adv_id);
+    if (_idx < 0) return;
+    var _a = state.adventurers[_idx];
+    var _old = _a.morale;
+    _a.morale = clamp(_a.morale + _delta, 0, 100);
+    if (!is_undefined(_reason) && _reason != "" && _a.morale != _old) {
+        add_log(_a.name + " morale " + ((_delta >= 0) ? "rose" : "fell") + " to " + string(_a.morale) + " (" + _reason + ").");
+    }
+};
+
+change_adventurer_trust = function(_adv_id, _delta, _reason) {
+    var _idx = get_adv_index(_adv_id);
+    if (_idx < 0) return;
+    var _a = state.adventurers[_idx];
+    var _old = _a.trust;
+    _a.trust = clamp(_a.trust + _delta, 0, 100);
+    if (!is_undefined(_reason) && _reason != "" && _a.trust != _old) {
+        add_log(_a.name + " trust " + ((_delta >= 0) ? "rose" : "fell") + " to " + string(_a.trust) + " (" + _reason + ").");
+    }
+};
+
+process_client_contract_pressure = function() {
+    for (var i = 0; i < array_length(state.adventurers); i++) {
+        var _a = state.adventurers[i];
+
+        if (variable_struct_exists(_a, "contract_days_remaining")) {
+            _a.contract_days_remaining = max(0, _a.contract_days_remaining - 1);
+            if (_a.contract_days_remaining == 5) {
+                add_log(_a.name + "'s " + _a.representation_type + " expires in 5 day(s).");
+            }
+        }
+
+        if (_a.status == "available" && variable_struct_exists(_a, "activity_expectation_days") && _a.idle_days > _a.activity_expectation_days) {
+            change_adventurer_morale(_a.id, -2, "too many quiet days between contracts");
+            if ((_a.idle_days - _a.activity_expectation_days) >= 2) {
+                change_adventurer_trust(_a.id, -1, "agency is not matching promised work tempo");
+            }
+        }
+    }
+};
+
+apply_client_profile_from_negotiation_style = function(_a) {
+    if (!variable_struct_exists(_a, "negotiation_style")) return;
+
+    switch (_a.negotiation_style) {
+        case "money_first":
+            _a.ambition = "higher pay";
+            _a.activity_expectation_days = 3;
+            _a.risk_preference = "balanced";
+        break;
+        case "prestige_first":
+            _a.ambition = "prestige jobs";
+            _a.activity_expectation_days = 4;
+            _a.risk_preference = "bold";
+        break;
+        case "security_first":
+            _a.ambition = "steady work";
+            _a.activity_expectation_days = 3;
+            _a.risk_preference = "careful";
+        break;
+        case "loyalty_first":
+            _a.ambition = "steady work";
+            _a.activity_expectation_days = 2;
+            _a.risk_preference = "balanced";
+            _a.trust = min(100, _a.trust + 4);
+        break;
+        case "hardline":
+            _a.ambition = "higher pay";
+            _a.activity_expectation_days = 2;
+            _a.risk_preference = "bold";
+        break;
+    }
+};
+
 refresh_mission_board = function() {
     state.missions = [];
 
@@ -384,6 +968,195 @@ refresh_mission_board = function() {
         state.selected_party_ids = [];
     } else if (state.selected_mission_index < 0 || state.selected_mission_index >= array_length(state.missions)) {
         state.selected_mission_index = 0;
+    }
+};
+
+count_available_adventurers = function() {
+    var _count = 0;
+    for (var i = 0; i < array_length(state.adventurers); i++) {
+        var _a = state.adventurers[i];
+        if (_a.status == "available" && !is_adventurer_committed(_a.id)) {
+            _count += 1;
+        }
+    }
+    return _count;
+};
+
+get_selected_contract = function() {
+    if (state.selected_contract_index < 0 || state.selected_contract_index >= array_length(state.contracts)) {
+        return undefined;
+    }
+    return state.contracts[state.selected_contract_index];
+};
+
+select_mission_by_contract_index = function(_contract_index) {
+    refresh_mission_board();
+
+    for (var i = 0; i < array_length(state.missions); i++) {
+        if (state.missions[i].contract_index == _contract_index) {
+            state.selected_mission_index = i;
+            return true;
+        }
+    }
+
+    state.selected_mission_index = -1;
+    return false;
+};
+
+get_patron_contract_indices = function(_patron_index) {
+    var _matches = [];
+    if (_patron_index < 0 || _patron_index >= array_length(state.patrons)) return _matches;
+
+    var _patron_id = state.patrons[_patron_index].id;
+    for (var i = 0; i < array_length(state.contracts); i++) {
+        var _c = state.contracts[i];
+        if (_c.patron_id == _patron_id && _c.unlocked && !_c.accepted && !_c.expired && state.absolute_hour < _c.expires_hour) {
+            array_push(_matches, i);
+        }
+    }
+
+    return _matches;
+};
+
+reset_contracting_selection = function() {
+    state.selected_patron_index = -1;
+    state.selected_contract_index = -1;
+    state.selected_mission_index = -1;
+    state.selected_party_ids = [];
+    state.contracting_stage = "patrons";
+};
+
+reset_mission_review_selection = function() {
+    state.selected_mission_index = -1;
+    state.selected_party_ids = [];
+    state.mission_review_stage = "missions";
+};
+
+open_adventurer_roster = function(_return_mode) {
+    if (is_undefined(_return_mode)) _return_mode = MODE.PLANNING;
+    state.adventurer_view_return_mode = _return_mode;
+    state.mode = MODE.ADVENTURERS;
+    state.adventurer_view_stage = "list";
+    state.selected_adventurer_index = -1;
+    state.status_line = "Reviewing represented adventurers.";
+    print_adventurers();
+};
+
+open_adventurer_detail = function(_idx) {
+    if (_idx < 0 || _idx >= array_length(state.adventurers)) return;
+
+    state.mode = MODE.ADVENTURERS;
+    state.adventurer_view_stage = "detail";
+    state.selected_adventurer_index = _idx;
+
+    var _a = state.adventurers[_idx];
+    state.status_line = "Adventurer file: " + _a.name;
+    add_log("Adventurer file: " + _a.name + " | " + _a.role + " | Age " + string(_a.age) + " [" + string_upper(_a.status) + "]");
+    add_log("Stats: C" + string(_a.combat) + " M" + string(_a.magic) + " S" + string(_a.stealth) + " D" + string(_a.diplomacy) + " R" + string(_a.reliability) + ".");
+    add_log("Contract terms: " + string(_a.adventure_rate) + "g/day | Agency commission " + string(round(_a.commission_rate * 100)) + "%.");
+    add_log("Representation: " + _a.representation_type + " | " + string(_a.contract_days_remaining) + "/" + string(_a.contract_term_days) + " day(s) remaining.");
+    add_log("Relationship: morale " + string(_a.morale) + " | trust " + string(_a.trust) + " | expects work every " + string(_a.activity_expectation_days) + " day(s) | priority " + _a.ambition + " | risk " + _a.risk_preference + ".");
+    add_log("Personal purse: " + string(_a.purse_gold) + "g | Lifetime earnings " + string(_a.lifetime_earnings) + "g | Last mission payout " + string(_a.last_mission_payout) + "g.");
+    add_log("Kit: " + array_join_text(_a.kit));
+    add_log("Magic & techniques: " + array_join_text(_a.found_magic));
+    add_log("Notable finds: " + array_join_text(_a.notable_finds));
+};
+
+open_contracting_patron_list = function() {
+    state.mode = MODE.CONTRACTING;
+    state.contracting_stage = "patrons";
+    state.selected_patron_index = -1;
+    state.selected_contract_index = -1;
+    state.selected_mission_index = -1;
+    state.selected_party_ids = [];
+    state.status_line = "Reviewing patron correspondence.";
+    print_patrons();
+};
+
+open_mission_board = function() {
+    refresh_mission_board();
+    state.mode = MODE.MISSION_REVIEW;
+    state.mission_review_stage = "missions";
+    state.selected_party_ids = [];
+    state.status_line = "Reviewing mission board.";
+    print_missions();
+};
+
+open_patron_contracts = function(_patron_index) {
+    unlock_patron_contracts(_patron_index);
+    state.mode = MODE.CONTRACTING;
+    state.contracting_stage = "contracts";
+    state.selected_contract_index = -1;
+    state.selected_party_ids = [];
+
+    var _patron = state.patrons[_patron_index];
+    state.status_line = "Reviewing contracts from " + _patron.name + ".";
+};
+
+select_contract_for_review = function(_contract_index) {
+    if (_contract_index < 0 || _contract_index >= array_length(state.contracts)) return;
+
+    var _contract = state.contracts[_contract_index];
+    if (!_contract.unlocked || _contract.accepted || _contract.expired || state.absolute_hour >= _contract.expires_hour) {
+        add_log("That contract is no longer available.");
+        return;
+    }
+
+    state.selected_contract_index = _contract_index;
+    state.contracting_stage = "contract";
+    state.selected_party_ids = [];
+    if (!select_mission_by_contract_index(_contract_index)) {
+        add_log("That contract is no longer on the board.");
+        state.selected_contract_index = -1;
+        return;
+    }
+    state.status_line = "Contract review: " + _contract.mission.title;
+};
+
+advance_to_party_assignment = function() {
+    var _contract = get_selected_contract();
+    if (!is_struct(_contract)) {
+        add_log("Select a contract first.");
+        return;
+    }
+
+    if (count_available_adventurers() <= 0) {
+        add_log("No available adventurers to assign right now.");
+        return;
+    }
+
+    state.contracting_stage = "party";
+    state.status_line = "Assign adventurers to " + _contract.mission.title + ".";
+    add_log("Choose your adventurers, then click Done Selecting.");
+};
+
+finish_party_assignment = function() {
+    if (array_length(selected_party()) <= 0) {
+        add_log("Select at least one available adventurer.");
+        return;
+    }
+
+    var _contract = get_selected_contract();
+    if (!is_struct(_contract)) {
+        add_log("Select a contract first.");
+        return;
+    }
+
+    state.contracting_stage = "confirm";
+    state.status_line = "Ready to launch " + _contract.mission.title + ".";
+};
+
+cancel_contract_flow = function() {
+    state.selected_contract_index = -1;
+    state.selected_mission_index = -1;
+    state.selected_party_ids = [];
+
+    if (state.selected_patron_index >= 0) {
+        state.contracting_stage = "contracts";
+        state.status_line = "Reviewing contracts from " + state.patrons[state.selected_patron_index].name + ".";
+    } else {
+        state.contracting_stage = "patrons";
+        state.status_line = "Reviewing patron correspondence.";
     }
 };
 
@@ -411,6 +1184,7 @@ unlock_patron_contracts = function(_patron_index) {
         add_log("No new contracts from this patron right now.");
     }
 
+    _patron.contracts_seen = max(_patron.contracts_seen, count_patron_seen_contracts(_patron_index));
     refresh_mission_board();
 };
 
@@ -484,253 +1258,6 @@ grow_adventurer_from_mission = function(_adv_id, _difficulty) {
     }
 };
 
-enter_game_house = function() {
-    if (state.game_over) return;
-    state.mode = MODE.GAME_HOUSE;
-    state.status_line = "At the Gilded Griffin Game House. Time and rivals keep moving.";
-    add_log("You step into the Gilded Griffin Game House. The city clock and rival offices continue in the background.");
-};
-
-reset_game_house_round = function() {
-    state.game_house.craps_phase = "idle";
-    state.game_house.craps_point = 0;
-    state.game_house.cards_in_round = false;
-    state.game_house.cards_player = [];
-    state.game_house.cards_dealer = [];
-    state.game_house.cards_last_outcome = "";
-};
-
-set_game_house_game = function(_game) {
-    state.game_house_game = _game;
-    reset_game_house_round();
-    switch (_game) {
-        case "CRAPS": add_log("Table selected: Street Craps. Roll for point."); break;
-        case "WHEEL": add_log("Table selected: Wyrm Wheel. Choose a bet and spin."); break;
-        case "DRAGON21": add_log("Table selected: Dragon 21. Beat the dealer without busting."); break;
-        default: add_log("Unknown table."); break;
-    }
-};
-
-change_game_house_wager = function(_delta) {
-    state.game_house_wager = clamp(state.game_house_wager + _delta, 10, 250);
-    add_log("Table wager set to " + string(state.game_house_wager) + "g.");
-};
-
-card_draw_value = function() {
-    var _rank = irandom_range(1, 13);
-    if (_rank > 10) return 10;
-    return _rank;
-};
-
-card_hand_total = function(_hand) {
-    var _sum = 0;
-    var _aces = 0;
-    for (var i = 0; i < array_length(_hand); i++) {
-        var _v = _hand[i];
-        if (_v == 1) {
-            _aces += 1;
-            _sum += 1;
-        } else {
-            _sum += _v;
-        }
-    }
-
-    while (_aces > 0 && _sum + 10 <= 21) {
-        _sum += 10;
-        _aces -= 1;
-    }
-    return _sum;
-};
-
-card_hand_text = function(_hand) {
-    if (array_length(_hand) <= 0) return "-";
-    var _txt = "";
-    for (var i = 0; i < array_length(_hand); i++) {
-        var _v = _hand[i];
-        var _piece = string(_v);
-        if (_v == 1) _piece = "A";
-        if (_v == 10) _piece = "10";
-        _txt += _piece;
-        if (i < array_length(_hand) - 1) _txt += " ";
-    }
-    return _txt;
-};
-
-wheel_number_color = function(_n) {
-    if (_n == 0) return "GREEN";
-    var _reds = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
-    for (var i = 0; i < array_length(_reds); i++) {
-        if (_reds[i] == _n) return "RED";
-    }
-    return "BLACK";
-};
-
-game_house_roll_craps = function() {
-    if (state.game_over) return;
-    var _w = state.game_house_wager;
-    if (_w > state.gold) {
-        add_log("Not enough gold for that wager.");
-        return;
-    }
-
-    var _roll = irandom_range(1, 6) + irandom_range(1, 6);
-    state.game_house.craps_last_roll = _roll;
-    var _phase = state.game_house.craps_phase;
-    var _result = "";
-
-    if (_phase == "idle") {
-        if (_roll == 7 || _roll == 11) {
-            add_gold(_w, "Craps win on come-out roll.");
-            _result = "Natural. You win " + string(_w) + "g.";
-        } else if (_roll == 2 || _roll == 3 || _roll == 12) {
-            spend_gold(_w, "Craps loss on come-out roll.");
-            _result = "Crap out. You lose " + string(_w) + "g.";
-        } else {
-            state.game_house.craps_phase = "point";
-            state.game_house.craps_point = _roll;
-            _result = "Point is set to " + string(_roll) + ". Roll again before a 7.";
-        }
-    } else {
-        var _pt = state.game_house.craps_point;
-        if (_roll == _pt) {
-            add_gold(_w, "Craps point made.");
-            _result = "Point made. You win " + string(_w) + "g.";
-            state.game_house.craps_phase = "idle";
-            state.game_house.craps_point = 0;
-        } else if (_roll == 7) {
-            spend_gold(_w, "Craps seven-out.");
-            _result = "Seven out. You lose " + string(_w) + "g.";
-            state.game_house.craps_phase = "idle";
-            state.game_house.craps_point = 0;
-        } else {
-            _result = "No decision on " + string(_roll) + ". Point " + string(_pt) + " stands.";
-        }
-    }
-
-    add_log("Street Craps roll: " + string(_roll) + ". " + _result);
-    advance_hours(1);
-};
-
-game_house_spin_wheel = function() {
-    if (state.game_over) return;
-    var _w = state.game_house_wager;
-    if (_w > state.gold) {
-        add_log("Not enough gold for that wager.");
-        return;
-    }
-
-    var _n = irandom_range(0, 36);
-    var _color = wheel_number_color(_n);
-    var _bet = state.game_house.wheel_bet;
-    var _won = false;
-    var _payout = 0;
-
-    switch (_bet) {
-        case "RED": _won = (_color == "RED"); _payout = _w; break;
-        case "BLACK": _won = (_color == "BLACK"); _payout = _w; break;
-        case "ODD": _won = (_n > 0 && ((_n mod 2) == 1)); _payout = _w; break;
-        case "EVEN": _won = (_n > 0 && ((_n mod 2) == 0)); _payout = _w; break;
-        case "LOW12": _won = (_n >= 1 && _n <= 12); _payout = _w * 2; break;
-        case "MID12": _won = (_n >= 13 && _n <= 24); _payout = _w * 2; break;
-        case "HIGH12": _won = (_n >= 25 && _n <= 36); _payout = _w * 2; break;
-    }
-
-    state.game_house.wheel_last_number = _n;
-    state.game_house.wheel_last_color = _color;
-
-    if (_won) add_gold(_payout, "Wyrm Wheel payout.");
-    else spend_gold(_w, "Wyrm Wheel loss.");
-
-    add_log("Wyrm Wheel spun " + string(_n) + " (" + _color + "). Bet: " + _bet + ". " + (_won ? ("Win +" + string(_payout) + "g.") : ("Loss -" + string(_w) + "g.")));
-    advance_hours(1);
-};
-
-game_house_deal_21 = function() {
-    if (state.game_over) return;
-    var _w = state.game_house_wager;
-    if (_w > state.gold) {
-        add_log("Not enough gold for that wager.");
-        return;
-    }
-    if (state.game_house.cards_in_round) {
-        add_log("A Dragon 21 hand is already in progress.");
-        return;
-    }
-
-    state.game_house.cards_player = [card_draw_value(), card_draw_value()];
-    state.game_house.cards_dealer = [card_draw_value(), card_draw_value()];
-    state.game_house.cards_in_round = true;
-    state.game_house.cards_last_outcome = "";
-
-    var _pt = card_hand_total(state.game_house.cards_player);
-    var _d_up = state.game_house.cards_dealer[0];
-    add_log("Dragon 21 deal: player " + card_hand_text(state.game_house.cards_player) + " (" + string(_pt) + "), dealer showing " + string(_d_up) + ".");
-
-    if (_pt == 21) {
-        add_gold(_w + floor(_w * 0.5), "Dragon 21 natural.");
-        add_log("Black rune natural. Payout +" + string(_w + floor(_w * 0.5)) + "g.");
-        state.game_house.cards_in_round = false;
-        state.game_house.cards_last_outcome = "BLACK RUNE NATURAL";
-    }
-
-    advance_hours(1);
-};
-
-game_house_hit_21 = function() {
-    if (!state.game_house.cards_in_round) {
-        add_log("No Dragon 21 hand active. Deal first.");
-        return;
-    }
-
-    array_push(state.game_house.cards_player, card_draw_value());
-    var _pt = card_hand_total(state.game_house.cards_player);
-    add_log("Dragon 21 hit: " + card_hand_text(state.game_house.cards_player) + " (" + string(_pt) + ").");
-
-    if (_pt > 21) {
-        spend_gold(state.game_house_wager, "Dragon 21 bust.");
-        add_log("Bust. You lose " + string(state.game_house_wager) + "g.");
-        state.game_house.cards_in_round = false;
-        state.game_house.cards_last_outcome = "BUST";
-    }
-
-    advance_hours(1);
-};
-
-game_house_stand_21 = function() {
-    if (!state.game_house.cards_in_round) {
-        add_log("No Dragon 21 hand active. Deal first.");
-        return;
-    }
-
-    var _pt = card_hand_total(state.game_house.cards_player);
-    var _dt = card_hand_total(state.game_house.cards_dealer);
-
-    while (_dt < 17) {
-        array_push(state.game_house.cards_dealer, card_draw_value());
-        _dt = card_hand_total(state.game_house.cards_dealer);
-    }
-
-    if (_dt > 21 || _pt > _dt) {
-        add_gold(state.game_house_wager, "Dragon 21 win.");
-        add_log("Dealer " + card_hand_text(state.game_house.cards_dealer) + " (" + string(_dt) + "). You win +" + string(state.game_house_wager) + "g.");
-        state.game_house.cards_last_outcome = "WIN";
-    } else if (_pt < _dt) {
-        spend_gold(state.game_house_wager, "Dragon 21 loss.");
-        add_log("Dealer " + card_hand_text(state.game_house.cards_dealer) + " (" + string(_dt) + "). You lose -" + string(state.game_house_wager) + "g.");
-        state.game_house.cards_last_outcome = "LOSS";
-    } else {
-        add_log("Push at " + string(_pt) + ". No gold changes hands.");
-        state.game_house.cards_last_outcome = "PUSH";
-    }
-
-    state.game_house.cards_in_round = false;
-    advance_hours(1);
-};
-
-office_activity_visit_game_house = function() {
-    enter_game_house();
-};
-
 office_activity_research = function() {
     if (state.game_over) return;
     var _options = [];
@@ -740,8 +1267,8 @@ office_activity_research = function() {
     if (array_length(_options) <= 0) return;
 
     var _pick = _options[irandom(array_length(_options) - 1)];
-    unlock_patron_contracts(_pick);
-    add_log("Research uncovered patron leads and opened contract channels.");
+    log_patron_research_report(_pick);
+    state.status_line = "Patron research updated.";
 };
 
 office_activity_recruit = function() {
@@ -751,13 +1278,8 @@ office_activity_recruit = function() {
         return;
     }
 
-    if (array_length(state.free_agents) <= 0) {
-        refresh_free_agent_market();
-    }
-
-    state.mode = MODE.BUYING;
-    state.status_line = "Free-agent market open. Build your offer.";
-    add_log("Entering free-agent market. Competing agencies are bidding.");
+    open_market_hub();
+    add_log("Recruitment desk opened. Scout the market before you approach a candidate.");
     rebuild_buttons();
 };
 
@@ -805,99 +1327,6 @@ office_activity_counteroffer = function() {
         add_log(state.adventurers[_pick].name + " accepted your counteroffer and returned.");
     } else {
         add_log(state.adventurers[_pick].name + " stayed with a rival agency for now.");
-    }
-};
-
-process_daily_finance = function() {
-    if (state.last_finance_day == state.day) return;
-    state.last_finance_day = state.day;
-
-    if (((state.day - 1) mod 30) == 0) {
-        spend_gold(55, "Monthly desk and office rent due.");
-    }
-
-    if (state.day > 1 && ((state.day - 1) mod 120) == 0) {
-        spend_gold(180, "Annual guild and civic taxes due.");
-    }
-
-    if (irandom(99) < 3) {
-        spend_gold(irandom_range(8, 35), "Unexpected operating expense.");
-    }
-    if (irandom(99) < 3) {
-        add_gold(irandom_range(6, 28), "Minor side commission paid out.");
-    }
-};
-
-process_world_pulse = function() {
-    if (state.game_over) return;
-    if (state.world_pulse_last_hour == state.absolute_hour) return;
-    state.world_pulse_last_hour = state.absolute_hour;
-
-    // Global world pulse every 3 in-game hours, regardless of current mode.
-    if ((state.absolute_hour mod 3) != 0) return;
-    if (irandom(99) >= 42) return;
-
-    var _event_roll = irandom_range(0, 4);
-    switch (_event_roll) {
-        case 0:
-            var _targets = [];
-            for (var i = 0; i < array_length(state.adventurers); i++) {
-                var _a = state.adventurers[i];
-                var _power = (_a.combat + _a.magic + _a.stealth + _a.diplomacy) / 4;
-                if (_a.status == "available" && _power >= 8) {
-                    array_push(_targets, i);
-                }
-            }
-
-            if (array_length(_targets) > 0) {
-                var _pick = _targets[irandom(array_length(_targets) - 1)];
-                if (irandom(99) < 22) {
-                    state.adventurers[_pick].status = "unavailable";
-                    add_log("World pulse: Rival recruiters poached " + state.adventurers[_pick].name + " while you were occupied.");
-                    state.rival_activity = "Rival agencies are aggressively courting proven talent.";
-                } else {
-                    add_log("World pulse: Rival scouts approached your roster, but no one signed away.");
-                }
-            }
-        break;
-
-        case 1:
-            var _open = [];
-            for (var c = 0; c < array_length(state.contracts); c++) {
-                var _ct = state.contracts[c];
-                if (_ct.unlocked && !_ct.accepted && !_ct.expired && state.absolute_hour < _ct.expires_hour) {
-                    array_push(_open, c);
-                }
-            }
-            if (array_length(_open) > 0) {
-                var _ci = _open[irandom(array_length(_open) - 1)];
-                var _trim = irandom_range(2, 6);
-                state.contracts[_ci].expires_hour = max(state.absolute_hour + 2, state.contracts[_ci].expires_hour - _trim);
-                refresh_mission_board();
-                add_log("World pulse: Patron urgency increased for " + state.contracts[_ci].mission.title + ". Deadline tightened.");
-            }
-        break;
-
-        case 2:
-            var _bonus = irandom_range(4, 18);
-            add_gold(_bonus, "World pulse: a broker paid a small finder fee.");
-        break;
-
-        case 3:
-            var _cost = irandom_range(5, 22);
-            spend_gold(_cost, "World pulse: office disruption generated surprise costs.");
-        break;
-
-        case 4:
-            if (array_length(state.free_agents) > 0) {
-                for (var f = 0; f < array_length(state.free_agents); f++) {
-                    state.free_agents[f].rival_pressure = clamp(state.free_agents[f].rival_pressure + irandom_range(1, 6), 0, 100);
-                }
-                add_log("World pulse: competing agencies pushed bids at the free-agent market.");
-            } else {
-                add_log("World pulse: city rumor mill shifted contract sentiment.");
-            }
-        break;
     }
 };
 
@@ -1052,6 +1481,18 @@ market_style_line = function(_style, _moment) {
     return "";
 };
 
+market_representation_reason = function(_cand) {
+    switch (_cand.negotiation_style) {
+        case "money_first": return "Seeking representation to secure better-paying contracts and stronger signing terms.";
+        case "prestige_first": return "Wants an agency banner that opens higher-status doors and more visible work.";
+        case "security_first": return "Looking for steadier contract flow and safer long-term terms.";
+        case "loyalty_first": return "Wants a dependable office that will actually keep them working.";
+        case "hardline": return "Between sponsors and shopping aggressively for the strongest representation package.";
+    }
+
+    return "Looking for a reliable agency relationship.";
+};
+
 refresh_free_agent_market = function() {
     state.free_agents = [];
     for (var i = 0; i < 5; i++) {
@@ -1059,22 +1500,12 @@ refresh_free_agent_market = function() {
     }
 
     state.selected_free_agent_index = 0;
-    state.offer_bonus = 0;
-    state.offer_rate_delta = 0;
-    state.offer_commission = 0.22;
+    reset_market_offer_terms();
     add_log("Free-agent market board refreshed.");
 };
 
 select_free_agent_target = function(_idx) {
-    if (array_length(state.free_agents) <= 0) {
-        add_log("No free agents on the board. Refresh market.");
-        return;
-    }
-    state.selected_free_agent_index = clamp(_idx, 0, array_length(state.free_agents) - 1);
-    var _fa = state.free_agents[state.selected_free_agent_index];
-    add_log("Target selected: " + _fa.name + " | Ask bonus " + string(_fa.ask_bonus) + "g | Ask rate " + string(_fa.ask_rate) + "g/day.");
-    add_log("Negotiation style: " + string_upper(_fa.negotiation_style) + ". " + _fa.style_blurb);
-    add_log(_fa.name + ": " + market_style_line(_fa.negotiation_style, "target"));
+    open_market_candidate(_idx);
 };
 
 submit_free_agent_offer = function() {
@@ -1123,6 +1554,8 @@ submit_free_agent_offer = function() {
     add_log("Negotiation read: " + _fa.style_blurb);
     add_log(_fa.name + ": " + market_style_line(_fa.negotiation_style, "offer"));
     add_log("Decision pending. Rival agencies are making counteroffers.");
+    state.market_stage = "submitted";
+    state.status_line = "Offer submitted to " + _fa.name + ".";
 };
 
 resolve_pending_signing = function() {
@@ -1138,10 +1571,14 @@ resolve_pending_signing = function() {
     if (_accepted) {
         if (_deal.offer_bonus > 0) spend_gold(_deal.offer_bonus, "Signing bonus paid to " + _deal.candidate.name + ".");
         var _new = _deal.candidate;
-        _new.id = state.next_adv_id;
+        variable_struct_set(_new, "id", state.next_adv_id);
         _new.adventure_rate = _deal.offer_rate;
         _new.commission_rate = _deal.offer_commission;
         _new.status = "available";
+        _new.idle_days = 0;
+        _new.last_contract_day = state.day;
+        _new.last_idle_notice_day = 0;
+        apply_client_profile_from_negotiation_style(_new);
         state.next_adv_id += 1;
         array_push(state.adventurers, _new);
         add_log(_new.name + " accepted representation terms.");
@@ -1152,6 +1589,8 @@ resolve_pending_signing = function() {
             array_delete(state.free_agents, _deal.candidate_index, 1);
         }
         state.pending_signing = undefined;
+        state.market_stage = "hub";
+        state.status_line = "Recruit signed. Back at recruitment desk.";
     } else if (_counter) {
         var _counter_bonus = max(_deal.offer_bonus, _deal.candidate.ask_bonus + irandom_range(0, 35));
         var _counter_rate = max(_deal.offer_rate, _deal.candidate.ask_rate + irandom_range(0, 4));
@@ -1206,10 +1645,14 @@ resolve_pending_signing = function() {
         add_log("Counter terms: bonus " + string(_counter_bonus) + "g, rate " + string(_counter_rate) + "g/day, commission " + string(round(_counter_comm * 100)) + "%.");
         add_log(_deal.candidate.name + ": " + market_style_line(_deal.candidate.negotiation_style, "counter"));
         add_log("Respond before " + format_duration_hours(max(0, state.pending_signing.counter_deadline - state.absolute_hour)) + ".");
+        state.market_stage = "counter";
+        state.status_line = "Counteroffer received from " + _deal.candidate.name + ".";
     } else {
         add_log(_deal.candidate.name + " rejected your offer and signed elsewhere.");
         add_log(_deal.candidate.name + ": " + market_style_line(_deal.candidate.negotiation_style, "reject"));
         state.pending_signing = undefined;
+        state.market_stage = "hub";
+        state.status_line = "Recruitment desk open. Scout or negotiate.";
     }
     if (array_length(state.free_agents) <= 0) state.selected_free_agent_index = -1;
     else state.selected_free_agent_index = clamp(state.selected_free_agent_index, 0, array_length(state.free_agents) - 1);
@@ -1238,10 +1681,14 @@ accept_counter_offer = function() {
 
     if (_deal.counter_bonus > 0) spend_gold(_deal.counter_bonus, "Counteroffer signing bonus paid to " + _deal.candidate.name + ".");
     var _new = _deal.candidate;
-    _new.id = state.next_adv_id;
+    variable_struct_set(_new, "id", state.next_adv_id);
     _new.adventure_rate = _deal.counter_rate;
     _new.commission_rate = _deal.counter_commission;
     _new.status = "available";
+    _new.idle_days = 0;
+    _new.last_contract_day = state.day;
+    _new.last_idle_notice_day = 0;
+    apply_client_profile_from_negotiation_style(_new);
     state.next_adv_id += 1;
     array_push(state.adventurers, _new);
 
@@ -1253,6 +1700,8 @@ accept_counter_offer = function() {
     add_log("Contract terms: " + string(_new.adventure_rate) + "g/day with " + string(round(_new.commission_rate * 100)) + "% agency commission.");
 
     state.pending_signing = undefined;
+    state.market_stage = "hub";
+    state.status_line = "Recruit signed. Back at recruitment desk.";
     if (array_length(state.free_agents) <= 0) state.selected_free_agent_index = -1;
     else state.selected_free_agent_index = clamp(state.selected_free_agent_index, 0, array_length(state.free_agents) - 1);
 };
@@ -1268,6 +1717,8 @@ decline_counter_offer = function() {
     }
     add_log("You declined " + state.pending_signing.candidate.name + "'s counteroffer.");
     state.pending_signing = undefined;
+    state.market_stage = "candidate";
+    state.status_line = "Reviewing candidate profile.";
 };
 get_adv_index = function(_id) {
     for (var i = 0; i < array_length(state.adventurers); i++) {
@@ -1479,19 +1930,47 @@ resolve_active_mission = function(_active) {
         var _commission = variable_struct_exists(_mbr, "commission_rate") ? _mbr.commission_rate : 0.22;
         var _gross_fee = _day_rate * _pay_days;
         var _cut = floor(_gross_fee * _commission);
+        var _client_take = _gross_fee - _cut;
         _agent_cut += _cut;
-        _adventurer_payout += (_gross_fee - _cut);
+        _adventurer_payout += _client_take;
+
+        var _m_idx = get_adv_index(_mbr.id);
+        if (_m_idx >= 0) {
+            state.adventurers[_m_idx].purse_gold += _client_take;
+            state.adventurers[_m_idx].lifetime_earnings += _client_take;
+            state.adventurers[_m_idx].last_mission_payout = _client_take;
+            state.adventurers[_m_idx].contract_days_remaining = state.adventurers[_m_idx].contract_term_days;
+            add_log(state.adventurers[_m_idx].name + " received " + string(_client_take) + "g and now holds " + string(state.adventurers[_m_idx].purse_gold) + "g.");
+        }
     }
 
-    var _net_gain = _result.gold_earned - _adventurer_payout;
+    var _gross_patron_pay = _result.gold_earned;
+    var _net_gain = _gross_patron_pay - _adventurer_payout;
     add_gold(_net_gain);
     _result.gold_earned = _net_gain;
     state.reputation = clamp(state.reputation + _result.reputation_delta, 0, 100);
-    add_log("Payout breakdown: patron " + string(_result.gold_earned + _adventurer_payout) + "g, adventurers -" + string(_adventurer_payout) + "g, agency cut " + string(_agent_cut) + "g.");
+    add_log("Payout breakdown: patron " + string(_gross_patron_pay) + "g, adventurers -" + string(_adventurer_payout) + "g, agency cut " + string(_agent_cut) + "g.");
+    record_patron_job_result(_active.contract_index, _result, _gross_patron_pay);
 
     if (_result.outcome == "success") {
         for (var g = 0; g < array_length(_active.party_ids); g++) {
             grow_adventurer_from_mission(_active.party_ids[g], _mission.difficulty);
+            change_adventurer_morale(_active.party_ids[g], 4, "successful contract delivery");
+            change_adventurer_trust(_active.party_ids[g], 2, "agency delivered a win");
+        }
+    } else if (_result.outcome == "partial") {
+        for (var gp = 0; gp < array_length(_active.party_ids); gp++) {
+            change_adventurer_morale(_active.party_ids[gp], 1, "contract closed with partial success");
+        }
+    } else {
+        for (var gf = 0; gf < array_length(_active.party_ids); gf++) {
+            change_adventurer_morale(_active.party_ids[gf], -5, "contract ended badly");
+            change_adventurer_trust(_active.party_ids[gf], -3, "agency could not secure a good result");
+        }
+    }
+    if (_result.outcome == "success" || _result.outcome == "partial") {
+        for (var f = 0; f < array_length(_active.party_ids); f++) {
+            award_adventurer_mission_find(_active.party_ids[f], _mission, _result.outcome);
         }
     }
 
@@ -1510,6 +1989,8 @@ resolve_active_mission = function(_active) {
         var _inj_idx = get_adv_index(_result.injured_adv_id);
         if (_inj_idx >= 0) {
             state.adventurers[_inj_idx].status = "injured";
+            change_adventurer_morale(_result.injured_adv_id, -6, "injured on contract");
+            change_adventurer_trust(_result.injured_adv_id, -2, "dangerous assignment aftermath");
         }
     }
 
@@ -1530,126 +2011,6 @@ resolve_active_mission = function(_active) {
     if (_can_open) {
         open_next_report();
     }
-};
-
-process_hour_tick = function() {
-    state.absolute_hour += 1;
-    update_clock_from_absolute();
-    expire_contracts();
-    process_daily_finance();
-    resolve_pending_signing();
-    if (is_struct(state.pending_signing) &&
-        variable_struct_exists(state.pending_signing, "stage") &&
-        state.pending_signing.stage == "counter" &&
-        state.absolute_hour > state.pending_signing.counter_deadline) {
-        add_log(state.pending_signing.candidate.name + "'s counteroffer expired.");
-        state.pending_signing = undefined;
-    }
-    process_world_pulse();
-
-    var i = 0;
-    while (i < array_length(state.active_missions)) {
-        var _active = state.active_missions[i];
-        var _mission = _active.mission;
-
-        if (_active.phase == "outbound" && state.absolute_hour >= _active.objective_hour) {
-            _active.phase = "returning";
-            add_log("Field report (" + _mission.title + "): Objective phase complete. Party is returning.");
-        }
-
-        if (state.absolute_hour >= _active.next_update_hour && _active.due_hour > state.absolute_hour) {
-            var _update = choose(
-                "Messenger pigeon reports steady progress.",
-                "Scrying mirror carries a brief status update from the field.",
-                "Enchanted ink letter arrives with route notes.",
-                "Rider report confirms the team remains on task."
-            );
-
-            if (irandom(99) < 30) {
-                var _delay = choose(2, 4, 6, 8);
-                _active.due_hour += _delay;
-                _active.delay_hours += _delay;
-                _update += " Delay: +" + format_duration_hours(_delay) + " due to setbacks.";
-            }
-
-            add_log("Field report (" + _mission.title + "): " + _update);
-            _active.next_update_hour = state.absolute_hour + irandom_range(4, 8);
-        }
-
-        state.active_missions[i] = _active;
-
-        if (_active.due_hour <= state.absolute_hour) {
-            resolve_active_mission(_active);
-            array_delete(state.active_missions, i, 1);
-        } else {
-            i += 1;
-        }
-    }
-};
-
-advance_hours = function(_hours) {
-    var _h = max(0, _hours);
-    repeat (_h) {
-        process_hour_tick();
-    }
-};
-
-run_overnight_maintenance = function() {
-    var _recovered = 0;
-    var _lured = 0;
-    for (var i = 0; i < array_length(state.adventurers); i++) {
-        if (state.adventurers[i].status == "injured" && irandom(99) < 35) {
-            state.adventurers[i].status = "available";
-            _recovered += 1;
-        }
-
-        if (state.adventurers[i].status == "available") {
-            var _power = (state.adventurers[i].combat + state.adventurers[i].magic + state.adventurers[i].stealth + state.adventurers[i].diplomacy) / 4;
-            if (_power >= 9 && irandom(99) < 6) {
-                state.adventurers[i].status = "unavailable";
-                _lured += 1;
-                add_log(state.adventurers[i].name + " accepted a rival agency offer.");
-            }
-        }
-    }
-
-    state.rival_activity = choose(
-        "Rival agents were seen buying rumors at Dock Ward.",
-        "No visible rival movement today.",
-        "A rival office quietly underbid a transport contract.",
-        "A patron letter hints at rival interference."
-    );
-
-    if (_recovered > 0) {
-        add_log(string(_recovered) + " injured adventurer(s) recovered overnight.");
-    }
-    if (_lured > 0) {
-        add_log(string(_lured) + " high-value adventurer(s) became unavailable to rival offers.");
-    }
-    add_log(state.rival_activity);
-};
-
-end_day = function() {
-    if (state.game_over) return;
-    add_log("Office closes for the day.");
-
-    var _hours_to_next_morning = (24 - state.hour) + 8;
-    advance_hours(_hours_to_next_morning);
-
-    run_overnight_maintenance();
-
-    add_log("Office opens for day " + string(state.day) + " at " + format_hh00(state.hour) + ".");
-    state.status_line = "A new day begins in " + state.season + ", Y" + string(state.year) + ".";
-
-    var _can_open = !is_struct(state.last_result) ||
-                    !variable_struct_exists(state.last_result, "acknowledged") ||
-                    state.last_result.acknowledged;
-
-    if (_can_open && array_length(state.pending_reports) > 0) {
-        open_next_report();
-    }
-
-    rebuild_buttons();
 };
 
 start_mission = function() {
@@ -1682,6 +2043,8 @@ start_mission = function() {
                 return;
             }
             state.adventurers[_idx].status = "on_mission";
+            state.adventurers[_idx].idle_days = 0;
+            state.adventurers[_idx].last_contract_day = state.day;
             array_push(_party_ids, _party[i].id);
         }
     }
@@ -1715,10 +2078,13 @@ start_mission = function() {
     }
 
     state.selected_party_ids = [];
+    state.selected_contract_index = -1;
+    state.mission_review_stage = "missions";
     add_log("Mission started: " + _mission.title + " | To objective " + format_duration_hours(_one_way) + ", est. full cycle " + format_duration_hours(_round_trip) + ".");
     state.status_line = "Mission in progress: " + _mission.title;
 
     state.mode = MODE.PLANNING;
+    state.contracting_stage = "patrons";
     rebuild_buttons();
 };
 
@@ -1740,7 +2106,11 @@ print_adventurers = function() {
     add_log("Adventurers:");
     for (var i = 0; i < array_length(state.adventurers); i++) {
         var _a = state.adventurers[i];
-        add_log(string(i + 1) + ") " + _a.name + " (" + _a.role + ") C" + string(_a.combat) + " M" + string(_a.magic) + " S" + string(_a.stealth) + " D" + string(_a.diplomacy) + " R" + string(_a.reliability) + " | " + string(_a.adventure_rate) + "g/day | Comm " + string(round(_a.commission_rate * 100)) + "% [" + string_upper(_a.status) + "]");
+        var _idle_text = "";
+        if (_a.status == "available" && variable_struct_exists(_a, "idle_days") && _a.idle_days > 0) {
+            _idle_text = " | Idle " + string(_a.idle_days) + "d";
+        }
+        add_log(string(i + 1) + ") " + _a.name + " (" + _a.role + ") C" + string(_a.combat) + " M" + string(_a.magic) + " S" + string(_a.stealth) + " D" + string(_a.diplomacy) + " R" + string(_a.reliability) + " | Purse " + string(_a.purse_gold) + "g | " + string(_a.adventure_rate) + "g/day | Comm " + string(round(_a.commission_rate * 100)) + "% [" + string_upper(_a.status) + "]" + _idle_text);
     }
 };
 
@@ -1763,9 +2133,11 @@ add_office_activity_buttons = function() {
     button_add("Counteroffer Talent", "act_counteroffer", -1);
 };
 
-rebuild_buttons = function() {
+rebuild_buttons = function(_reset_scroll) {
+    if (is_undefined(_reset_scroll)) _reset_scroll = false;
+    var _prev_page = state.button_page;
     state.buttons = [];
-    state.button_page = 0;
+    state.button_page = _reset_scroll ? 0 : _prev_page;
 
     if (state.game_over) {
         button_add("Guild Closed - Review Logs", "noop", -1);
@@ -1784,51 +2156,139 @@ rebuild_buttons = function() {
         break;
 
         case MODE.BUYING:
-            button_add("Back to Planning", "goto_planning", -1);
-            button_add("Refresh Market", "market_refresh", -1);
-            button_add("Submit Offer", "market_submit", -1);
-            button_add("Bonus -10", "market_bonus_add", -10);
-            button_add("Bonus +10", "market_bonus_add", 10);
-            button_add("Rate -5", "market_rate_add", -5);
-            button_add("Rate +5", "market_rate_add", 5);
-            button_add("Commission -1%", "market_comm_add", -0.01);
-            button_add("Commission +1%", "market_comm_add", 0.01);
-            if (is_struct(state.pending_signing) &&
-                variable_struct_exists(state.pending_signing, "stage") &&
-                state.pending_signing.stage == "counter") {
-                button_add("Accept Counter", "market_accept_counter", -1);
-                button_add("Decline Counter", "market_decline_counter", -1);
+            switch (state.market_stage) {
+                case "board":
+                    button_add("Back to Recruit Desk", "market_back_hub", -1);
+                    button_add("Refresh Market", "market_refresh", -1);
+                    for (var fa_i = 0; fa_i < array_length(state.free_agents); fa_i++) {
+                        button_add("Scout " + string(fa_i + 1) + ": " + state.free_agents[fa_i].name, "market_select", fa_i);
+                    }
+                    if (array_length(state.free_agents) <= 0) {
+                        button_add("No Free Agents Available", "noop", -1);
+                    }
+                break;
+
+                case "candidate":
+                    button_add("Back to Market Board", "market_back_board", -1);
+                    button_add("Prepare Offer", "market_open_offer", -1);
+                    button_add("Review Adventurers", "show_adventurers", -1);
+                break;
+
+                case "offer":
+                    button_add("Back to Candidate", "market_back_candidate", -1);
+                    button_add("Submit Offer", "market_submit", -1);
+                    button_add("Bonus -10", "market_bonus_add", -10);
+                    button_add("Bonus +10", "market_bonus_add", 10);
+                    button_add("Rate -5", "market_rate_add", -5);
+                    button_add("Rate +5", "market_rate_add", 5);
+                    button_add("Commission -1%", "market_comm_add", -0.01);
+                    button_add("Commission +1%", "market_comm_add", 0.01);
+                break;
+
+                case "submitted":
+                    button_add("Back to Recruit Desk", "market_back_hub", -1);
+                    button_add("Review Adventurers", "show_adventurers", -1);
+                    button_add("Wait On Offer", "noop", -1);
+                break;
+
+                case "counter":
+                    button_add("Back to Candidate", "market_back_candidate", -1);
+                    button_add("Accept Counter", "market_accept_counter", -1);
+                    button_add("Decline Counter", "market_decline_counter", -1);
+                break;
+
+                default:
+                    button_add("Back to Planning", "goto_planning", -1);
+                    button_add("Review Adventurers", "show_adventurers", -1);
+                    button_add("Scout Free Agents", "market_open_board", -1);
+                    button_add("Refresh Market", "market_refresh", -1);
+                    if (is_struct(state.pending_signing)) {
+                        button_add("Resume Negotiation", "market_resume_pending", -1);
+                    }
+                break;
             }
-            for (var fa_i = 0; fa_i < array_length(state.free_agents); fa_i++) {
-                button_add("Target " + string(fa_i + 1) + ": " + state.free_agents[fa_i].name, "market_select", fa_i);
-            }
-            add_office_activity_buttons();
         break;
 
         case MODE.CONTRACTING:
-            button_add("Back to Planning", "goto_planning", -1);
-            button_add("Mission Board", "goto_review", -1);
-            for (var p = 0; p < array_length(state.patrons); p++) {
-                button_add("Patron " + string(p + 1) + ": " + state.patrons[p].name, "select_patron", p);
+            switch (state.contracting_stage) {
+                case "contracts":
+                    button_add("Back to Patrons", "contract_back_to_patrons", -1);
+                    var _contract_ids = get_patron_contract_indices(state.selected_patron_index);
+                    for (var c = 0; c < array_length(_contract_ids); c++) {
+                        var _contract_index = _contract_ids[c];
+                        var _ct = state.contracts[_contract_index];
+                        button_add("Contract " + string(c + 1) + ": " + _ct.mission.title, "select_contract", _contract_index);
+                    }
+                    if (array_length(_contract_ids) <= 0) {
+                        button_add("No Contracts Available", "noop", -1);
+                    }
+                break;
+
+                case "contract":
+                    button_add("Back to Contracts", "contract_back_to_contracts", -1);
+                    button_add("Accept Contract", "contract_accept", -1);
+                    button_add("Decline Contract", "contract_decline", -1);
+                break;
+
+                case "party":
+                    button_add("Back to Contract", "contract_back_to_contract", -1);
+                    button_add("Clear Party", "clear_party", -1);
+                    button_add("Done Selecting", "contract_party_done", -1);
+                    for (var j = 0; j < array_length(state.adventurers); j++) {
+                        var _a = state.adventurers[j];
+                        if (_a.status == "available" && !is_adventurer_committed(_a.id)) {
+                            var _mark = party_has(_a.id) ? "[X] " : "[ ] ";
+                            button_add(_mark + "Adventurer " + string(j + 1) + ": " + _a.name, "toggle_party", _a.id);
+                        }
+                    }
+                break;
+
+                case "confirm":
+                    button_add("Back to Party Selection", "contract_back_to_party", -1);
+                    button_add("Start Adventure", "start_mission", -1);
+                    button_add("Cancel Contract", "contract_cancel", -1);
+                break;
+
+                default:
+                    button_add("Back to Planning", "goto_planning", -1);
+                    for (var p = 0; p < array_length(state.patrons); p++) {
+                        button_add("Patron " + string(p + 1) + ": " + state.patrons[p].name, "select_patron", p);
+                    }
+                break;
             }
-            add_office_activity_buttons();
         break;
 
         case MODE.MISSION_REVIEW:
-            button_add("Back to Planning", "goto_planning", -1);
-            button_add("Start Mission", "start_mission", -1);
-            button_add("Clear Party", "clear_party", -1);
-            for (var i = 0; i < array_length(state.missions); i++) {
-                button_add("Mission " + string(i + 1) + ": " + state.missions[i].title, "select_mission", i);
+            switch (state.mission_review_stage) {
+                case "party":
+                    button_add("Back to Missions", "review_back_to_missions", -1);
+                    button_add("Clear Party", "clear_party", -1);
+                    button_add("Done Selecting", "review_party_done", -1);
+                    for (var j = 0; j < array_length(state.adventurers); j++) {
+                        var _a = state.adventurers[j];
+                        if (_a.status == "available" && !is_adventurer_committed(_a.id)) {
+                            var _mark = party_has(_a.id) ? "[X] " : "[ ] ";
+                            button_add(_mark + "Adventurer " + string(j + 1) + ": " + _a.name, "toggle_party", _a.id);
+                        }
+                    }
+                break;
+
+                case "confirm":
+                    button_add("Back to Party Selection", "review_back_to_party", -1);
+                    button_add("Start Mission", "start_mission", -1);
+                    button_add("Cancel Launch", "review_back_to_missions", -1);
+                break;
+
+                default:
+                    button_add("Back to Planning", "goto_planning", -1);
+                    for (var i = 0; i < array_length(state.missions); i++) {
+                        button_add("Mission " + string(i + 1) + ": " + state.missions[i].title, "select_mission", i);
+                    }
+                    if (array_length(state.missions) <= 0) {
+                        button_add("No Missions Available", "noop", -1);
+                    }
+                break;
             }
-            for (var j = 0; j < array_length(state.adventurers); j++) {
-                var _a = state.adventurers[j];
-                if (_a.status == "available" && !is_adventurer_committed(_a.id)) {
-                    var _mark = party_has(_a.id) ? "[X] " : "[ ] ";
-                    button_add(_mark + "Party " + string(j + 1) + ": " + _a.name, "toggle_party", _a.id);
-                }
-            }
-            add_office_activity_buttons();
         break;
 
         case MODE.MISSION_RESULT:
@@ -1839,41 +2299,18 @@ rebuild_buttons = function() {
             add_office_activity_buttons();
         break;
 
-        case MODE.GAME_HOUSE:
-            button_add("Back to Planning", "goto_planning", -1);
-            button_add("Wager -10", "gh_wager_add", -10);
-            button_add("Wager +10", "gh_wager_add", 10);
-            button_add("Game: Street Craps", "gh_set_game", "CRAPS");
-            button_add("Game: Wyrm Wheel", "gh_set_game", "WHEEL");
-            button_add("Game: Dragon 21", "gh_set_game", "DRAGON21");
-
-            switch (state.game_house_game) {
-                case "CRAPS":
-                    if (state.game_house.craps_phase == "idle") button_add("Roll Come-Out", "gh_craps_roll", -1);
-                    else button_add("Roll For Point " + string(state.game_house.craps_point), "gh_craps_roll", -1);
-                break;
-
-                case "WHEEL":
-                    button_add("Bet RED", "gh_wheel_bet", "RED");
-                    button_add("Bet BLACK", "gh_wheel_bet", "BLACK");
-                    button_add("Bet ODD", "gh_wheel_bet", "ODD");
-                    button_add("Bet EVEN", "gh_wheel_bet", "EVEN");
-                    button_add("Bet LOW 1-12", "gh_wheel_bet", "LOW12");
-                    button_add("Bet MID 13-24", "gh_wheel_bet", "MID12");
-                    button_add("Bet HIGH 25-36", "gh_wheel_bet", "HIGH12");
-                    button_add("Spin Wyrm Wheel", "gh_wheel_spin", -1);
-                break;
-
-                case "DRAGON21":
-                    if (!state.game_house.cards_in_round) {
-                        button_add("Deal Dragon 21", "gh_21_deal", -1);
-                    } else {
-                        button_add("Hit", "gh_21_hit", -1);
-                        button_add("Stand", "gh_21_stand", -1);
-                    }
-                break;
+        case MODE.ADVENTURERS:
+            if (state.adventurer_view_stage == "detail") {
+                button_add("Back to Adventurers", "adventurers_back_list", -1);
+            } else {
+                button_add("Back", "adventurers_back", -1);
+                for (var av = 0; av < array_length(state.adventurers); av++) {
+                    button_add("Adventurer " + string(av + 1) + ": " + state.adventurers[av].name, "adventurer_select", av);
+                }
             }
         break;
+
+        case MODE.GAME_HOUSE: build_game_house_buttons(); break;
 
         default:
             button_add("Return to Planning", "goto_planning", -1);
@@ -1889,53 +2326,164 @@ run_button = function(_action, _value) {
 
     switch (_action) {
         case "goto_review":
-            refresh_mission_board();
-            state.mode = MODE.MISSION_REVIEW;
-            state.status_line = "Reviewing unlocked contracts and party assignments.";
-            print_missions();
-            rebuild_buttons();
+            open_mission_board();
+            rebuild_buttons(true);
         break;
 
         case "goto_contracting":
-            state.mode = MODE.CONTRACTING;
-            state.status_line = "Reviewing patron correspondence.";
-            print_patrons();
-            rebuild_buttons();
+            open_contracting_patron_list();
+            rebuild_buttons(true);
         break;
 
         case "goto_market":
-            if (array_length(state.free_agents) <= 0) refresh_free_agent_market();
-            state.mode = MODE.BUYING;
-            state.status_line = "Free-agent market open. Structure your offer.";
-            rebuild_buttons();
+            open_market_hub();
+            rebuild_buttons(true);
         break;
 
         case "goto_game_house":
             enter_game_house();
-            rebuild_buttons();
+            rebuild_buttons(true);
         break;
 
         case "goto_planning":
+            reset_contracting_selection();
+            reset_mission_review_selection();
             state.mode = MODE.PLANNING;
             state.status_line = "Back at the desk. Planning board active.";
             add_log("Back at the desk. Planning board active.");
-            rebuild_buttons();
+            rebuild_buttons(true);
         break;
 
-        case "show_adventurers": print_adventurers(); break;
+        case "show_adventurers":
+            open_adventurer_roster(state.mode);
+            rebuild_buttons(true);
+        break;
+        case "adventurer_select":
+            open_adventurer_detail(_value);
+            rebuild_buttons(true);
+        break;
+        case "adventurers_back_list":
+            open_adventurer_roster(state.adventurer_view_return_mode);
+            rebuild_buttons(true);
+        break;
+        case "adventurers_back":
+            state.mode = state.adventurer_view_return_mode;
+            state.adventurer_view_stage = "list";
+            state.selected_adventurer_index = -1;
+            state.status_line = "Returned from adventurer files.";
+            rebuild_buttons(true);
+        break;
         case "select_patron":
-            unlock_patron_contracts(_value);
-            refresh_mission_board();
-            state.mode = MODE.MISSION_REVIEW;
-            print_missions();
+            open_patron_contracts(_value);
+            rebuild_buttons();
+        break;
+        case "select_contract": select_contract_for_review(_value); rebuild_buttons(); break;
+        case "contract_back_to_patrons":
+            open_contracting_patron_list();
+            rebuild_buttons();
+        break;
+        case "contract_back_to_contracts":
+            state.contracting_stage = "contracts";
+            state.selected_contract_index = -1;
+            state.selected_mission_index = -1;
+            state.selected_party_ids = [];
+            if (state.selected_patron_index >= 0) {
+                state.status_line = "Reviewing contracts from " + state.patrons[state.selected_patron_index].name + ".";
+            }
+            rebuild_buttons();
+        break;
+        case "contract_back_to_contract":
+            state.contracting_stage = "contract";
+            state.selected_party_ids = [];
+            if (is_struct(get_selected_contract())) {
+                state.status_line = "Contract review: " + get_selected_contract().mission.title;
+            }
+            rebuild_buttons();
+        break;
+        case "contract_back_to_party":
+            state.contracting_stage = "party";
+            if (is_struct(get_selected_contract())) {
+                state.status_line = "Assign adventurers to " + get_selected_contract().mission.title + ".";
+            }
+            rebuild_buttons();
+        break;
+        case "contract_accept": advance_to_party_assignment(); rebuild_buttons(); break;
+        case "contract_decline":
+            add_log("Contract declined: " + (is_struct(get_selected_contract()) ? get_selected_contract().mission.title : "selection cleared") + ".");
+            cancel_contract_flow();
+            rebuild_buttons();
+        break;
+        case "contract_party_done": finish_party_assignment(); rebuild_buttons(); break;
+        case "contract_cancel":
+            add_log("Contract cancelled before launch.");
+            cancel_contract_flow();
             rebuild_buttons();
         break;
         case "start_mission": start_mission(); break;
         case "end_day": end_day(); break;
-        case "select_mission": select_mission(_value); rebuild_buttons(); break;
+        case "select_mission":
+            select_mission(_value);
+            if (state.mode == MODE.MISSION_REVIEW && state.selected_mission_index >= 0) {
+                state.mission_review_stage = "party";
+                state.selected_party_ids = [];
+                state.status_line = "Assign adventurers to " + state.missions[state.selected_mission_index].title + ".";
+            }
+            rebuild_buttons();
+        break;
         case "toggle_party": toggle_party(_value); rebuild_buttons(); break;
         case "clear_party": state.selected_party_ids = []; add_log("Party cleared."); rebuild_buttons(); break;
-        case "market_refresh": refresh_free_agent_market(); rebuild_buttons(); break;
+        case "review_back_to_missions":
+            state.mission_review_stage = "missions";
+            state.selected_party_ids = [];
+            state.status_line = "Reviewing mission board.";
+            rebuild_buttons();
+        break;
+        case "review_party_done":
+            if (array_length(selected_party()) <= 0) {
+                add_log("Select at least one available adventurer.");
+            } else {
+                state.mission_review_stage = "confirm";
+                if (state.selected_mission_index >= 0) {
+                    state.status_line = "Ready to launch " + state.missions[state.selected_mission_index].title + ".";
+                }
+            }
+            rebuild_buttons();
+        break;
+        case "review_back_to_party":
+            state.mission_review_stage = "party";
+            if (state.selected_mission_index >= 0) {
+                state.status_line = "Assign adventurers to " + state.missions[state.selected_mission_index].title + ".";
+            }
+            rebuild_buttons();
+        break;
+        case "market_open_board": open_market_board(); rebuild_buttons(); break;
+        case "market_open_offer": open_market_offer_stage(); rebuild_buttons(); break;
+        case "market_back_hub": open_market_hub(); rebuild_buttons(true); break;
+        case "market_resume_pending":
+            if (is_struct(state.pending_signing) &&
+                variable_struct_exists(state.pending_signing, "stage") &&
+                state.pending_signing.stage == "counter") {
+                state.market_stage = "counter";
+                state.status_line = "Counteroffer received from " + state.pending_signing.candidate.name + ".";
+            } else if (is_struct(state.pending_signing)) {
+                state.market_stage = "submitted";
+                state.status_line = "Offer submitted to " + state.pending_signing.candidate.name + ".";
+            } else {
+                open_market_hub();
+            }
+            rebuild_buttons();
+        break;
+        case "market_back_board": open_market_board(); rebuild_buttons(); break;
+        case "market_back_candidate":
+            if (state.selected_free_agent_index >= 0) open_market_candidate(state.selected_free_agent_index);
+            else open_market_board();
+            rebuild_buttons();
+        break;
+        case "market_refresh":
+            refresh_free_agent_market();
+            if (state.mode == MODE.BUYING && state.market_stage != "hub") state.market_stage = "board";
+            rebuild_buttons();
+        break;
         case "market_select": select_free_agent_target(_value); rebuild_buttons(); break;
         case "market_bonus_add":
             state.offer_bonus = max(0, state.offer_bonus + _value);
@@ -1957,6 +2505,11 @@ run_button = function(_action, _value) {
         case "market_decline_counter": decline_counter_offer(); rebuild_buttons(); break;
         case "gh_wager_add": change_game_house_wager(_value); rebuild_buttons(); break;
         case "gh_set_game": set_game_house_game(_value); rebuild_buttons(); break;
+        case "gh_back_lobby":
+            state.game_house_view = "lobby";
+            state.status_line = "Browsing game house tables.";
+            rebuild_buttons();
+        break;
         case "gh_craps_roll": game_house_roll_craps(); rebuild_buttons(); break;
         case "gh_wheel_bet":
             state.game_house.wheel_bet = _value;
@@ -1968,7 +2521,7 @@ run_button = function(_action, _value) {
         case "gh_21_hit": game_house_hit_21(); rebuild_buttons(); break;
         case "gh_21_stand": game_house_stand_21(); rebuild_buttons(); break;
         case "act_research": office_activity_research(); rebuild_buttons(); break;
-        case "act_recruit": office_activity_recruit(); rebuild_buttons(); break;
+        case "act_recruit": office_activity_recruit(); rebuild_buttons(true); break;
         case "act_scout": office_activity_scout_rival(); rebuild_buttons(); break;
         case "act_counteroffer": office_activity_counteroffer(); rebuild_buttons(); break;
         case "noop": break;
@@ -2011,26 +2564,19 @@ process_command = function(_raw) {
         break;
 
         case "MISSIONS":
-            refresh_mission_board();
-            state.mode = MODE.MISSION_REVIEW;
-            state.status_line = "Reviewing mission board.";
-            print_missions();
+            open_mission_board();
         break;
 
         case "ADVENTURERS":
-            print_adventurers();
+            open_adventurer_roster(MODE.PLANNING);
         break;
 
         case "PATRONS":
-            state.mode = MODE.CONTRACTING;
-            state.status_line = "Reviewing patron correspondence.";
-            print_patrons();
+            open_contracting_patron_list();
         break;
 
         case "MARKET":
-            if (array_length(state.free_agents) <= 0) refresh_free_agent_market();
-            state.mode = MODE.BUYING;
-            state.status_line = "Free-agent market open. Structure your offer.";
+            open_market_hub();
         break;
 
         case "CASINO":
@@ -2079,11 +2625,7 @@ process_command = function(_raw) {
         case "PATRON":
             if (array_length(_parts) > 1) {
                 var _pidx = clamp(real(_parts[1]) - 1, 0, array_length(state.patrons) - 1);
-                unlock_patron_contracts(_pidx);
-                refresh_mission_board();
-                state.mode = MODE.MISSION_REVIEW;
-                state.status_line = "Patron asks reviewed. Contracts updated.";
-                print_missions();
+                open_patron_contracts(_pidx);
             } else add_log("Usage: PATRON <1-" + string(array_length(state.patrons)) + ">");
         break;
 
@@ -2101,6 +2643,8 @@ process_command = function(_raw) {
             if (array_length(_parts) > 1) {
                 select_mission(clamp(real(_parts[1]) - 1, 0, array_length(state.missions) - 1));
                 state.mode = MODE.MISSION_REVIEW;
+                state.mission_review_stage = "party";
+                state.selected_party_ids = [];
                 state.status_line = "Mission focus updated.";
             } else add_log("Usage: MISSION <1-" + string(array_length(state.missions)) + ">");
         break;
@@ -2169,15 +2713,16 @@ process_command = function(_raw) {
                 var _m = _parts[1];
                 switch (_m) {
                     case "PLANNING": state.mode = MODE.PLANNING; break;
-                    case "BUYING": state.mode = MODE.BUYING; break;
+                    case "BUYING": open_market_hub(); break;
                     case "SELLING": state.mode = MODE.SELLING; break;
-                    case "CONTRACTING": state.mode = MODE.CONTRACTING; break;
+                    case "CONTRACTING": open_contracting_patron_list(); break;
                     case "PITCHING": state.mode = MODE.PITCHING; break;
                     case "ARGUING": state.mode = MODE.ARGUING; break;
                     case "SABOTAGE": state.mode = MODE.SABOTAGE; break;
-                    case "MISSION_REVIEW": refresh_mission_board(); state.mode = MODE.MISSION_REVIEW; break;
+                    case "MISSION_REVIEW": open_mission_board(); break;
                     case "MISSION_RESULT": state.mode = MODE.MISSION_RESULT; break;
-                    case "GAME_HOUSE": state.mode = MODE.GAME_HOUSE; break;
+                    case "GAME_HOUSE": state.mode = MODE.GAME_HOUSE; state.game_house_view = "lobby"; break;
+                    case "ADVENTURERS": open_adventurer_roster(MODE.PLANNING); break;
                     default: add_log("Unknown mode: " + _m); break;
                 }
                 state.status_line = "Mode: " + mode_to_string(state.mode);
@@ -2202,9 +2747,10 @@ layout = {
 
 keyboard_string = "";
 input_buffer_prev_len = 0;
-state.realtime_hour_interval_steps = max(60, room_speed * 8);
+state.realtime_hour_interval_steps = max(60, game_get_speed(gamespeed_fps) * 8);
 state.realtime_step_accum = 0;
 
+load_world_content_xml();
 state.adventurers = init_adventurers();
 var _mission_templates = init_missions();
 state.patrons = init_patrons();
@@ -2225,7 +2771,8 @@ add_log("Game House available: Street Craps, Wyrm Wheel, and Dragon 21.");
 add_log("Type HELP for commands or use quick actions.");
 add_log("Mission durations and global world pulses run over time in every mode.");
 
-rebuild_buttons();
+rebuild_buttons(true);
+
 
 
 
