@@ -255,6 +255,7 @@ function office_activity_visit_game_house() {
 }
 
 function build_game_house_buttons() {
+    add_card_gallery_button();
     button_add("Back to Planning", "goto_planning", -1);
 
     if (state.game_house_view == "lobby") {

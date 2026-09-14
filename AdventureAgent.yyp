@@ -11,11 +11,13 @@
   "defaultScriptType":1,
   "Folders":[],
   "ForcedPrefabProjectReferences":[],
-  "IncludedFiles":[],
+  "IncludedFiles":[
+    {"$GMIncludedFile":"","%Name":"world_content.xml","CopyToMask":-1,"filePath":"datafiles","name":"world_content.xml","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+  ],
   "isEcma":false,
   "LibraryEmitters":[],
   "MetaData":{
-    "IDEVersion":"2024.14.3.217",
+    "IDEVersion":"2024.14.4.222",
   },
   "name":"AdventureAgent",
   "resources":[

@@ -11,52 +11,52 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Adventurer purse tracking, kit basics, and file view
 
 ## 1. Client Contracts and Relationship Depth
-- [ ] Add represented-adventurer client contracts with:
-- [ ] Day rate
-- [ ] Agency commission
-- [ ] Contract term length
-- [ ] Exclusivity / representation type
-- [ ] Minimum activity expectations
-- [ ] Add trust and morale as separate values for each represented adventurer
-- [ ] Add client priorities such as:
-- [ ] Wants steady work
-- [ ] Wants prestige jobs
-- [ ] Avoids high-risk work
-- [ ] Wants larger personal payouts
+- [x] Add represented-adventurer client contracts with:
+- [x] Day rate
+- [x] Agency commission
+- [x] Contract term length
+- [x] Exclusivity / representation type
+- [x] Minimum activity expectations
+- [x] Add trust and morale as separate values for each represented adventurer
+- [x] Add client priorities such as:
+- [x] Wants steady work
+- [x] Wants prestige jobs
+- [x] Avoids high-risk work
+- [x] Wants larger personal payouts
 - [ ] Add relationship changes from:
-- [ ] Idle time
-- [ ] Mission success/failure
-- [ ] Injury outcomes
+- [x] Idle time
+- [x] Mission success/failure
+- [x] Injury outcomes
 - [ ] Pay quality
 - [ ] Patron fit
-- [ ] Add renegotiation flow for existing clients
+- [x] Add renegotiation flow for existing clients
 - [ ] Medieval fantasy dressing:
-- [ ] Guild charters
-- [ ] Sworn retainerships
+- [x] Guild charters
+- [x] Sworn retainerships
 - [ ] Temple service oaths
 - [ ] Mercenary letters
 - [ ] Bardic sponsorship agreements
 
 ## 2. Morale, Usage Pressure, and Defection Risk
-- [ ] Expand idle-time complaints into escalating client pressure
-- [ ] Add "poachable star" behavior for famous or powerful clients
+- [x] Expand idle-time complaints into escalating client pressure
+- [x] Add "poachable star" behavior for famous or powerful clients
 - [ ] Add rival offers from lords, towers, temples, mercenary bands, and trade houses
 - [ ] Add burnout from overuse and resentment from repeated benching
-- [ ] Add departure warnings before a client leaves
+- [x] Add departure warnings before a client leaves
 
 ## 3. Equipment, Kit, and Magic Inventory
-- [ ] Separate agency-owned gear from client-owned gear
+- [x] Separate agency-owned gear from client-owned gear
 - [ ] Add consumables:
-- [ ] Salves
-- [ ] Rations
-- [ ] Lockpicks
-- [ ] Ward scrolls
-- [ ] Healing kits
-- [ ] Add relic and magic-find categories
+- [x] Salves
+- [x] Rations
+- [x] Lockpicks
+- [x] Ward scrolls
+- [x] Healing kits
+- [x] Add relic and magic-find categories
 - [ ] Add repair, replacement, and upgrade loops
-- [ ] Add equipment impact on mission scoring and injury reduction
+- [x] Add equipment impact on mission scoring and injury reduction
 - [ ] Medieval fantasy dressing:
-- [ ] Rune-etched shields
+- [x] Rune-etched shields
 - [ ] Abbey relics
 - [ ] Hedge charms
 - [ ] Dwarf-forged arms
@@ -70,7 +70,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Add role-combo synergy notes in roster and staffing views
 
 ## 5. Patron Depth and Patron Negotiation
-- [ ] Add patron satisfaction tracking
+- [x] Add patron satisfaction tracking
 - [ ] Add patron payment reliability and dispute likelihood
 - [ ] Add pre-launch negotiation for:
 - [ ] Hazard premium
@@ -152,8 +152,8 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Add civic / church / guild political factions
 
 ## 14. World Customization and XML Content Packs
-- [ ] Add XML-driven content packs for:
-- [ ] Adventurer names
+- [x] Add XML-driven content packs for:
+- [x] Adventurer names
 - [ ] Patron names and titles
 - [ ] Place names
 - [ ] Weapons

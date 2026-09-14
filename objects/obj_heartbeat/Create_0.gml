@@ -1,5 +1,5 @@
 /// Guild Agent prototype controller bootstrap
-
+//random_set_seed(12345);
 randomize();
 
 MODE = {
@@ -56,8 +56,12 @@ state = {
     adventurer_view_stage: "list",
     selected_adventurer_index: -1,
     adventurer_view_return_mode: MODE.PLANNING,
+    renegotiation_rate_offer: 0,
+    renegotiation_commission_offer: 0,
+    renegotiation_term_offer: 0,
     selected_party_ids: [],
     show_intro: true,
+    splash: undefined,
 
     // Mission lifecycle
     active_missions: [],
@@ -73,6 +77,15 @@ state = {
     button_page: 0,
     button_nav_prev: { x1: 0, y1: 0, x2: 0, y2: 0 },
     button_nav_next: { x1: 0, y1: 0, x2: 0, y2: 0 },
+    card_overlay: {
+        open: false,
+        focus_type: "",
+        focus_id: -1,
+        columns: [],
+        action_buttons: [],
+        card_hitboxes: [],
+        close_button: { x1: 0, y1: 0, x2: 0, y2: 0 }
+    },
 
     next_adv_id: 5,
     free_agents: [],
@@ -87,6 +100,7 @@ state = {
     realtime_step_accum: 0,
     realtime_hour_interval_steps: 0,
     world_content: undefined,
+    agency_inventory: [],
 
     game_house_game: "CRAPS",
     game_house_view: "lobby",
@@ -139,6 +153,56 @@ format_duration_hours = function(_hours) {
     if (_d > 0 && _h > 0) return string(_d) + "d " + string(_h) + "h";
     if (_d > 0) return string(_d) + "d";
     return string(_h) + "h";
+};
+
+init_splash_screen = function() {
+    var _title = "Adventure Agent";
+    var _subtitle = "A Fantasy Agent Simulator by John Hoffer";
+    return {
+        active: true,
+        progress: 0,
+        title: _title,
+        subtitle: _subtitle,
+        total_chars: string_length(_title) + string_length(_subtitle) + 16,
+        quill_exit: 0,
+        start_button: { x1: 0, y1: 0, x2: 0, y2: 0 }
+    };
+};
+
+splash_is_finished = function() {
+    return is_struct(state.splash) && state.splash.progress >= state.splash.total_chars;
+};
+
+splash_finish_drawing = function() {
+    if (!is_struct(state.splash)) return;
+    state.splash.progress = state.splash.total_chars;
+    state.splash.quill_exit = 1;
+};
+
+splash_begin_game = function() {
+    if (!is_struct(state.splash)) return;
+    state.splash.active = false;
+    state.show_intro = false;
+    state.status_line = "Desk open. Planning board active.";
+    add_log("Splash complete. Office doors open.");
+};
+
+splash_reveal_text = function(_text, _count) {
+    if (_count <= 0) return "";
+    return string_copy(_text, 1, min(string_length(_text), floor(_count)));
+};
+
+splash_measure_start_button = function() {
+    var _gw = display_get_gui_width();
+    var _gh = display_get_gui_height();
+    var _bw = 180;
+    var _bh = 42;
+    return {
+        x1: floor((_gw - _bw) * 0.5),
+        y1: floor(_gh * 0.76),
+        x2: floor((_gw - _bw) * 0.5) + _bw,
+        y2: floor(_gh * 0.76) + _bh
+    };
 };
 
 classify_log_category = function(_msg) {
@@ -384,6 +448,26 @@ default_adventurer_arcana = function(_role) {
     return [];
 };
 
+default_adventurer_relics = function(_role) {
+    switch (_role) {
+        case "Cleric": return ["pilgrim icon"];
+        case "Warrior": return ["captain's favor"];
+        case "Ranger": return ["trail token"];
+    }
+    return [];
+};
+
+default_agency_inventory = function() {
+    return [
+        { name: "Healing Kit", kind: "consumable", stock: 3, score_bonus: 0, injury_guard: 10, roles: ["Cleric", "Warrior", "Ranger"] },
+        { name: "Ward Scroll", kind: "consumable", stock: 2, score_bonus: 8, injury_guard: 8, roles: ["Mage", "Cleric", "Bard"] },
+        { name: "Lockpick Roll", kind: "consumable", stock: 2, score_bonus: 10, injury_guard: 0, roles: ["Rogue", "Bard"] },
+        { name: "Fine Rations", kind: "consumable", stock: 4, score_bonus: 4, injury_guard: 0, roles: ["Warrior", "Ranger", "Cleric"] },
+        { name: "Rune Shield", kind: "durable", stock: 2, score_bonus: 6, injury_guard: 14, roles: ["Warrior", "Cleric"] },
+        { name: "Travel Cloak", kind: "durable", stock: 2, score_bonus: 5, injury_guard: 4, roles: ["Rogue", "Bard", "Ranger"] }
+    ];
+};
+
 build_adventurer_profile = function(_name, _role, _combat, _magic, _stealth, _diplomacy, _reliability, _age, _rate, _commission, _starting_gold, _id) {
     if (is_undefined(_starting_gold)) _starting_gold = irandom_range(18, 70);
     if (is_undefined(_id)) _id = -1;
@@ -415,8 +499,16 @@ build_adventurer_profile = function(_name, _role, _combat, _magic, _stealth, _di
         activity_expectation_days: choose(2, 3, 4),
         risk_preference: choose("careful", "balanced", "bold"),
         ambition: choose("steady work", "prestige jobs", "higher pay", "glory"),
+        renegotiation_annoyance: 0,
+        last_renegotiation_day: 0,
+        defection_risk: 0,
+        departure_warning: false,
+        promised_work_by_day: 0,
+        last_charter_notice_day: -1,
+        issued_gear: [],
         kit: default_adventurer_kit(_role),
         found_magic: default_adventurer_arcana(_role),
+        found_relics: default_adventurer_relics(_role),
         notable_finds: []
     };
 };
@@ -429,6 +521,578 @@ array_join_text = function(_arr) {
         if (i < array_length(_arr) - 1) _txt += ", ";
     }
     return _txt;
+};
+
+find_agency_inventory_index = function(_item_name) {
+    for (var i = 0; i < array_length(state.agency_inventory); i++) {
+        if (state.agency_inventory[i].name == _item_name) return i;
+    }
+    return -1;
+};
+
+find_contract_index_by_id = function(_contract_id) {
+    for (var i = 0; i < array_length(state.contracts); i++) {
+        if (state.contracts[i].id == _contract_id) return i;
+    }
+    return -1;
+};
+
+get_focus_card_type = function() {
+    if (!is_struct(state.card_overlay)) return "";
+    return state.card_overlay.focus_type;
+};
+
+get_focus_card_id = function() {
+    if (!is_struct(state.card_overlay)) return -1;
+    return state.card_overlay.focus_id;
+};
+
+set_card_overlay_focus = function(_type, _id) {
+    state.card_overlay.focus_type = _type;
+    state.card_overlay.focus_id = _id;
+};
+
+card_stat = function(_label, _value) {
+    return { label: _label, value: string(_value) };
+};
+
+card_action = function(_label, _action, _value) {
+    return { label: _label, action: _action, value: _value };
+};
+
+card_palette = function(_type) {
+    switch (_type) {
+        case "patron":
+            return {
+                top: make_color_rgb(76, 46, 72),
+                bottom: make_color_rgb(36, 22, 44),
+                border: make_color_rgb(232, 175, 221),
+                accent: make_color_rgb(248, 214, 241),
+                plate: make_color_rgb(143, 105, 152)
+            };
+        case "contract":
+            return {
+                top: make_color_rgb(54, 80, 126),
+                bottom: make_color_rgb(25, 42, 78),
+                border: make_color_rgb(149, 195, 255),
+                accent: make_color_rgb(221, 237, 255),
+                plate: make_color_rgb(87, 127, 186)
+            };
+        case "location":
+            return {
+                top: make_color_rgb(58, 96, 74),
+                bottom: make_color_rgb(28, 54, 42),
+                border: make_color_rgb(176, 230, 191),
+                accent: make_color_rgb(231, 251, 237),
+                plate: make_color_rgb(100, 145, 113)
+            };
+        case "prospect":
+            return {
+                top: make_color_rgb(104, 78, 34),
+                bottom: make_color_rgb(59, 44, 18),
+                border: make_color_rgb(241, 209, 128),
+                accent: make_color_rgb(255, 240, 200),
+                plate: make_color_rgb(169, 128, 56)
+            };
+        default:
+            return {
+                top: make_color_rgb(82, 58, 112),
+                bottom: make_color_rgb(40, 28, 62),
+                border: make_color_rgb(206, 178, 255),
+                accent: make_color_rgb(243, 236, 255),
+                plate: make_color_rgb(120, 94, 170)
+            };
+    }
+};
+
+card_holo_text = function(_type, _id) {
+    var _prefix = "FILE";
+    switch (_type) {
+        case "patron": _prefix = "PATRON"; break;
+        case "contract": _prefix = "CONTRACT"; break;
+        case "location": _prefix = "SITE"; break;
+        case "prospect": _prefix = "PROSPECT"; break;
+        default: _prefix = "ADVENTURER"; break;
+    }
+    return _prefix + " " + string(max(0, _id + 1));
+};
+
+mission_location_title = function(_mission) {
+    if (variable_struct_exists(_mission, "title")) return _mission.title;
+    return "Unmarked Site";
+};
+
+build_patron_card = function(_patron_index) {
+    if (_patron_index < 0 || _patron_index >= array_length(state.patrons)) return undefined;
+    var _p = state.patrons[_patron_index];
+    var _open_requests = count_patron_open_requests(_patron_index);
+    var _worked = _p.jobs_completed + _p.jobs_partial + _p.jobs_failed;
+    return {
+        type: "patron",
+        id: _patron_index,
+        title: _p.name,
+        subtitle: string_upper(_p.personality) + " patron",
+        status: patron_satisfaction_label(_p.satisfaction) + " relationship",
+        summary: _p.temperament_note,
+        stats: [
+            card_stat("Satisfaction", string(_p.satisfaction) + "/100"),
+            card_stat("Open asks", _open_requests),
+            card_stat("Jobs", _worked),
+            card_stat("Pay profile", _p.pay_profile)
+        ],
+        details: [
+            "Contact: " + _p.contact,
+            "Bonuses: " + _p.bonus_profile,
+            "Risk appetite: " + _p.risk_profile
+        ],
+        actions: [
+            card_action("View Requests", "select_patron", _patron_index),
+            card_action("Research File", "card_patron_research", _patron_index)
+        ]
+    };
+};
+
+build_contract_card = function(_contract_index) {
+    if (_contract_index < 0 || _contract_index >= array_length(state.contracts)) return undefined;
+    var _c = state.contracts[_contract_index];
+    var _m = _c.mission;
+    var _state = "Locked";
+    if (_c.accepted) _state = "Accepted";
+    else if (_c.expired || state.absolute_hour >= _c.expires_hour) _state = "Expired";
+    else if (_c.unlocked) _state = "Open";
+
+    var _actions = [card_action("Review Contract", "card_open_contract", _contract_index)];
+    if (_c.unlocked && !_c.accepted && !_c.expired && state.absolute_hour < _c.expires_hour) {
+        array_push(_actions, card_action("Assign Party", "card_accept_contract", _contract_index));
+    }
+
+    return {
+        type: "contract",
+        id: _contract_index,
+        title: _m.title,
+        subtitle: _m.type + " contract",
+        status: _state,
+        summary: _m.description,
+        stats: [
+            card_stat("Reward", string(_m.reward) + "g"),
+            card_stat("Risk", string(_m.risk) + "%"),
+            card_stat("Diff", _m.difficulty),
+            card_stat("Party", "up to " + string(_m.patron_max_party))
+        ],
+        details: [
+            "Patron: " + _m.patron_name,
+            "ETA: " + format_duration_hours(_m.duration_hours),
+            "Expires in: " + format_duration_hours(max(0, _c.expires_hour - state.absolute_hour))
+        ],
+        actions: _actions
+    };
+};
+
+build_location_card = function(_contract_index) {
+    if (_contract_index < 0 || _contract_index >= array_length(state.contracts)) return undefined;
+    var _c = state.contracts[_contract_index];
+    var _m = _c.mission;
+    return {
+        type: "location",
+        id: _contract_index,
+        title: mission_location_title(_m),
+        subtitle: "Adventure target",
+        status: _m.type + " posting",
+        summary: _m.description,
+        stats: [
+            card_stat("Risk", string(_m.risk) + "%"),
+            card_stat("Travel", format_duration_hours(_m.duration_hours)),
+            card_stat("Best role", _m.preferred_role),
+            card_stat("Reward", string(_m.reward) + "g")
+        ],
+        details: [
+            "Contract: " + _m.title,
+            "Patron: " + _m.patron_name,
+            "Difficulty: " + string(_m.difficulty)
+        ],
+        actions: [
+            card_action("Open Contract", "card_open_contract", _contract_index)
+        ]
+    };
+};
+
+build_adventurer_card = function(_adv_index, _type_name) {
+    if (_adv_index < 0) return undefined;
+    var _arr = (_type_name == "prospect") ? state.free_agents : state.adventurers;
+    if (_adv_index >= array_length(_arr)) return undefined;
+    var _a = _arr[_adv_index];
+    var _actions = [];
+    if (_type_name == "prospect") {
+        _actions = [
+            card_action("Scout Prospect", "market_select", _adv_index),
+            card_action("Prepare Offer", "card_open_market_offer", _adv_index)
+        ];
+    } else {
+        _actions = [card_action("Open File", "adventurer_select", _adv_index)];
+        if (_a.status == "available") {
+            array_push(_actions, card_action("Meet Client", "card_open_retention", _adv_index));
+        }
+    }
+
+    return {
+        type: _type_name,
+        id: _adv_index,
+        title: _a.name,
+        subtitle: _a.role + ((_type_name == "prospect") ? " prospect" : " client"),
+        status: string_upper(_a.status),
+        summary: (_type_name == "prospect")
+            ? ("Negotiation style " + string_upper(_a.negotiation_style) + ". " + _a.style_blurb)
+            : ("Morale " + string(_a.morale) + ", trust " + string(_a.trust) + ", ambition " + _a.ambition + "."),
+        stats: [
+            card_stat("C", _a.combat),
+            card_stat("M", _a.magic),
+            card_stat("S", _a.stealth),
+            card_stat("D", _a.diplomacy),
+            card_stat("Rate", string(_a.adventure_rate) + "g"),
+            card_stat("Rel", _a.reliability)
+        ],
+        details: (_type_name == "prospect")
+            ? [
+                "Ask bonus: " + string(_a.ask_bonus) + "g",
+                "Ask rate: " + string(_a.ask_rate) + "g/day",
+                "Min commission: " + string(round(_a.min_commission * 100)) + "%"
+            ]
+            : [
+                "Commission: " + string(round(_a.commission_rate * 100)) + "%",
+                "Charter: " + string(_a.contract_days_remaining) + "/" + string(_a.contract_term_days) + " day(s)",
+                "Defection risk: " + string(_a.defection_risk)
+            ],
+        actions: _actions
+    };
+};
+
+get_card_column_items = function(_column_key) {
+    var _items = [];
+    switch (_column_key) {
+        case "patrons":
+            for (var p = 0; p < array_length(state.patrons); p++) {
+                array_push(_items, build_patron_card(p));
+            }
+        break;
+        case "contracts":
+            for (var c = 0; c < array_length(state.contracts); c++) {
+                var _contract = state.contracts[c];
+                if (_contract.unlocked && !_contract.accepted && !_contract.expired && state.absolute_hour < _contract.expires_hour) {
+                    array_push(_items, build_contract_card(c));
+                }
+            }
+        break;
+        case "adventurers":
+            for (var a = 0; a < array_length(state.adventurers); a++) {
+                if (state.adventurers[a].status != "retired") {
+                    array_push(_items, build_adventurer_card(a, "adventurer"));
+                }
+            }
+        break;
+        case "prospects":
+            for (var f = 0; f < array_length(state.free_agents); f++) {
+                array_push(_items, build_adventurer_card(f, "prospect"));
+            }
+        break;
+        case "locations":
+            for (var l = 0; l < array_length(state.contracts); l++) {
+                var _site_contract = state.contracts[l];
+                if (_site_contract.unlocked && !_site_contract.accepted && !_site_contract.expired && state.absolute_hour < _site_contract.expires_hour) {
+                    array_push(_items, build_location_card(l));
+                }
+            }
+        break;
+    }
+    return _items;
+};
+
+refresh_card_overlay = function() {
+    if (!is_struct(state.card_overlay)) return;
+
+    var _prev_keys = [];
+    var _prev_values = [];
+    for (var i = 0; i < array_length(state.card_overlay.columns); i++) {
+        var _prev = state.card_overlay.columns[i];
+        array_push(_prev_keys, _prev.key);
+        array_push(_prev_values, _prev.scroll);
+    }
+
+    var _column_defs = [
+        { key: "patrons", title: "Patrons" },
+        { key: "contracts", title: "Contracts" },
+        { key: "adventurers", title: "Adventurers" },
+        { key: "locations", title: "Locations" }
+    ];
+    if (array_length(state.free_agents) > 0) {
+        array_push(_column_defs, { key: "prospects", title: "Prospects" });
+    }
+
+    state.card_overlay.columns = [];
+    state.card_overlay.action_buttons = [];
+    state.card_overlay.card_hitboxes = [];
+
+    for (var d = 0; d < array_length(_column_defs); d++) {
+        var _def = _column_defs[d];
+        var _items = get_card_column_items(_def.key);
+        var _saved_scroll = 0;
+        for (var s = 0; s < array_length(_prev_keys); s++) {
+            if (_prev_keys[s] == _def.key) {
+                _saved_scroll = _prev_values[s];
+                break;
+            }
+        }
+        array_push(state.card_overlay.columns, {
+            key: _def.key,
+            title: _def.title,
+            scroll: _saved_scroll,
+            items: _items,
+            x1: 0, y1: 0, x2: 0, y2: 0,
+            content_h: 0
+        });
+    }
+};
+
+open_card_overlay = function(_focus_type, _focus_id) {
+    dismiss_intro();
+    state.card_overlay.open = true;
+    set_card_overlay_focus(_focus_type, _focus_id);
+    refresh_card_overlay();
+    state.status_line = "Card gallery open. Scroll each column to browse the desk dossiers.";
+};
+
+close_card_overlay = function() {
+    state.card_overlay.open = false;
+    state.card_overlay.action_buttons = [];
+    state.card_overlay.card_hitboxes = [];
+    state.status_line = "Returned to desk view.";
+};
+
+card_overlay_focus_selected_context = function() {
+    if (state.mode == MODE.ADVENTURERS && state.selected_adventurer_index >= 0) {
+        open_card_overlay("adventurer", state.selected_adventurer_index);
+        return;
+    }
+    if (state.mode == MODE.BUYING && state.selected_free_agent_index >= 0) {
+        open_card_overlay("prospect", state.selected_free_agent_index);
+        return;
+    }
+    if (state.selected_contract_index >= 0) {
+        open_card_overlay("contract", state.selected_contract_index);
+        return;
+    }
+    if (state.selected_patron_index >= 0) {
+        open_card_overlay("patron", state.selected_patron_index);
+        return;
+    }
+    if (state.selected_mission_index >= 0 && state.selected_mission_index < array_length(state.missions)) {
+        open_card_overlay("location", state.missions[state.selected_mission_index].contract_index);
+        return;
+    }
+    open_card_overlay("", -1);
+};
+
+run_card_action = function(_action, _value) {
+    switch (_action) {
+        case "card_patron_research":
+            log_patron_research_report(_value);
+            refresh_card_overlay();
+            rebuild_buttons();
+        break;
+        case "card_open_contract":
+            if (_value >= 0 && _value < array_length(state.contracts)) {
+                var _patron_idx = get_patron_index(state.contracts[_value].patron_id);
+                if (_patron_idx >= 0) open_patron_contracts(_patron_idx);
+                select_contract_for_review(_value);
+                rebuild_buttons(true);
+                open_card_overlay("contract", _value);
+            }
+        break;
+        case "card_accept_contract":
+            if (_value >= 0 && _value < array_length(state.contracts)) {
+                var _pid = get_patron_index(state.contracts[_value].patron_id);
+                if (_pid >= 0) open_patron_contracts(_pid);
+                select_contract_for_review(_value);
+                advance_to_party_assignment();
+                rebuild_buttons(true);
+                open_card_overlay("contract", _value);
+            }
+        break;
+        case "card_open_market_offer":
+            select_free_agent_target(_value);
+            open_market_offer_stage();
+            rebuild_buttons(true);
+            open_card_overlay("prospect", _value);
+        break;
+        case "card_open_retention":
+            open_adventurer_detail(_value);
+            open_adventurer_retention_meeting();
+            rebuild_buttons(true);
+            open_card_overlay("adventurer", _value);
+        break;
+        default:
+            run_button(_action, _value);
+            refresh_card_overlay();
+        break;
+    }
+};
+
+get_agency_inventory_item = function(_item_name) {
+    var _idx = find_agency_inventory_index(_item_name);
+    if (_idx < 0) return undefined;
+    return state.agency_inventory[_idx];
+};
+
+adventurer_has_issued_item = function(_a, _item_name) {
+    for (var i = 0; i < array_length(_a.issued_gear); i++) {
+        if (_a.issued_gear[i] == _item_name) return true;
+    }
+    return false;
+};
+
+adventurer_issued_gear_text = function(_a) {
+    return array_join_text(_a.issued_gear);
+};
+
+open_adventurer_loadout = function() {
+    if (state.selected_adventurer_index < 0 || state.selected_adventurer_index >= array_length(state.adventurers)) return;
+
+    var _a = state.adventurers[state.selected_adventurer_index];
+    if (_a.status == "on_mission") {
+        add_log(_a.name + " is currently in the field. Adjust issued gear after the mission.");
+        return;
+    }
+
+    state.mode = MODE.ADVENTURERS;
+    state.adventurer_view_stage = "loadout";
+    state.status_line = "Managing issued gear for " + _a.name + ".";
+    add_log("Loadout desk opened for " + _a.name + ".");
+    add_log("Personal kit: " + array_join_text(_a.kit));
+    add_log("Agency-issued kit: " + adventurer_issued_gear_text(_a) + ".");
+};
+
+issue_agency_gear_to_adventurer = function(_item_name) {
+    if (state.selected_adventurer_index < 0 || state.selected_adventurer_index >= array_length(state.adventurers)) return;
+
+    var _a = state.adventurers[state.selected_adventurer_index];
+    if (_a.status == "on_mission") {
+        add_log(_a.name + " is currently in the field. Gear changes will have to wait.");
+        return;
+    }
+    var _item_idx = find_agency_inventory_index(_item_name);
+    if (_item_idx < 0) return;
+
+    var _item = state.agency_inventory[_item_idx];
+    if (_item.stock <= 0) {
+        add_log("No " + _item_name + " remain in agency stores.");
+        return;
+    }
+    if (adventurer_has_issued_item(_a, _item_name)) {
+        add_log(_a.name + " already has " + _item_name + " issued.");
+        return;
+    }
+
+    array_push(_a.issued_gear, _item_name);
+    state.agency_inventory[_item_idx].stock -= 1;
+    add_log(_item_name + " issued to " + _a.name + ".");
+};
+
+reclaim_agency_gear_from_adventurer = function(_item_name) {
+    if (state.selected_adventurer_index < 0 || state.selected_adventurer_index >= array_length(state.adventurers)) return;
+
+    var _a = state.adventurers[state.selected_adventurer_index];
+    if (_a.status == "on_mission") {
+        add_log(_a.name + " is currently in the field. Gear changes will have to wait.");
+        return;
+    }
+    for (var i = 0; i < array_length(_a.issued_gear); i++) {
+        if (_a.issued_gear[i] == _item_name) {
+            array_delete(_a.issued_gear, i, 1);
+            var _item_idx = find_agency_inventory_index(_item_name);
+            if (_item_idx >= 0) state.agency_inventory[_item_idx].stock += 1;
+            add_log(_item_name + " returned from " + _a.name + " to agency stores.");
+            return;
+        }
+    }
+
+    add_log(_a.name + " does not currently have " + _item_name + " issued.");
+};
+
+adventurer_mission_gear_bonus = function(_a, _mission) {
+    var _bonus = 0;
+    for (var i = 0; i < array_length(_a.issued_gear); i++) {
+        var _item = get_agency_inventory_item(_a.issued_gear[i]);
+        if (!is_struct(_item)) continue;
+        _bonus += _item.score_bonus;
+        for (var r = 0; r < array_length(_item.roles); r++) {
+            if (_item.roles[r] == _a.role) {
+                _bonus += 3;
+                break;
+            }
+        }
+        if (_item.name == "Lockpick Roll" && (_mission.type == "Recovery" || _mission.type == "Diplomatic")) _bonus += 6;
+        if (_item.name == "Ward Scroll" && (_mission.preferred_role == "Mage" || _mission.type == "Recovery")) _bonus += 4;
+        if (_item.name == "Healing Kit" && _mission.risk >= 35) _bonus += 2;
+    }
+    return _bonus;
+};
+
+adventurer_collection_bonus = function(_a, _mission) {
+    var _bonus = 0;
+    _bonus += min(8, array_length(_a.found_magic) * 2);
+    _bonus += min(6, array_length(_a.found_relics) * 2);
+
+    for (var i = 0; i < array_length(_a.found_magic); i++) {
+        var _magic = _a.found_magic[i];
+        if ((_magic == "cipher sigil" || _magic == "warded chant" || _magic == "spark diagram") && _mission.type == "Recovery") _bonus += 2;
+        if ((_magic == "binding phrase" || _magic == "court glamour" || _magic == "echo charm") && _mission.type == "Diplomatic") _bonus += 2;
+    }
+
+    for (var r = 0; r < array_length(_a.found_relics); r++) {
+        var _relic = _a.found_relics[r];
+        if ((_relic == "saint's seal" || _relic == "abbey lantern") && _mission.risk >= 35) _bonus += 2;
+        if ((_relic == "border map case" || _relic == "old watch badge") && _mission.type == "Security") _bonus += 2;
+    }
+
+    return _bonus;
+};
+
+adventurer_mission_injury_guard = function(_a) {
+    var _guard = 0;
+    for (var i = 0; i < array_length(_a.issued_gear); i++) {
+        var _item = get_agency_inventory_item(_a.issued_gear[i]);
+        if (is_struct(_item)) _guard += _item.injury_guard;
+    }
+    return _guard;
+};
+
+resolve_agency_gear_after_mission = function(_party_ids, _mission, _outcome) {
+    for (var p = 0; p < array_length(_party_ids); p++) {
+        var _idx = get_adv_index(_party_ids[p]);
+        if (_idx < 0) continue;
+
+        var _a = state.adventurers[_idx];
+        var _i = 0;
+        while (_i < array_length(_a.issued_gear)) {
+            var _gear_name = _a.issued_gear[_i];
+            var _item = get_agency_inventory_item(_gear_name);
+            if (!is_struct(_item) || _item.kind != "consumable") {
+                _i += 1;
+                continue;
+            }
+
+            var _consume = false;
+            if (_outcome == "failure") _consume = true;
+            else if (_mission.risk >= 30 && irandom(99) < 55) _consume = true;
+            else if (irandom(99) < 25) _consume = true;
+
+            if (_consume) {
+                add_log(_a.name + " used " + _gear_name + " on " + _mission.title + ".");
+                array_delete(_a.issued_gear, _i, 1);
+            } else {
+                _i += 1;
+            }
+        }
+    }
 };
 
 generate_free_agent = function() {
@@ -509,16 +1173,16 @@ init_missions = function() {
 
 init_patrons = function() {
     return [
-        { id: 0, name: "Lady Merrow Vale", personality: "courteous", contact: "sealed letter", pay_profile: "high", bonus_profile: "sometimes", risk_profile: "measured", temperament_note: "Usually gracious, but expects polished results.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 },
-        { id: 1, name: "Quartermaster Halden Pike", personality: "practical", contact: "guild messenger", pay_profile: "steady", bonus_profile: "rare", risk_profile: "moderate", temperament_note: "Values reliability, logistics, and no-nonsense briefings.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 },
-        { id: 2, name: "Archivist Ilyra Quill", personality: "scholarly", contact: "arcane correspondence", pay_profile: "modest", bonus_profile: "rare", risk_profile: "low", temperament_note: "Prefers careful handling and detailed reports over speed.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 },
-        { id: 3, name: "Magistrate Doran Flint", personality: "stern", contact: "official courier", pay_profile: "steady", bonus_profile: "rare", risk_profile: "high", temperament_note: "Formal and demanding. Tolerates little improvisation.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 },
-        { id: 4, name: "Captain Roen Blackwake", personality: "brisk", contact: "dock runner", pay_profile: "high", bonus_profile: "often", risk_profile: "high", temperament_note: "Moves fast, pays for urgency, and accepts rough conditions.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 },
-        { id: 5, name: "Matron Ysabet Thorn", personality: "demanding", contact: "house steward", pay_profile: "high", bonus_profile: "sometimes", risk_profile: "moderate", temperament_note: "Generous when satisfied, difficult when crossed.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 },
-        { id: 6, name: "Prior Cedric Vale", personality: "calm", contact: "monastery letter", pay_profile: "modest", bonus_profile: "sometimes", risk_profile: "low", temperament_note: "Patient and fair. Usually prefers safer, service-minded work.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 },
-        { id: 7, name: "Guildmaster Olin Brass", personality: "transactional", contact: "clerk dispatch", pay_profile: "steady", bonus_profile: "rare", risk_profile: "moderate", temperament_note: "Treats every arrangement like a ledger entry.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 },
-        { id: 8, name: "Envoy Seris Dawn", personality: "polished", contact: "embassy aide", pay_profile: "high", bonus_profile: "often", risk_profile: "measured", temperament_note: "Refined, image-conscious, and willing to pay for discretion.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 },
-        { id: 9, name: "Warden Petra Stone", personality: "direct", contact: "watch courier", pay_profile: "steady", bonus_profile: "rare", risk_profile: "high", temperament_note: "Blunt, dependable, and more concerned with results than manners.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0 }
+        { id: 0, name: "Lady Merrow Vale", personality: "courteous", contact: "sealed letter", pay_profile: "high", bonus_profile: "sometimes", risk_profile: "measured", temperament_note: "Usually gracious, but expects polished results.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50 },
+        { id: 1, name: "Quartermaster Halden Pike", personality: "practical", contact: "guild messenger", pay_profile: "steady", bonus_profile: "rare", risk_profile: "moderate", temperament_note: "Values reliability, logistics, and no-nonsense briefings.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50 },
+        { id: 2, name: "Archivist Ilyra Quill", personality: "scholarly", contact: "arcane correspondence", pay_profile: "modest", bonus_profile: "rare", risk_profile: "low", temperament_note: "Prefers careful handling and detailed reports over speed.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50 },
+        { id: 3, name: "Magistrate Doran Flint", personality: "stern", contact: "official courier", pay_profile: "steady", bonus_profile: "rare", risk_profile: "high", temperament_note: "Formal and demanding. Tolerates little improvisation.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50 },
+        { id: 4, name: "Captain Roen Blackwake", personality: "brisk", contact: "dock runner", pay_profile: "high", bonus_profile: "often", risk_profile: "high", temperament_note: "Moves fast, pays for urgency, and accepts rough conditions.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50 },
+        { id: 5, name: "Matron Ysabet Thorn", personality: "demanding", contact: "house steward", pay_profile: "high", bonus_profile: "sometimes", risk_profile: "moderate", temperament_note: "Generous when satisfied, difficult when crossed.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50 },
+        { id: 6, name: "Prior Cedric Vale", personality: "calm", contact: "monastery letter", pay_profile: "modest", bonus_profile: "sometimes", risk_profile: "low", temperament_note: "Patient and fair. Usually prefers safer, service-minded work.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50 },
+        { id: 7, name: "Guildmaster Olin Brass", personality: "transactional", contact: "clerk dispatch", pay_profile: "steady", bonus_profile: "rare", risk_profile: "moderate", temperament_note: "Treats every arrangement like a ledger entry.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50 },
+        { id: 8, name: "Envoy Seris Dawn", personality: "polished", contact: "embassy aide", pay_profile: "high", bonus_profile: "often", risk_profile: "measured", temperament_note: "Refined, image-conscious, and willing to pay for discretion.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50 },
+        { id: 9, name: "Warden Petra Stone", personality: "direct", contact: "watch courier", pay_profile: "steady", bonus_profile: "rare", risk_profile: "high", temperament_note: "Blunt, dependable, and more concerned with results than manners.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50 }
     ];
 };
 
@@ -678,10 +1342,27 @@ record_patron_job_result = function(_contract_index, _result, _gross_patron_pay)
     _patron.total_patron_pay += _gross_patron_pay;
 
     switch (_result.outcome) {
-        case "success": _patron.jobs_completed += 1; break;
-        case "partial": _patron.jobs_partial += 1; break;
-        default: _patron.jobs_failed += 1; break;
+        case "success":
+            _patron.jobs_completed += 1;
+            _patron.satisfaction = clamp(_patron.satisfaction + 8, 0, 100);
+        break;
+        case "partial":
+            _patron.jobs_partial += 1;
+            _patron.satisfaction = clamp(_patron.satisfaction + 2, 0, 100);
+        break;
+        default:
+            _patron.jobs_failed += 1;
+            _patron.satisfaction = clamp(_patron.satisfaction - 10, 0, 100);
+        break;
     }
+};
+
+patron_satisfaction_label = function(_score) {
+    if (_score >= 75) return "favored";
+    if (_score >= 60) return "warm";
+    if (_score >= 40) return "neutral";
+    if (_score >= 25) return "strained";
+    return "hostile";
 };
 
 award_adventurer_mission_find = function(_adv_id, _mission, _outcome) {
@@ -703,6 +1384,21 @@ award_adventurer_mission_find = function(_adv_id, _mission, _outcome) {
         if (array_length(_a.found_magic) < 8) {
             array_push(_a.found_magic, _item);
             add_log(_a.name + " picked up new magic: " + _item + ".");
+        }
+        return;
+    }
+
+    if (_find_roll < 28) {
+        switch (_mission.type) {
+            case "Security": _item = choose("old watch badge", "captain's seal", "border map case"); break;
+            case "Recovery": _item = choose("saint's seal", "abbey lantern", "ruin key fragment"); break;
+            case "Diplomatic": _item = choose("court signet shard", "envoy ribbon", "oath token"); break;
+            default: _item = choose("weathered charm", "road marker token", "guild tally plate"); break;
+        }
+
+        if (array_length(_a.found_relics) < 8) {
+            array_push(_a.found_relics, _item);
+            add_log(_a.name + " secured a relic: " + _item + ".");
         }
         return;
     }
@@ -737,6 +1433,7 @@ log_patron_research_report = function(_patron_index) {
     add_log("Profile: " + string_upper(_p.personality) + " | Contact usually via " + _p.contact + ".");
     add_log("Intel: pay tends " + _p.pay_profile + ", bonuses " + _p.bonus_profile + ", assignments trend " + _p.risk_profile + " risk.");
     add_log("Temperament: " + _p.temperament_note);
+    add_log("Relationship standing: " + patron_satisfaction_label(_p.satisfaction) + " (" + string(_p.satisfaction) + "/100).");
 
     if (_worked > 0) {
         add_log("Agency history: worked " + string(_worked) + " contract(s) | success " + string(_p.jobs_completed) + ", partial " + string(_p.jobs_partial) + ", failed " + string(_p.jobs_failed) + ".");
@@ -813,6 +1510,19 @@ open_market_offer_stage = function() {
     state.market_stage = "offer";
     state.status_line = "Drafting recruitment offer.";
     add_log("Adjust bonus, rate, and commission, then submit your proposal.");
+};
+
+match_market_offer_to_ask = function() {
+    if (array_length(state.free_agents) <= 0 || state.selected_free_agent_index < 0) {
+        add_log("Select a free agent first.");
+        return;
+    }
+
+    var _fa = state.free_agents[state.selected_free_agent_index];
+    state.offer_bonus = _fa.ask_bonus;
+    state.offer_rate_delta = _fa.ask_rate - _fa.adventure_rate;
+    state.offer_commission = _fa.min_commission;
+    add_log("Offer terms matched to " + _fa.name + "'s stated ask.");
 };
 
 process_idle_adventurer_pressure = function() {
@@ -904,6 +1614,9 @@ process_client_contract_pressure = function() {
             _a.contract_days_remaining = max(0, _a.contract_days_remaining - 1);
             if (_a.contract_days_remaining == 5) {
                 add_log(_a.name + "'s " + _a.representation_type + " expires in 5 day(s).");
+            } else if (_a.contract_days_remaining == 0 && _a.last_charter_notice_day != state.day) {
+                _a.last_charter_notice_day = state.day;
+                add_log(_a.name + "'s charter has expired. They expect a renewal meeting or a release.");
             }
         }
 
@@ -912,6 +1625,40 @@ process_client_contract_pressure = function() {
             if ((_a.idle_days - _a.activity_expectation_days) >= 2) {
                 change_adventurer_trust(_a.id, -1, "agency is not matching promised work tempo");
             }
+        }
+
+        if (variable_struct_exists(_a, "renegotiation_annoyance") && _a.renegotiation_annoyance > 0) {
+            _a.renegotiation_annoyance = max(0, _a.renegotiation_annoyance - 1);
+        }
+
+        if (variable_struct_exists(_a, "promised_work_by_day") && _a.promised_work_by_day > 0) {
+            if (_a.status == "on_mission") {
+                _a.promised_work_by_day = 0;
+            } else if (state.day > _a.promised_work_by_day) {
+                _a.promised_work_by_day = 0;
+                add_log("You missed a promised assignment window for " + _a.name + ".");
+                change_adventurer_morale(_a.id, -3, "agency broke a promise of near-term work");
+                change_adventurer_trust(_a.id, -4, "promised work never materialized");
+                _a.renegotiation_annoyance = min(5, _a.renegotiation_annoyance + 1);
+            }
+        }
+
+        var _risk = 0;
+        if (_a.morale < 60) _risk += (60 - _a.morale);
+        if (_a.trust < 55) _risk += (55 - _a.trust);
+        if (_a.idle_days > _a.activity_expectation_days) _risk += (_a.idle_days - _a.activity_expectation_days) * 6;
+        _risk += _a.renegotiation_annoyance * 5;
+        if (_a.promised_work_by_day > 0) _risk -= 8;
+        if (_a.contract_days_remaining <= 5) _risk += 8;
+        if (_a.contract_days_remaining <= 0) _risk += 15;
+        _a.defection_risk = clamp(_risk, 0, 100);
+
+        if (_a.defection_risk >= 45 && !_a.departure_warning) {
+            _a.departure_warning = true;
+            add_log(_a.name + " is openly considering other banners. Defection risk is rising.");
+        } else if (_a.defection_risk < 30 && _a.departure_warning) {
+            _a.departure_warning = false;
+            add_log(_a.name + " seems calmer about staying with the agency.");
         }
     }
 };
@@ -1055,11 +1802,234 @@ open_adventurer_detail = function(_idx) {
     add_log("Stats: C" + string(_a.combat) + " M" + string(_a.magic) + " S" + string(_a.stealth) + " D" + string(_a.diplomacy) + " R" + string(_a.reliability) + ".");
     add_log("Contract terms: " + string(_a.adventure_rate) + "g/day | Agency commission " + string(round(_a.commission_rate * 100)) + "%.");
     add_log("Representation: " + _a.representation_type + " | " + string(_a.contract_days_remaining) + "/" + string(_a.contract_term_days) + " day(s) remaining.");
-    add_log("Relationship: morale " + string(_a.morale) + " | trust " + string(_a.trust) + " | expects work every " + string(_a.activity_expectation_days) + " day(s) | priority " + _a.ambition + " | risk " + _a.risk_preference + ".");
+    add_log("Relationship: morale " + string(_a.morale) + " | trust " + string(_a.trust) + " | expects work every " + string(_a.activity_expectation_days) + " day(s) | priority " + _a.ambition + " | risk " + _a.risk_preference + " | negotiation annoyance " + string(_a.renegotiation_annoyance) + " | defection risk " + string(_a.defection_risk) + ".");
     add_log("Personal purse: " + string(_a.purse_gold) + "g | Lifetime earnings " + string(_a.lifetime_earnings) + "g | Last mission payout " + string(_a.last_mission_payout) + "g.");
     add_log("Kit: " + array_join_text(_a.kit));
-    add_log("Magic & techniques: " + array_join_text(_a.found_magic));
-    add_log("Notable finds: " + array_join_text(_a.notable_finds));
+    add_log("Agency-issued gear: " + adventurer_issued_gear_text(_a) + ".");
+    add_log("Arcana known: " + array_join_text(_a.found_magic));
+    add_log("Relics held: " + array_join_text(_a.found_relics));
+    add_log("Field finds: " + array_join_text(_a.notable_finds));
+};
+
+open_adventurer_renegotiation = function() {
+    if (state.selected_adventurer_index < 0 || state.selected_adventurer_index >= array_length(state.adventurers)) return;
+
+    var _a = state.adventurers[state.selected_adventurer_index];
+    state.mode = MODE.ADVENTURERS;
+    state.adventurer_view_stage = "renegotiate";
+    state.renegotiation_rate_offer = _a.adventure_rate;
+    state.renegotiation_commission_offer = _a.commission_rate;
+    state.renegotiation_term_offer = _a.contract_term_days;
+    state.status_line = "Renegotiating " + _a.name + "'s representation terms.";
+    add_log("Renegotiation opened for " + _a.name + ".");
+    add_log("Current terms: " + string(_a.adventure_rate) + "g/day | Agency commission " + string(round(_a.commission_rate * 100)) + "% | " + string(_a.contract_term_days) + "-day charter.");
+};
+
+open_adventurer_retention_meeting = function() {
+    if (state.selected_adventurer_index < 0 || state.selected_adventurer_index >= array_length(state.adventurers)) return;
+
+    var _a = state.adventurers[state.selected_adventurer_index];
+    if (_a.status == "on_mission") {
+        add_log(_a.name + " is currently in the field. Meet them after the contract closes.");
+        return;
+    }
+
+    state.mode = MODE.ADVENTURERS;
+    state.adventurer_view_stage = "retention";
+    state.status_line = "Meeting with " + _a.name + " about representation concerns.";
+    add_log("Retention meeting opened for " + _a.name + ".");
+    if (_a.departure_warning) {
+        add_log(_a.name + " is clearly entertaining outside offers.");
+    }
+    if (_a.contract_days_remaining <= 0) {
+        add_log("Their current charter has expired and needs a renewal decision.");
+    } else if (_a.contract_days_remaining <= 5) {
+        add_log("Their charter is nearly up. A renewal offer would steady the relationship.");
+    }
+};
+
+adjust_adventurer_renegotiation = function(_field, _delta) {
+    if (state.selected_adventurer_index < 0 || state.selected_adventurer_index >= array_length(state.adventurers)) return;
+
+    switch (_field) {
+        case "rate":
+            state.renegotiation_rate_offer = clamp(state.renegotiation_rate_offer + _delta, 10, 120);
+            add_log("Renegotiation day rate set to " + string(state.renegotiation_rate_offer) + "g/day.");
+        break;
+        case "commission":
+            state.renegotiation_commission_offer = clamp(state.renegotiation_commission_offer + _delta, 0.10, 0.35);
+            add_log("Agency commission set to " + string(round(state.renegotiation_commission_offer * 100)) + "%.");
+        break;
+        case "term":
+            state.renegotiation_term_offer = clamp(state.renegotiation_term_offer + _delta, 10, 90);
+            add_log("Representation term set to " + string(state.renegotiation_term_offer) + " day(s).");
+        break;
+    }
+};
+
+evaluate_adventurer_renegotiation = function(_a) {
+    var _desired_rate = _a.adventure_rate;
+    var _desired_commission = _a.commission_rate;
+    var _desired_term = _a.contract_term_days;
+
+    switch (_a.ambition) {
+        case "higher pay": _desired_rate += 4; _desired_commission -= 0.01; break;
+        case "prestige jobs": _desired_rate += 2; break;
+        case "steady work": _desired_term += 10; break;
+        case "glory": _desired_rate += 1; _desired_term += 5; break;
+    }
+
+    switch (_a.risk_preference) {
+        case "careful": _desired_commission -= 0.01; break;
+        case "bold": _desired_rate += 1; break;
+    }
+
+    _desired_commission = clamp(_desired_commission, 0.10, 0.35);
+    _desired_term = clamp(_desired_term, 10, 90);
+
+    var _score = 48;
+    _score += (state.renegotiation_rate_offer - _desired_rate) * 2.8;
+    _score += (_desired_commission - state.renegotiation_commission_offer) * 260;
+    _score += (state.renegotiation_term_offer - _desired_term) * 0.35;
+    _score += (_a.trust - 60) * 0.30;
+    _score += (_a.morale - 60) * 0.20;
+    _score -= _a.renegotiation_annoyance * 4;
+    _score += irandom_range(-6, 6);
+
+    return {
+        score: _score,
+        desired_rate: _desired_rate,
+        desired_commission: _desired_commission,
+        desired_term: _desired_term
+    };
+};
+
+submit_adventurer_renegotiation = function() {
+    if (state.selected_adventurer_index < 0 || state.selected_adventurer_index >= array_length(state.adventurers)) return;
+
+    var _a = state.adventurers[state.selected_adventurer_index];
+    var _eval = evaluate_adventurer_renegotiation(_a);
+    _a.last_renegotiation_day = state.day;
+
+    add_log("You propose: " + string(state.renegotiation_rate_offer) + "g/day | Agency commission " + string(round(state.renegotiation_commission_offer * 100)) + "% | " + string(state.renegotiation_term_offer) + "-day charter.");
+
+    if (_eval.score >= 55) {
+        _a.adventure_rate = state.renegotiation_rate_offer;
+        _a.commission_rate = state.renegotiation_commission_offer;
+        _a.contract_term_days = state.renegotiation_term_offer;
+        _a.contract_days_remaining = max(_a.contract_days_remaining, state.renegotiation_term_offer);
+        _a.renegotiation_annoyance = max(0, _a.renegotiation_annoyance - 1);
+        add_log(_a.name + " accepted the revised charter terms.");
+        change_adventurer_morale(_a.id, 3, "renegotiation concluded on acceptable terms");
+        change_adventurer_trust(_a.id, 1, "agency responded to contract concerns");
+        open_adventurer_detail(state.selected_adventurer_index);
+    } else {
+        _a.renegotiation_annoyance = min(5, _a.renegotiation_annoyance + ((_eval.score < 42) ? 2 : 1));
+        add_log(_a.name + " rejected the proposal. They seem to want roughly " + string(_eval.desired_rate) + "g/day, agency commission near " + string(round(_eval.desired_commission * 100)) + "%, and about " + string(_eval.desired_term) + " days.");
+        add_log(_a.name + " seems irritated by the terms. Negotiation annoyance is now " + string(_a.renegotiation_annoyance) + ".");
+        change_adventurer_morale(_a.id, -2, "unsuccessful renegotiation");
+        if (_eval.score < 42) change_adventurer_trust(_a.id, -2, "agency proposal missed client expectations");
+    }
+};
+
+promise_adventurer_work = function() {
+    if (state.selected_adventurer_index < 0 || state.selected_adventurer_index >= array_length(state.adventurers)) return;
+
+    var _a = state.adventurers[state.selected_adventurer_index];
+    if (_a.status != "available") {
+        add_log(_a.name + " is not waiting at the desk right now.");
+        return;
+    }
+
+    _a.promised_work_by_day = state.day + 3;
+    add_log("You promise " + _a.name + " a contract lead within 3 days.");
+    change_adventurer_morale(_a.id, 2, "agency promised near-term work");
+    change_adventurer_trust(_a.id, 2, "agency gave a concrete work promise");
+};
+
+pay_adventurer_retention_bonus = function(_amount) {
+    if (state.selected_adventurer_index < 0 || state.selected_adventurer_index >= array_length(state.adventurers)) return;
+    if (_amount <= 0) return;
+    if (_amount > state.gold) {
+        add_log("Insufficient gold to offer that loyalty purse.");
+        return;
+    }
+
+    var _a = state.adventurers[state.selected_adventurer_index];
+    spend_gold(_amount, "Retention purse paid to " + _a.name + ".");
+    _a.purse_gold += _amount;
+    _a.renegotiation_annoyance = max(0, _a.renegotiation_annoyance - 1);
+    add_log(_a.name + " accepts a " + string(_amount) + "g loyalty purse.");
+    change_adventurer_morale(_a.id, (_amount >= 30) ? 5 : 3, "agency invested directly in client goodwill");
+    change_adventurer_trust(_a.id, (_amount >= 30) ? 3 : 2, "agency backed words with coin");
+};
+
+evaluate_adventurer_renewal = function(_a, _term_days, _rate_delta) {
+    var _score = 44;
+    _score += (_a.trust - 55) * 0.45;
+    _score += (_a.morale - 55) * 0.30;
+    _score -= _a.renegotiation_annoyance * 4;
+    _score -= floor(_a.defection_risk / 8);
+    _score += _rate_delta * 4;
+    _score += (_term_days >= 30) ? 4 : 1;
+    if (_a.promised_work_by_day > 0) _score += 4;
+    if (_a.ambition == "higher pay") _score += _rate_delta * 2;
+    if (_a.ambition == "steady work") _score += (_term_days >= 30) ? 5 : 1;
+    if (_a.ambition == "prestige jobs") _score += 1;
+    if (_a.risk_preference == "careful" && _term_days >= 30) _score += 2;
+    _score += irandom_range(-5, 5);
+
+    return _score;
+};
+
+offer_adventurer_renewal = function(_term_days, _rate_delta) {
+    if (state.selected_adventurer_index < 0 || state.selected_adventurer_index >= array_length(state.adventurers)) return;
+
+    var _a = state.adventurers[state.selected_adventurer_index];
+    var _score = evaluate_adventurer_renewal(_a, _term_days, _rate_delta);
+    var _new_rate = _a.adventure_rate + _rate_delta;
+    add_log("You offer " + _a.name + " a renewed charter: +" + string(_term_days) + " day(s) at " + string(_new_rate) + "g/day.");
+
+    if (_score >= 52) {
+        _a.adventure_rate = _new_rate;
+        _a.contract_term_days = max(_a.contract_term_days, _term_days);
+        _a.contract_days_remaining += _term_days;
+        _a.departure_warning = false;
+        _a.promised_work_by_day = 0;
+        _a.renegotiation_annoyance = max(0, _a.renegotiation_annoyance - 1);
+        add_log(_a.name + " renewed their charter with the agency.");
+        change_adventurer_morale(_a.id, 4, "charter renewed on workable terms");
+        change_adventurer_trust(_a.id, 3, "agency secured continued representation");
+        open_adventurer_detail(state.selected_adventurer_index);
+    } else {
+        _a.renegotiation_annoyance = min(5, _a.renegotiation_annoyance + 1);
+        add_log(_a.name + " rejected the renewal and wants better proof this agency is worth staying with.");
+        if (_rate_delta <= 0 && _a.ambition == "higher pay") {
+            add_log("Hint: they are leaning toward a sweeter pay package.");
+        } else if (_term_days < 30 && _a.ambition == "steady work") {
+            add_log("Hint: they want a longer, steadier charter.");
+        } else {
+            add_log("Hint: better trust, morale, or sweeter terms may be needed before they renew.");
+        }
+        change_adventurer_morale(_a.id, -1, "renewal talks stalled");
+        change_adventurer_trust(_a.id, -1, "agency failed to close renewal concerns");
+    }
+};
+
+release_adventurer_client = function() {
+    if (state.selected_adventurer_index < 0 || state.selected_adventurer_index >= array_length(state.adventurers)) return;
+
+    var _a = state.adventurers[state.selected_adventurer_index];
+    if (_a.status == "on_mission") {
+        add_log(_a.name + " cannot be released while currently on contract.");
+        return;
+    }
+    _a.status = "unavailable";
+    _a.departure_warning = false;
+    _a.promised_work_by_day = 0;
+    add_log("You released " + _a.name + " from representation. They leave the roster to seek other banners.");
+    state.status_line = _a.name + " has left the agency roster.";
+    open_adventurer_roster(state.adventurer_view_return_mode);
 };
 
 open_contracting_patron_list = function() {
@@ -1172,6 +2142,15 @@ unlock_patron_contracts = function(_patron_index) {
     for (var i = 0; i < array_length(state.contracts); i++) {
         if (state.contracts[i].patron_id == _patron.id && !state.contracts[i].accepted && !state.contracts[i].expired) {
             if (!state.contracts[i].unlocked) {
+                if (variable_struct_exists(_patron, "satisfaction")) {
+                    if (_patron.satisfaction >= 65) {
+                        state.contracts[i].mission.reward += 15;
+                        state.contracts[i].expires_hour += 8;
+                    } else if (_patron.satisfaction <= 35) {
+                        state.contracts[i].mission.reward = max(50, state.contracts[i].mission.reward - 12);
+                        state.contracts[i].expires_hour = max(state.absolute_hour + 8, state.contracts[i].expires_hour - 6);
+                    }
+                }
                 state.contracts[i].unlocked = true;
                 _unlocked_any = true;
                 add_log("Contract unlocked: " + state.contracts[i].mission.title + " (expires in " + format_duration_hours(max(1, state.contracts[i].expires_hour - state.absolute_hour)) + ").");
@@ -1820,6 +2799,8 @@ simulate_mission = function(_mission, _party, _delay_hours) {
         ) * 10;
 
         if (_a.role == _mission.preferred_role) _member += 12;
+        _member += adventurer_mission_gear_bonus(_a, _mission);
+        _member += adventurer_collection_bonus(_a, _mission);
         _raw_power += _member;
         _rel_sum += _a.reliability;
     }
@@ -1858,6 +2839,12 @@ simulate_mission = function(_mission, _party, _delay_hours) {
     else if (_outcome == "partial") _injury_chance = 10 + floor(_mission.risk * 0.5);
     else _injury_chance = floor(_mission.risk * 0.2);
 
+    var _guard_total = 0;
+    for (var g = 0; g < array_length(_party); g++) {
+        _guard_total += adventurer_mission_injury_guard(_party[g]);
+    }
+    _injury_chance = max(0, _injury_chance - floor(_guard_total / max(1, array_length(_party))));
+
     if (array_length(_party) > 0 && irandom(99) < _injury_chance) {
         _injury = true;
         _injured_id = _party[irandom(array_length(_party) - 1)].id;
@@ -1867,6 +2854,12 @@ simulate_mission = function(_mission, _party, _delay_hours) {
     array_push(_events, "Mission brief: " + _mission.title);
     array_push(_events, "Difficulty " + string(_mission.difficulty) + " / Risk " + string(_mission.risk) + "%");
     array_push(_events, "Team score " + string(round(_score)) + " vs target " + string(round(_target)) + ".");
+    if (_guard_total > 0) array_push(_events, "Issued gear reduced injury pressure by " + string(floor(_guard_total / max(1, array_length(_party)))) + ".");
+    var _collection_total = 0;
+    for (var c = 0; c < array_length(_party); c++) {
+        _collection_total += adventurer_collection_bonus(_party[c], _mission);
+    }
+    if (_collection_total > 0) array_push(_events, "Client finds and relics added " + string(_collection_total) + " field score.");
     if (_delay_hours > 0) {
         array_push(_events, "Delays accumulated: " + format_duration_hours(_delay_hours) + " (efficiency penalty applied).");
     }
@@ -1900,6 +2893,7 @@ open_next_report = function() {
 
     state.mode = MODE.MISSION_RESULT;
     state.status_line = "Mission report received: " + state.last_result.mission_title;
+    add_log("Mission report ready: " + state.last_result.mission_title + ". Click Acknowledge to file the report and clear this result.");
     rebuild_buttons();
 };
 
@@ -1951,6 +2945,7 @@ resolve_active_mission = function(_active) {
     state.reputation = clamp(state.reputation + _result.reputation_delta, 0, 100);
     add_log("Payout breakdown: patron " + string(_gross_patron_pay) + "g, adventurers -" + string(_adventurer_payout) + "g, agency cut " + string(_agent_cut) + "g.");
     record_patron_job_result(_active.contract_index, _result, _gross_patron_pay);
+    resolve_agency_gear_after_mission(_active.party_ids, _mission, _result.outcome);
 
     if (_result.outcome == "success") {
         for (var g = 0; g < array_length(_active.party_ids); g++) {
@@ -2045,6 +3040,11 @@ start_mission = function() {
             state.adventurers[_idx].status = "on_mission";
             state.adventurers[_idx].idle_days = 0;
             state.adventurers[_idx].last_contract_day = state.day;
+            if (variable_struct_exists(state.adventurers[_idx], "promised_work_by_day") && state.adventurers[_idx].promised_work_by_day > 0) {
+                state.adventurers[_idx].promised_work_by_day = 0;
+                add_log("Promise kept: " + state.adventurers[_idx].name + " has been placed on new work.");
+                change_adventurer_trust(state.adventurers[_idx].id, 1, "agency followed through on promised work");
+            }
             array_push(_party_ids, _party[i].id);
         }
     }
@@ -2133,6 +3133,10 @@ add_office_activity_buttons = function() {
     button_add("Counteroffer Talent", "act_counteroffer", -1);
 };
 
+add_card_gallery_button = function() {
+    button_add("Open Card Gallery", "cards_open", -1);
+};
+
 rebuild_buttons = function(_reset_scroll) {
     if (is_undefined(_reset_scroll)) _reset_scroll = false;
     var _prev_page = state.button_page;
@@ -2146,6 +3150,7 @@ rebuild_buttons = function(_reset_scroll) {
 
     switch (state.mode) {
         case MODE.PLANNING:
+            add_card_gallery_button();
             button_add("View Patron Requests", "goto_contracting", -1);
             button_add("View Missions", "goto_review", -1);
             button_add("Free Agent Market", "goto_market", -1);
@@ -2156,6 +3161,7 @@ rebuild_buttons = function(_reset_scroll) {
         break;
 
         case MODE.BUYING:
+            add_card_gallery_button();
             switch (state.market_stage) {
                 case "board":
                     button_add("Back to Recruit Desk", "market_back_hub", -1);
@@ -2176,6 +3182,7 @@ rebuild_buttons = function(_reset_scroll) {
 
                 case "offer":
                     button_add("Back to Candidate", "market_back_candidate", -1);
+                    button_add("Match Exact Ask", "market_match_ask", -1);
                     button_add("Submit Offer", "market_submit", -1);
                     button_add("Bonus -10", "market_bonus_add", -10);
                     button_add("Bonus +10", "market_bonus_add", 10);
@@ -2210,6 +3217,7 @@ rebuild_buttons = function(_reset_scroll) {
         break;
 
         case MODE.CONTRACTING:
+            add_card_gallery_button();
             switch (state.contracting_stage) {
                 case "contracts":
                     button_add("Back to Patrons", "contract_back_to_patrons", -1);
@@ -2259,6 +3267,7 @@ rebuild_buttons = function(_reset_scroll) {
         break;
 
         case MODE.MISSION_REVIEW:
+            add_card_gallery_button();
             switch (state.mission_review_stage) {
                 case "party":
                     button_add("Back to Missions", "review_back_to_missions", -1);
@@ -2292,6 +3301,7 @@ rebuild_buttons = function(_reset_scroll) {
         break;
 
         case MODE.MISSION_RESULT:
+            add_card_gallery_button();
             if (!is_struct(state.last_result) || !variable_struct_exists(state.last_result, "acknowledged") || !state.last_result.acknowledged) {
                 button_add("Acknowledge", "ack", -1);
             }
@@ -2300,13 +3310,55 @@ rebuild_buttons = function(_reset_scroll) {
         break;
 
         case MODE.ADVENTURERS:
-            if (state.adventurer_view_stage == "detail") {
-                button_add("Back to Adventurers", "adventurers_back_list", -1);
-            } else {
-                button_add("Back", "adventurers_back", -1);
-                for (var av = 0; av < array_length(state.adventurers); av++) {
-                    button_add("Adventurer " + string(av + 1) + ": " + state.adventurers[av].name, "adventurer_select", av);
-                }
+            add_card_gallery_button();
+            switch (state.adventurer_view_stage) {
+                case "detail":
+                    button_add("Back to Adventurers", "adventurers_back_list", -1);
+                    button_add("Meet Client", "adventurer_open_retention", -1);
+                    button_add("Manage Kit", "adventurer_open_loadout", -1);
+                    button_add("Renegotiate Terms", "adventurer_open_renegotiation", -1);
+                break;
+
+                case "loadout":
+                    button_add("Back to File", "adventurer_back_detail", -1);
+                    for (var gi = 0; gi < array_length(state.agency_inventory); gi++) {
+                        var _gear = state.agency_inventory[gi];
+                        var _adv_load = state.adventurers[state.selected_adventurer_index];
+                        if (adventurer_has_issued_item(_adv_load, _gear.name)) {
+                            button_add("Return " + _gear.name, "adventurer_return_gear", gi);
+                        } else {
+                            button_add("Issue " + _gear.name + " (" + string(_gear.stock) + ")", "adventurer_issue_gear", gi);
+                        }
+                    }
+                break;
+
+                case "retention":
+                    button_add("Back to File", "adventurer_back_detail", -1);
+                    button_add("Promise Work", "adventurer_promise_work", -1);
+                    button_add("Loyalty Purse 15g", "adventurer_retention_bonus", 15);
+                    button_add("Loyalty Purse 35g", "adventurer_retention_bonus", 35);
+                    button_add("Renew 20d", "adventurer_offer_renewal_basic", -1);
+                    button_add("Renew 30d +2g/day", "adventurer_offer_renewal_better", -1);
+                    button_add("Let Them Walk", "adventurer_release_client", -1);
+                break;
+
+                case "renegotiate":
+                    button_add("Back to File", "adventurer_back_detail", -1);
+                    button_add("Submit Charter", "adventurer_submit_renegotiation", -1);
+                    button_add("Rate -2", "adventurer_renegotiate_rate", -2);
+                    button_add("Rate +2", "adventurer_renegotiate_rate", 2);
+                    button_add("Commission -1%", "adventurer_renegotiate_commission", -0.01);
+                    button_add("Commission +1%", "adventurer_renegotiate_commission", 0.01);
+                    button_add("Term -5d", "adventurer_renegotiate_term", -5);
+                    button_add("Term +5d", "adventurer_renegotiate_term", 5);
+                break;
+
+                default:
+                    button_add("Back", "adventurers_back", -1);
+                    for (var av = 0; av < array_length(state.adventurers); av++) {
+                        button_add("Adventurer " + string(av + 1) + ": " + state.adventurers[av].name, "adventurer_select", av);
+                    }
+                break;
             }
         break;
 
@@ -2328,6 +3380,15 @@ run_button = function(_action, _value) {
         case "goto_review":
             open_mission_board();
             rebuild_buttons(true);
+        break;
+
+        case "cards_open":
+            card_overlay_focus_selected_context();
+        break;
+
+        case "cards_close":
+            close_card_overlay();
+            refresh_card_overlay();
         break;
 
         case "goto_contracting":
@@ -2360,6 +3421,70 @@ run_button = function(_action, _value) {
         break;
         case "adventurer_select":
             open_adventurer_detail(_value);
+            rebuild_buttons(true);
+        break;
+        case "adventurer_open_renegotiation":
+            open_adventurer_renegotiation();
+            rebuild_buttons(true);
+        break;
+        case "adventurer_open_retention":
+            open_adventurer_retention_meeting();
+            rebuild_buttons(true);
+        break;
+        case "adventurer_open_loadout":
+            open_adventurer_loadout();
+            rebuild_buttons(true);
+        break;
+        case "adventurer_back_detail":
+            open_adventurer_detail(state.selected_adventurer_index);
+            rebuild_buttons(true);
+        break;
+        case "adventurer_issue_gear":
+            if (_value >= 0 && _value < array_length(state.agency_inventory)) {
+                issue_agency_gear_to_adventurer(state.agency_inventory[_value].name);
+            }
+            rebuild_buttons();
+        break;
+        case "adventurer_return_gear":
+            if (_value >= 0 && _value < array_length(state.agency_inventory)) {
+                reclaim_agency_gear_from_adventurer(state.agency_inventory[_value].name);
+            }
+            rebuild_buttons();
+        break;
+        case "adventurer_promise_work":
+            promise_adventurer_work();
+            rebuild_buttons();
+        break;
+        case "adventurer_retention_bonus":
+            pay_adventurer_retention_bonus(_value);
+            rebuild_buttons();
+        break;
+        case "adventurer_offer_renewal_basic":
+            offer_adventurer_renewal(20, 0);
+            rebuild_buttons(true);
+        break;
+        case "adventurer_offer_renewal_better":
+            offer_adventurer_renewal(30, 2);
+            rebuild_buttons(true);
+        break;
+        case "adventurer_release_client":
+            release_adventurer_client();
+            rebuild_buttons(true);
+        break;
+        case "adventurer_renegotiate_rate":
+            adjust_adventurer_renegotiation("rate", _value);
+            rebuild_buttons();
+        break;
+        case "adventurer_renegotiate_commission":
+            adjust_adventurer_renegotiation("commission", _value);
+            rebuild_buttons();
+        break;
+        case "adventurer_renegotiate_term":
+            adjust_adventurer_renegotiation("term", _value);
+            rebuild_buttons();
+        break;
+        case "adventurer_submit_renegotiation":
+            submit_adventurer_renegotiation();
             rebuild_buttons(true);
         break;
         case "adventurers_back_list":
@@ -2490,6 +3615,10 @@ run_button = function(_action, _value) {
             add_log("Offer bonus set to " + string(state.offer_bonus) + "g.");
             rebuild_buttons();
         break;
+        case "market_match_ask":
+            match_market_offer_to_ask();
+            rebuild_buttons();
+        break;
         case "market_rate_add":
             state.offer_rate_delta = clamp(state.offer_rate_delta + _value, -20, 30);
             add_log("Offer rate adjustment set to " + string(state.offer_rate_delta) + "g/day.");
@@ -2560,7 +3689,7 @@ process_command = function(_raw) {
 
     switch (_cmd) {
         case "HELP":
-            add_log("Commands: HELP, MARKET, TARGET <n>, BONUS <g>, RATE <g>, COMM <pct>, OFFER, ACCEPTCOUNTER, DECLINECOUNTER, PATRONS, PATRON <n>, MISSIONS, ADVENTURERS, START, NEXTDAY, MISSION <n>, PARTY <n>, CASINO, WAGER <g>, GAME <CRAPS|WHEEL|DRAGON21>, ROLL, SPIN, DEAL, HIT, STAND, RESEARCH, RECRUIT, SCOUT, COUNTER, MODE <name>");
+            add_log("Commands: HELP, CARDS, MARKET, TARGET <n>, BONUS <g>, RATE <g>, COMM <pct>, OFFER, ACCEPTCOUNTER, DECLINECOUNTER, PATRONS, PATRON <n>, MISSIONS, ADVENTURERS, START, NEXTDAY, MISSION <n>, PARTY <n>, CASINO, WAGER <g>, GAME <CRAPS|WHEEL|DRAGON21>, ROLL, SPIN, DEAL, HIT, STAND, RESEARCH, RECRUIT, SCOUT, COUNTER, MODE <name>");
         break;
 
         case "MISSIONS":
@@ -2577,6 +3706,10 @@ process_command = function(_raw) {
 
         case "MARKET":
             open_market_hub();
+        break;
+
+        case "CARDS":
+            card_overlay_focus_selected_context();
         break;
 
         case "CASINO":
@@ -2749,8 +3882,10 @@ keyboard_string = "";
 input_buffer_prev_len = 0;
 state.realtime_hour_interval_steps = max(60, game_get_speed(gamespeed_fps) * 8);
 state.realtime_step_accum = 0;
+state.splash = init_splash_screen();
 
 load_world_content_xml();
+state.agency_inventory = default_agency_inventory();
 state.adventurers = init_adventurers();
 var _mission_templates = init_missions();
 state.patrons = init_patrons();
@@ -2767,43 +3902,9 @@ add_log("You inherited your late uncle's struggling adventurer agency.");
 add_log("Only five clients remain on the roster. Rebuild the office to its former glory.");
 add_log("To begin: open Patron Requests, read a patron ask to unlock contracts, then build a party.");
 add_log("Free-agent market now uses negotiated offers (bonus, daily rate, and commission).");
+add_log("Agency stores stocked with loadout gear and consumables.");
 add_log("Game House available: Street Craps, Wyrm Wheel, and Dragon 21.");
 add_log("Type HELP for commands or use quick actions.");
 add_log("Mission durations and global world pulses run over time in every mode.");
 
 rebuild_buttons(true);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

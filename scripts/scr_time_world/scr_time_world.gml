@@ -181,10 +181,17 @@ function run_overnight_maintenance() {
 
         if (state.adventurers[i].status == "available") {
             var _power = (state.adventurers[i].combat + state.adventurers[i].magic + state.adventurers[i].stealth + state.adventurers[i].diplomacy) / 4;
-            if (_power >= 9 && irandom(99) < 6) {
+            var _leave_chance = 0;
+            if (_power >= 9) _leave_chance += 6;
+            if (variable_struct_exists(state.adventurers[i], "defection_risk")) {
+                _leave_chance += floor(state.adventurers[i].defection_risk / 12);
+            }
+
+            if (_leave_chance > 0 && irandom(99) < _leave_chance) {
                 state.adventurers[i].status = "unavailable";
+                if (variable_struct_exists(state.adventurers[i], "departure_warning")) state.adventurers[i].departure_warning = false;
                 _lured += 1;
-                add_log(state.adventurers[i].name + " accepted a rival agency offer.");
+                add_log(state.adventurers[i].name + " accepted a rival agency offer after growing dissatisfied with the agency.");
             }
         }
     }

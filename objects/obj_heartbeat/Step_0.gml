@@ -1,5 +1,34 @@
 /// Input, commands, button clicks
 
+if (is_struct(state.splash) && state.splash.active) {
+    state.splash.start_button = splash_measure_start_button();
+
+    var _typed_during_splash = (string_length(keyboard_string) > input_buffer_prev_len);
+    var _skip_draw = mouse_check_button_pressed(mb_left) || keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space) || _typed_during_splash;
+
+    if (!splash_is_finished()) {
+        state.splash.progress = min(state.splash.total_chars, state.splash.progress + 0.8);
+        if (_skip_draw) {
+            splash_finish_drawing();
+            keyboard_string = "";
+            input_buffer_prev_len = 0;
+        }
+    } else {
+        state.splash.quill_exit = min(1, state.splash.quill_exit + 0.08);
+        var _mx_splash = device_mouse_x_to_gui(0);
+        var _my_splash = device_mouse_y_to_gui(0);
+        var _start = state.splash.start_button;
+        var _clicked_start = mouse_check_button_pressed(mb_left) && point_in_rectangle(_mx_splash, _my_splash, _start.x1, _start.y1, _start.x2, _start.y2);
+        if (_clicked_start || keyboard_check_pressed(vk_enter)) {
+            splash_begin_game();
+            keyboard_string = "";
+            input_buffer_prev_len = 0;
+        }
+    }
+
+    exit;
+}
+
 // Pull typed changes from keyboard_string (supports key repeat + held backspace).
 var _kb = keyboard_string;
 var _kb_len = string_length(_kb);
@@ -52,6 +81,52 @@ if (!state.game_over && state.realtime_hour_interval_steps > 0) {
         state.realtime_step_accum = 0;
         advance_hours(1);
     }
+}
+
+if (state.card_overlay.open) {
+    var _overlay_mx = device_mouse_x_to_gui(0);
+    var _overlay_my = device_mouse_y_to_gui(0);
+
+    if (keyboard_check_pressed(vk_escape)) {
+        close_card_overlay();
+        exit;
+    }
+
+    for (var oc = 0; oc < array_length(state.card_overlay.columns); oc++) {
+        var _col = state.card_overlay.columns[oc];
+        if (point_in_rectangle(_overlay_mx, _overlay_my, _col.x1, _col.y1, _col.x2, _col.y2)) {
+            var _view_h = max(1, _col.y2 - _col.y1);
+            var _max_card_scroll = max(0, _col.content_h - _view_h + 10);
+            if (mouse_wheel_up()) _col.scroll = max(0, _col.scroll - 28);
+            if (mouse_wheel_down()) _col.scroll = min(_max_card_scroll, _col.scroll + 28);
+        }
+    }
+
+    if (mouse_check_button_pressed(mb_left)) {
+        if (point_in_rectangle(_overlay_mx, _overlay_my, state.card_overlay.close_button.x1, state.card_overlay.close_button.y1, state.card_overlay.close_button.x2, state.card_overlay.close_button.y2)) {
+            close_card_overlay();
+            exit;
+        }
+
+        for (var ob = 0; ob < array_length(state.card_overlay.action_buttons); ob++) {
+            var _action_btn = state.card_overlay.action_buttons[ob];
+            if (point_in_rectangle(_overlay_mx, _overlay_my, _action_btn.x1, _action_btn.y1, _action_btn.x2, _action_btn.y2)) {
+                run_card_action(_action_btn.action, _action_btn.value);
+                exit;
+            }
+        }
+
+        for (var oh = 0; oh < array_length(state.card_overlay.card_hitboxes); oh++) {
+            var _hit = state.card_overlay.card_hitboxes[oh];
+            if (point_in_rectangle(_overlay_mx, _overlay_my, _hit.x1, _hit.y1, _hit.x2, _hit.y2)) {
+                set_card_overlay_focus(_hit.type, _hit.id);
+                refresh_card_overlay();
+                exit;
+            }
+        }
+    }
+
+    exit;
 }
 
 // Console log scrolling (mouse wheel + PageUp/PageDown)
