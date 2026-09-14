@@ -183,7 +183,7 @@ splash_begin_game = function() {
     if (!is_struct(state.splash)) return;
     state.splash.active = false;
     state.show_intro = false;
-    state.status_line = "Desk open. Planning board active.";
+    state.status_line = "Daily Briefing: Review today's objectives and make strategic decisions.";
     add_log("Splash complete. Office doors open.");
 };
 
@@ -3897,7 +3897,7 @@ state.selected_free_agent_index = 0;
 refresh_mission_board();
 update_clock_from_absolute();
 
-add_log("Guild office opened.");
+add_log("Daily Briefing: Guild office opened. Review contracts, missions, and adventurer roster.");
 add_log("You inherited your late uncle's struggling adventurer agency.");
 add_log("Only five clients remain on the roster. Rebuild the office to its former glory.");
 add_log("To begin: open Patron Requests, read a patron ask to unlock contracts, then build a party.");
