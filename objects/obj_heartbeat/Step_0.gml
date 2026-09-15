@@ -1,6 +1,11 @@
 /// Input, commands, button clicks
 
 if (is_struct(state.splash) && state.splash.active) {
+    if (!variable_instance_exists(id, "aa_storm_run_id")) {
+        aa_storm_run_id = environment_get_variable("AA_STORM_RUN_ID");
+        aa_storm_startup_emitted = false;
+    }
+
     state.splash.start_button = splash_measure_start_button();
 
     var _typed_during_splash = (string_length(keyboard_string) > input_buffer_prev_len);
@@ -23,6 +28,22 @@ if (is_struct(state.splash) && state.splash.active) {
             splash_begin_game();
             keyboard_string = "";
             input_buffer_prev_len = 0;
+
+            // Verification channel startup message
+            var _run_id = environment_get_variable("AA_STORM_RUN_ID");
+            if (string_length(aa_storm_run_id) > 0 && !aa_storm_startup_emitted) {
+                aa_storm_startup_emitted = true;
+                var _data = {
+                    "run_id": _run_id,
+                    "last_command": "",
+                    "day": state.day,
+                    "hour": state.hour,
+                    "gold": state.gold,
+                    "reputation": state.reputation,
+                    "mode": mode_to_string(state.mode)
+                };
+                show_debug_message("AA_STATE: " + json_stringify(_data));
+            }
         }
     }
 
@@ -67,6 +88,21 @@ if (keyboard_check_pressed(vk_enter)) {
     if (_cmd != "") {
         add_log("> " + _cmd);
         process_command(_cmd);
+
+        // Verification channel command message
+        var _run_id = environment_get_variable("AA_STORM_RUN_ID");
+        if (string_length(aa_storm_run_id) > 0 && aa_storm_startup_emitted) {
+            var _data = {
+                "run_id": _run_id,
+                "last_command": _cmd,
+                "day": state.day,
+                "hour": state.hour,
+                "gold": state.gold,
+                "reputation": state.reputation,
+                "mode": mode_to_string(state.mode)
+            };
+            show_debug_message("AA_STATE: " + json_stringify(_data));
+        }
     }
 
     state.input_line = "";
