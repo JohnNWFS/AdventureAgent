@@ -2095,6 +2095,32 @@ advance_to_party_assignment = function() {
         return;
     }
 
+    // Track patron payment quality when accepting contracts
+    if (state.selected_patron_index >= 0 && state.selected_patron_index < array_length(state.patrons)) {
+        var _patron = state.patrons[state.selected_patron_index];
+        var _contract_reward = _contract.mission.reward;
+
+        // Determine payment quality based on reward
+        var _pay_quality = "modest";
+        if (_contract_reward >= 200) {
+            _pay_quality = "high";
+        } else if (_contract_reward >= 100) {
+            _pay_quality = "steady";
+        }
+
+        // Update patron's payment quality tracking
+        if (_pay_quality == "high") {
+            _patron.pay_profile = "high";
+        } else if (_pay_quality == "steady") {
+            if (_patron.pay_profile != "high") {
+                _patron.pay_profile = "steady";
+            }
+        }
+
+        // Log patron research update
+        log_patron_research_report(state.selected_patron_index);
+    }
+
     state.contracting_stage = "party";
     state.status_line = "Assign adventurers to " + _contract.mission.title + ".";
     add_log("Choose your adventurers, then click Done Selecting.");
@@ -2110,6 +2136,37 @@ finish_party_assignment = function() {
     if (!is_struct(_contract)) {
         add_log("Select a contract first.");
         return;
+    }
+
+    // Track patron payment quality when accepting contracts
+    if (state.selected_patron_index >= 0 && state.selected_patron_index < array_length(state.patrons)) {
+        var _patron = state.patrons[state.selected_patron_index];
+        var _contract_reward = _contract.mission.reward;
+
+        // Determine payment quality based on reward
+        var _pay_quality = "modest";
+        if (_contract_reward >= 200) {
+            _pay_quality = "high";
+        } else if (_contract_reward >= 100) {
+            _pay_quality = "steady";
+        }
+
+        // Update patron's payment quality tracking
+        if (_pay_quality == "high") {
+            _patron.pay_profile = "high";
+        } else if (_pay_quality == "steady") {
+            if (_patron.pay_profile != "high") {
+                _patron.pay_profile = "steady";
+            }
+        }
+
+        // Update patron's total pay and research hits
+        _patron.total_patron_pay += _contract_reward;
+        _patron.research_hits += 1;
+        _patron.contracts_seen = max(_patron.contracts_seen, count_patron_seen_contracts(state.selected_patron_index));
+
+        // Log patron research update
+        log_patron_research_report(state.selected_patron_index);
     }
 
     state.contracting_stage = "confirm";
