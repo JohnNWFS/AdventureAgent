@@ -650,6 +650,11 @@ for (var b = 0; b < array_length(state.buttons); b++) {
     draw_set_color(c_white);
     draw_set_halign(fa_left);
     draw_text_ext(_btn.x1 + 6, _btn.y1 + 5, _btn.label, 16, _btn.x2 - _btn.x1 - 10);
+    if (text_ui_is_focused_button(b)) {
+        draw_set_color(c_yellow);
+        draw_rectangle(_btn.x1 - 1, _btn.y1 - 1, _btn.x2 + 1, _btn.y2 + 1, true);
+        draw_rectangle(_btn.x1 - 2, _btn.y1 - 2, _btn.x2 + 2, _btn.y2 + 2, true);
+    }
 }
 draw_set_halign(fa_left);
 
@@ -706,6 +711,10 @@ if (state.card_overlay.open) {
     draw_set_color(make_color_rgb(231, 212, 220));
     draw_rectangle(state.card_overlay.close_button.x1, state.card_overlay.close_button.y1, state.card_overlay.close_button.x2, state.card_overlay.close_button.y2, true);
     draw_text(state.card_overlay.close_button.x1 + 25, state.card_overlay.close_button.y1 + 8, "Close");
+    if (text_ui_is_focused_card_action("__close__", -1)) {
+        draw_set_color(c_yellow);
+        draw_rectangle(state.card_overlay.close_button.x1 - 2, state.card_overlay.close_button.y1 - 2, state.card_overlay.close_button.x2 + 2, state.card_overlay.close_button.y2 + 2, true);
+    }
 
     var draw_card_button = function(_x1, _y1, _x2, _y2, _label, _action, _value, _mouse_x, _mouse_y) {
         var _hover_btn = point_in_rectangle(_mouse_x, _mouse_y, _x1, _y1, _x2, _y2);
@@ -718,6 +727,10 @@ if (state.card_overlay.open) {
         draw_rectangle(_x1, _y1, _x2, _y2, true);
         draw_set_color(c_white);
         draw_text(_x1 + 8, _y1 + 5, _label);
+        if (text_ui_is_focused_card_action(_action, _value)) {
+            draw_set_color(c_yellow);
+            draw_rectangle(_x1 - 2, _y1 - 2, _x2 + 2, _y2 + 2, true);
+        }
         array_push(state.card_overlay.action_buttons, { x1: _x1, y1: _y1, x2: _x2, y2: _y2, action: _action, value: _value });
     };
 

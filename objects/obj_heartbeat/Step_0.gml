@@ -30,19 +30,9 @@ if (is_struct(state.splash) && state.splash.active) {
             input_buffer_prev_len = 0;
 
             // Verification channel startup message
-            var _run_id = environment_get_variable("AA_STORM_RUN_ID");
             if (string_length(aa_storm_run_id) > 0 && !aa_storm_startup_emitted) {
                 aa_storm_startup_emitted = true;
-                var _data = {
-                    "run_id": _run_id,
-                    "last_command": "",
-                    "day": state.day,
-                    "hour": state.hour,
-                    "gold": state.gold,
-                    "reputation": state.reputation,
-                    "mode": mode_to_string(state.mode)
-                };
-                show_debug_message("AA_STATE: " + json_stringify(_data));
+                text_ui_emit_state("");
             }
         }
     }
@@ -83,26 +73,16 @@ else if (_kb_len < input_buffer_prev_len) {
 
 input_buffer_prev_len = _kb_len;
 
+// Keyboard driving (Tab focus, Enter on empty line, F-keys). See scr_text_ui.
+var _key_action = text_ui_keys(string_trim(state.input_line) == "");
+if (_key_action != "") text_ui_emit_state(_key_action);
+
 if (keyboard_check_pressed(vk_enter)) {
     var _cmd = string_trim(state.input_line);
     if (_cmd != "") {
         add_log("> " + _cmd);
-        process_command(_cmd);
-
-        // Verification channel command message
-        var _run_id = environment_get_variable("AA_STORM_RUN_ID");
-        if (string_length(aa_storm_run_id) > 0 && aa_storm_startup_emitted) {
-            var _data = {
-                "run_id": _run_id,
-                "last_command": _cmd,
-                "day": state.day,
-                "hour": state.hour,
-                "gold": state.gold,
-                "reputation": state.reputation,
-                "mode": mode_to_string(state.mode)
-            };
-            show_debug_message("AA_STATE: " + json_stringify(_data));
-        }
+        if (!text_ui_command(_cmd)) process_command(_cmd);
+        text_ui_emit_state(_cmd);
     }
 
     state.input_line = "";
