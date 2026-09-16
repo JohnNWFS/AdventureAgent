@@ -472,6 +472,7 @@ default_agency_inventory = function() {
         { name: "Ward Scroll", kind: "consumable", stock: 2, score_bonus: 8, injury_guard: 8, roles: ["Mage", "Cleric", "Bard"] },
         { name: "Lockpick Roll", kind: "consumable", stock: 2, score_bonus: 10, injury_guard: 0, roles: ["Rogue", "Bard"] },
         { name: "Fine Rations", kind: "consumable", stock: 4, score_bonus: 4, injury_guard: 0, roles: ["Warrior", "Ranger", "Cleric"] },
+        { name: "Hedge Charm", kind: "consumable", stock: 3, score_bonus: 5, injury_guard: 0, roles: ["Warrior", "Mage", "Rogue", "Bard", "Cleric", "Ranger"] },
         { name: "Rune Shield", kind: "durable", stock: 2, score_bonus: 6, injury_guard: 14, roles: ["Warrior", "Cleric"] },
         { name: "Travel Cloak", kind: "durable", stock: 2, score_bonus: 5, injury_guard: 4, roles: ["Rogue", "Bard", "Ranger"] },
         { name: "Dwarven Warhammer", kind: "durable", stock: 3, score_bonus: 12, injury_guard: 18, roles: ["Warrior"] },
