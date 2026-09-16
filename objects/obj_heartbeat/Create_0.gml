@@ -468,7 +468,10 @@ default_agency_inventory = function() {
         { name: "Lockpick Roll", kind: "consumable", stock: 2, score_bonus: 10, injury_guard: 0, roles: ["Rogue", "Bard"] },
         { name: "Fine Rations", kind: "consumable", stock: 4, score_bonus: 4, injury_guard: 0, roles: ["Warrior", "Ranger", "Cleric"] },
         { name: "Rune Shield", kind: "durable", stock: 2, score_bonus: 6, injury_guard: 14, roles: ["Warrior", "Cleric"] },
-        { name: "Travel Cloak", kind: "durable", stock: 2, score_bonus: 5, injury_guard: 4, roles: ["Rogue", "Bard", "Ranger"] }
+        { name: "Travel Cloak", kind: "durable", stock: 2, score_bonus: 5, injury_guard: 4, roles: ["Rogue", "Bard", "Ranger"] },
+        { name: "Dwarven Warhammer", kind: "durable", stock: 3, score_bonus: 12, injury_guard: 18, roles: ["Warrior"] },
+        { name: "Dwarven Battleaxe", kind: "durable", stock: 3, score_bonus: 10, injury_guard: 16, roles: ["Warrior"] },
+        { name: "Dwarven Shield", kind: "durable", stock: 3, score_bonus: 8, injury_guard: 22, roles: ["Warrior", "Cleric"] }
     ];
 };
 
@@ -3936,5 +3939,6 @@ add_log("Agency stores stocked with loadout gear and consumables.");
 add_log("Game House available: Street Craps, Wyrm Wheel, and Dragon 21.");
 add_log("Type HELP for commands or use quick actions.");
 add_log("Mission durations and global world pulses run over time in every mode.");
+add_log("Dwarven Warhammer; Dwarven Battleaxe; Dwarven Shield.");
 
 rebuild_buttons(true);
