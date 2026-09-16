@@ -459,11 +459,11 @@ default_adventurer_arcana = function(_role) {
 
 default_adventurer_relics = function(_role) {
     switch (_role) {
-        case "Cleric": return ["pilgrim icon"];
-        case "Warrior": return ["captain's favor"];
-        case "Ranger": return ["trail token"];
+        case "Cleric": return ["pilgrim icon", "saint's seal"];
+        case "Warrior": return ["captain's favor", "saint's seal"];
+        case "Ranger": return ["trail token", "ruin key fragment"];
     }
-    return [];
+    return ["abbey lantern"];
 };
 
 default_agency_inventory = function() {
@@ -476,7 +476,10 @@ default_agency_inventory = function() {
         { name: "Travel Cloak", kind: "durable", stock: 2, score_bonus: 5, injury_guard: 4, roles: ["Rogue", "Bard", "Ranger"] },
         { name: "Dwarven Warhammer", kind: "durable", stock: 3, score_bonus: 12, injury_guard: 18, roles: ["Warrior"] },
         { name: "Dwarven Battleaxe", kind: "durable", stock: 3, score_bonus: 10, injury_guard: 16, roles: ["Warrior"] },
-        { name: "Dwarven Shield", kind: "durable", stock: 3, score_bonus: 8, injury_guard: 22, roles: ["Warrior", "Cleric"] }
+        { name: "Dwarven Shield", kind: "durable", stock: 3, score_bonus: 8, injury_guard: 22, roles: ["Warrior", "Cleric"] },
+        { name: "Saint's Seal", kind: "relic", stock: 2, score_bonus: 0, injury_guard: 0, roles: ["Cleric", "Warrior", "Ranger"] },
+        { name: "Abbey Lantern", kind: "relic", stock: 2, score_bonus: 0, injury_guard: 0, roles: ["Cleric", "Mage", "Bard"] },
+        { name: "Ruin Key Fragment", kind: "relic", stock: 2, score_bonus: 0, injury_guard: 0, roles: ["Rogue", "Ranger"] }
     ];
 };
 
