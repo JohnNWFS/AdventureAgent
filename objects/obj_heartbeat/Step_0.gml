@@ -99,6 +99,16 @@ if (!state.game_over && state.realtime_hour_interval_steps > 0) {
     }
 }
 
+// Process rival offers after a cooldown period
+if (!state.game_over && state.rival_offer_cooldown <= 0 && state.absolute_hour > state.rival_offer_last_hour) {
+    // Check if we should generate a rival offer (every 12-24 hours)
+    if (irandom(99) < 15) { // 15% chance each hour
+        process_rival_offer();
+        state.rival_offer_last_hour = state.absolute_hour;
+        state.rival_offer_cooldown = irandom_range(12, 24); // Cooldown for 12-24 hours
+    }
+}
+
 if (state.card_overlay.open) {
     var _overlay_mx = device_mouse_x_to_gui(0);
     var _overlay_my = device_mouse_y_to_gui(0);

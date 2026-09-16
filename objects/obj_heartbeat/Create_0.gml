@@ -43,6 +43,10 @@ state = {
     rival_activity: "Rival office appears quiet.",
     status_line: "Morning briefing complete.",
 
+    // Rival offer tracking
+    rival_offer_last_hour: -1,
+    rival_offer_cooldown: 0,
+
     adventurers: [],
     missions: [],
     patrons: [],

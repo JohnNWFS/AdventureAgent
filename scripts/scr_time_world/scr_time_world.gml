@@ -106,6 +106,64 @@ function process_world_pulse() {
     }
 }
 
+function process_rival_offer() {
+    // Check if we should generate a rival offer
+    if (array_length(state.adventurers) <= 0) return;
+
+    // Find available adventurers with high enough rival pressure
+    var _targets = [];
+    for (var i = 0; i < array_length(state.adventurers); i++) {
+        var _a = state.adventurers[i];
+        if (_a.status == "available") {
+            // Check if this adventurer has high enough rival pressure to be susceptible
+            if (irandom(99) < 30) { // 30% chance for any available adventurer
+                array_push(_targets, i);
+            }
+        }
+    }
+
+    if (array_length(_targets) <= 0) return;
+
+    // Select a random target
+    var _pick = _targets[irandom(array_length(_targets) - 1)];
+    var _adventurer = state.adventurers[_pick];
+
+    // Generate a rival offer from a random organization
+    var _organizations = [
+        "Lord Aldric's Tower",
+        "Temple of the Sacred Flame",
+        "Mercenary Band of the Iron Fist",
+        "Trade House of the Silver Merchant",
+        "Guild of the Shadowed Blade",
+        "Order of the Golden Rose",
+        "Cult of the Forgotten God",
+        "Court of the Crimson Crown"
+    ];
+
+    var _org = _organizations[irandom(array_length(_organizations) - 1)];
+
+    add_log("Rival offer from " + _org + "; " + _adventurer.name + " accepted a rival agency offer.");
+
+    // Make adventurer unavailable
+    _adventurer.status = "unavailable";
+
+    // Update rival activity
+    var _activities = [
+        "Rival agents were seen buying rumors at Dock Ward.",
+        "No visible rival movement today.",
+        "A rival office quietly underbid a transport contract.",
+        "A patron letter hints at rival interference.",
+        "Rival agencies are aggressively courting proven talent.",
+        "A rival office quietly poached a high-value agent.",
+        "Rival agents were spotted at the tavern district."
+    ];
+
+    state.rival_activity = _activities[irandom(array_length(_activities) - 1)];
+
+    // Add additional log entries for the rival offer
+    add_log("Rival agents were seen buying rumors at Dock Ward.");
+}
+
 function process_hour_tick() {
     state.absolute_hour += 1;
     update_clock_from_absolute();
