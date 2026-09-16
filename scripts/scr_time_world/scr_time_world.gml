@@ -42,7 +42,7 @@ function process_world_pulse() {
     if ((state.absolute_hour mod 3) != 0) return;
     if (irandom(99) >= 42) return;
 
-    var _event_roll = irandom_range(0, 4);
+    var _event_roll = irandom_range(0, 5);
     switch (_event_roll) {
         case 0:
             var _targets = [];
@@ -103,6 +103,23 @@ function process_world_pulse() {
                 add_log("World pulse: city rumor mill shifted contract sentiment.");
             }
         break;
+
+        case 5:
+            // Temple patron special event
+            var _temple_patrons = [];
+            for (var p = 0; p < array_length(state.patrons); p++) {
+                if (patron_is_temple(p)) {
+                    array_push(_temple_patrons, p);
+                }
+            }
+
+            if (array_length(_temple_patrons) > 0) {
+                var _temple_pick = _temple_patrons[irandom(array_length(_temple_patrons) - 1)];
+                var _patron = state.patrons[_temple_pick];
+                add_log("World pulse: Temple of the Sacred Flame requests additional sacred service.");
+                add_log("Patron: " + _patron.name + " | Oath: " + _patron.oath_vow);
+            }
+        break;
     }
 }
 
@@ -131,7 +148,6 @@ function process_rival_offer() {
     // Generate a rival offer from a random organization
     var _organizations = [
         "Lord Aldric's Tower",
-        "Temple of the Sacred Flame",
         "Mercenary Band of the Iron Fist",
         "Trade House of the Silver Merchant",
         "Guild of the Shadowed Blade",
@@ -139,6 +155,19 @@ function process_rival_offer() {
         "Cult of the Forgotten God",
         "Court of the Crimson Crown"
     ];
+
+    // Add temple as a possible rival organization if there are temple patrons
+    var _has_temple_patrons = false;
+    for (var p = 0; p < array_length(state.patrons); p++) {
+        if (patron_is_temple(p)) {
+            _has_temple_patrons = true;
+            break;
+        }
+    }
+
+    if (_has_temple_patrons) {
+        array_push(_organizations, "Temple of the Sacred Flame");
+    }
 
     var _org = _organizations[irandom(array_length(_organizations) - 1)];
 

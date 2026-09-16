@@ -639,11 +639,17 @@ build_patron_card = function(_patron_index) {
     var _p = state.patrons[_patron_index];
     var _open_requests = count_patron_open_requests(_patron_index);
     var _worked = _p.jobs_completed + _p.jobs_partial + _p.jobs_failed;
+
+    var _subtitle = string_upper(_p.personality) + " patron";
+    if (patron_is_temple(_patron_index)) {
+        _subtitle = "Temple of the Sacred Flame (Oath-based)";
+    }
+
     return {
         type: "patron",
         id: _patron_index,
         title: _p.name,
-        subtitle: string_upper(_p.personality) + " patron",
+        subtitle: _subtitle,
         status: patron_satisfaction_label(_p.satisfaction) + " relationship",
         summary: _p.temperament_note,
         stats: [
@@ -1194,7 +1200,8 @@ init_patrons = function() {
         { id: 6, name: "Prior Cedric Vale", personality: "calm", contact: "monastery letter", pay_profile: "modest", bonus_profile: "sometimes", risk_profile: "low", temperament_note: "Patient and fair. Usually prefers safer, service-minded work.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50 },
         { id: 7, name: "Guildmaster Olin Brass", personality: "transactional", contact: "clerk dispatch", pay_profile: "steady", bonus_profile: "rare", risk_profile: "moderate", temperament_note: "Treats every arrangement like a ledger entry.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50 },
         { id: 8, name: "Envoy Seris Dawn", personality: "polished", contact: "embassy aide", pay_profile: "high", bonus_profile: "often", risk_profile: "measured", temperament_note: "Refined, image-conscious, and willing to pay for discretion.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50 },
-        { id: 9, name: "Warden Petra Stone", personality: "direct", contact: "watch courier", pay_profile: "steady", bonus_profile: "rare", risk_profile: "high", temperament_note: "Blunt, dependable, and more concerned with results than manners.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50 }
+        { id: 9, name: "Warden Petra Stone", personality: "direct", contact: "watch courier", pay_profile: "steady", bonus_profile: "rare", risk_profile: "high", temperament_note: "Blunt, dependable, and more concerned with results than manners.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50 },
+        { id: 10, name: "Temple of the Sacred Flame", personality: "devout", contact: "holy messenger", pay_profile: "high", bonus_profile: "sometimes", risk_profile: "low", temperament_note: "Deeply spiritual, expects sacred service and oaths.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50, oath_type: "sacred_service", oath_vow: "I swear to serve the flame and protect the innocent." }
     ];
 };
 
@@ -1219,6 +1226,13 @@ build_contract_mission = function(_id, _tpl, _patron_name, _variant) {
         break;
     }
 
+    // Check if this is a temple patron with sacred service oath
+    var _patron_index = get_patron_index_by_name(_patron_name);
+    if (_patron_index >= 0 && patron_is_temple(_patron_index)) {
+        _title = _title + " - Sacred Service";
+        _desc += " This is a sacred service contract with vows to uphold divine principles.";
+    }
+
     return {
         id: _id,
         title: _title,
@@ -1233,6 +1247,13 @@ build_contract_mission = function(_id, _tpl, _patron_name, _variant) {
         patron_name: _patron_name,
         patron_max_party: choose(2, 3, 3)
     };
+};
+
+get_patron_index_by_name = function(_patron_name) {
+    for (var i = 0; i < array_length(state.patrons); i++) {
+        if (state.patrons[i].name == _patron_name) return i;
+    }
+    return -1;
 };
 
 init_contracts = function(_patrons, _templates) {
@@ -1356,15 +1377,30 @@ record_patron_job_result = function(_contract_index, _result, _gross_patron_pay)
     switch (_result.outcome) {
         case "success":
             _patron.jobs_completed += 1;
-            _patron.satisfaction = clamp(_patron.satisfaction + 8, 0, 100);
+            // Temple patrons have special satisfaction handling
+            if (patron_is_temple(_pidx)) {
+                _patron.satisfaction = clamp(_patron.satisfaction + 12, 0, 100);
+            } else {
+                _patron.satisfaction = clamp(_patron.satisfaction + 8, 0, 100);
+            }
         break;
         case "partial":
             _patron.jobs_partial += 1;
-            _patron.satisfaction = clamp(_patron.satisfaction + 2, 0, 100);
+            // Temple patrons have special satisfaction handling
+            if (patron_is_temple(_pidx)) {
+                _patron.satisfaction = clamp(_patron.satisfaction + 4, 0, 100);
+            } else {
+                _patron.satisfaction = clamp(_patron.satisfaction + 2, 0, 100);
+            }
         break;
         default:
             _patron.jobs_failed += 1;
-            _patron.satisfaction = clamp(_patron.satisfaction - 10, 0, 100);
+            // Temple patrons have special satisfaction handling
+            if (patron_is_temple(_pidx)) {
+                _patron.satisfaction = clamp(_patron.satisfaction - 15, 0, 100);
+            } else {
+                _patron.satisfaction = clamp(_patron.satisfaction - 10, 0, 100);
+            }
         break;
     }
 };
@@ -1375,6 +1411,21 @@ patron_satisfaction_label = function(_score) {
     if (_score >= 40) return "neutral";
     if (_score >= 25) return "strained";
     return "hostile";
+};
+
+patron_is_temple = function(_patron_index) {
+    if (_patron_index < 0 || _patron_index >= array_length(state.patrons)) return false;
+    var _patron = state.patrons[_patron_index];
+    return variable_struct_exists(_patron, "oath_type") && _patron.oath_type == "sacred_service";
+};
+
+patron_is_temple_by_name = function(_patron_name) {
+    for (var i = 0; i < array_length(state.patrons); i++) {
+        if (state.patrons[i].name == _patron_name) {
+            return patron_is_temple(i);
+        }
+    }
+    return false;
 };
 
 award_adventurer_mission_find = function(_adv_id, _mission, _outcome) {
@@ -1457,6 +1508,14 @@ log_patron_research_report = function(_patron_index) {
 
     add_log("Known requests on file: " + string(_p.contracts_seen) + " seen so far, " + string(_open_requests) + " currently visible from View Patron Requests.");
     add_log("Offer pattern: average listed pay " + string(_avg_offer_pay) + "g, average listed risk " + string(_avg_offer_risk) + ".");
+
+    // Special handling for temple patrons
+    if (patron_is_temple(_patron_index)) {
+        add_log("Special note: Temple of the Sacred Flame requires sacred service oaths and divine commitment.");
+        if (variable_struct_exists(_p, "oath_vow")) {
+            add_log("Oath vow: " + _p.oath_vow);
+        }
+    }
 };
 
 reset_market_offer_terms = function() {
@@ -3738,6 +3797,7 @@ process_command = function(_raw) {
     switch (_cmd) {
         case "HELP":
             add_log("Commands: HELP, CARDS, MARKET, TARGET <n>, BONUS <g>, RATE <g>, COMM <pct>, OFFER, ACCEPTCOUNTER, DECLINECOUNTER, PATRONS, PATRON <n>, MISSIONS, ADVENTURERS, START, NEXTDAY, MISSION <n>, PARTY <n>, CASINO, WAGER <g>, GAME <CRAPS|WHEEL|DRAGON21>, ROLL, SPIN, DEAL, HIT, STAND, RESEARCH, RECRUIT, SCOUT, COUNTER, MODE <name>");
+            add_log("New patron type: Temple of the Sacred Flame; Oath-based contract; Sacred service");
         break;
 
         case "MISSIONS":
