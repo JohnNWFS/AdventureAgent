@@ -475,6 +475,7 @@ default_agency_inventory = function() {
         { name: "Hedge Charm", kind: "consumable", stock: 3, score_bonus: 5, injury_guard: 0, roles: ["Warrior", "Mage", "Rogue", "Bard", "Cleric", "Ranger"] },
         { name: "Rune Shield", kind: "durable", stock: 2, score_bonus: 6, injury_guard: 14, roles: ["Warrior", "Cleric"] },
         { name: "Travel Cloak", kind: "durable", stock: 2, score_bonus: 5, injury_guard: 4, roles: ["Rogue", "Bard", "Ranger"] },
+        { name: "Noble Travel Attire", kind: "durable", stock: 1, score_bonus: 7, injury_guard: 6, roles: ["Warrior", "Mage", "Rogue", "Bard", "Cleric", "Ranger"] },
         { name: "Dwarven Warhammer", kind: "durable", stock: 3, score_bonus: 12, injury_guard: 18, roles: ["Warrior"] },
         { name: "Dwarven Battleaxe", kind: "durable", stock: 3, score_bonus: 10, injury_guard: 16, roles: ["Warrior"] },
         { name: "Dwarven Shield", kind: "durable", stock: 3, score_bonus: 8, injury_guard: 22, roles: ["Warrior", "Cleric"] },
