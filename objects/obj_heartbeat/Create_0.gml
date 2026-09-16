@@ -1446,6 +1446,7 @@ log_patron_research_report = function(_patron_index) {
     add_log("Intel: pay tends " + _p.pay_profile + ", bonuses " + _p.bonus_profile + ", assignments trend " + _p.risk_profile + " risk.");
     add_log("Temperament: " + _p.temperament_note);
     add_log("Relationship standing: " + patron_satisfaction_label(_p.satisfaction) + " (" + string(_p.satisfaction) + "/100).");
+    add_log("Patron payment quality: " + _p.pay_profile + ".");
 
     if (_worked > 0) {
         add_log("Agency history: worked " + string(_worked) + " contract(s) | success " + string(_p.jobs_completed) + ", partial " + string(_p.jobs_partial) + ", failed " + string(_p.jobs_failed) + ".");
@@ -2144,6 +2145,15 @@ finish_party_assignment = function() {
             if (_patron.pay_profile != "high") {
                 _patron.pay_profile = "steady";
             }
+        }
+
+        // Update patron satisfaction based on payment quality
+        if (_pay_quality == "high") {
+            _patron.satisfaction = clamp(_patron.satisfaction + 5, 0, 100);
+        } else if (_pay_quality == "steady") {
+            _patron.satisfaction = clamp(_patron.satisfaction + 2, 0, 100);
+        } else {
+            _patron.satisfaction = clamp(_patron.satisfaction - 3, 0, 100);
         }
 
         // Log patron research update

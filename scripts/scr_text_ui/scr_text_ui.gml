@@ -108,6 +108,7 @@ function text_ui_command(_raw) {
         case "HELP":
             process_command(_raw);
             add_log("Screen: LOOK, BUTTONS, PRESS <n|label>. Keys: Tab/Shift+Tab focus, Enter press, F1 look, F2-F12 press 1-11.");
+            add_log("Patron payment quality tracked: high, steady, modest. See research reports.");
             return true;
     }
     return false;
