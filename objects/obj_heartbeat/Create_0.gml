@@ -1,6 +1,11 @@
 /// Guild Agent prototype controller bootstrap
 //random_set_seed(12345);
-randomize();
+// Deterministic content for automated test runs; normal play stays random.
+if (string_length(environment_get_variable("AA_STORM_SEED")) > 0) {
+    random_set_seed(real(environment_get_variable("AA_STORM_SEED")));
+} else {
+    randomize();
+}
 
 MODE = {
     PLANNING: 0,
