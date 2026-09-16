@@ -3918,7 +3918,13 @@ layout = {
 
 keyboard_string = "";
 input_buffer_prev_len = 0;
-state.realtime_hour_interval_steps = max(60, game_get_speed(gamespeed_fps) * 8);
+// Automated test runs freeze the clock and advance time explicitly with NEXTDAY, so a run
+// depends only on its inputs. Normal play keeps the live one-hour-per-8-seconds pulse.
+if (string_length(environment_get_variable("AA_STORM_SEED")) > 0) {
+    state.realtime_hour_interval_steps = 0;
+} else {
+    state.realtime_hour_interval_steps = max(60, game_get_speed(gamespeed_fps) * 8);
+}
 state.realtime_step_accum = 0;
 state.splash = init_splash_screen();
 
