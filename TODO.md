@@ -118,7 +118,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 ## 9. Apprentice and Academy Pipeline
 - [ ] Add low-cost prospects and trainees
 - [ ] Add in-house development track for squires, acolytes, hedge apprentices, and wardens-in-training
-- [ ] Add training focus areas and growth paths
+- [x] Add training focus areas and growth paths
 - [ ] Add graduation into represented clients
 
 ## 10. Regional and Seasonal World Structure

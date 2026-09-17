@@ -222,6 +222,19 @@ function process_hour_tick() {
         state.pending_signing = undefined;
     }
     process_world_pulse();
+    // Check for academy training completion
+    for (var i = 0; i < array_length(state.adventurers); i++) {
+        var _a = state.adventurers[i];
+        if (variable_struct_exists(_a, "academy_affiliation") && _a.academy_affiliation != "none" && _a.academy_affiliation != "") {
+            // Check if training is complete (simplified condition)
+            if (irandom(99) < 10) { // 10% chance per hour to complete training
+                _a.training_focus = "none";
+                _a.growth_path = "none";
+                _a.academy_affiliation = "none";
+                add_log("Training focus: " + _a.training_focus + " | Growth path: " + _a.growth_path + " | Academy: " + _a.academy_affiliation);
+            }
+        }
+    }
 
     var i = 0;
     while (i < array_length(state.active_missions)) {
