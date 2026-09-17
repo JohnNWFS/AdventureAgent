@@ -3111,6 +3111,17 @@ resolve_active_mission = function(_active) {
     _result.completed_day = state.day;
     _result.completed_hour = state.hour;
     _result.delay_hours = _active.delay_hours;
+    _result.debrief_choices_available = true;
+    _result.debrief_options = [
+        {
+            text: "Share victory celebration with team (+2 morale, +1 trust)",
+            effect: function(_adv_id) {
+                change_adventurer_morale(_adv_id, 2, "debrief celebration");
+                change_adventurer_trust(_adv_id, 1, "debrief celebration");
+                add_log("Debrief options available: Share victory celebration with team (+2 morale, +1 trust)");
+            }
+        }
+    ];
 
     add_log("Mission team returned: " + _mission.title + ". Report delivered to desk.");
     array_push(state.pending_reports, _result);
