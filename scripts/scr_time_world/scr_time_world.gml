@@ -119,6 +119,21 @@ function process_world_pulse() {
                 add_log("World pulse: Temple of the Sacred Flame requests additional sacred service.");
                 add_log("Patron: " + _patron.name + " | Oath: " + _patron.oath_vow);
             }
+            else {
+                // Arcane College special event
+                var _arcane_patrons = [];
+                for (var p = 0; p < array_length(state.patrons); p++) {
+                    var _patron = state.patrons[p];
+                    if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "arcane_college") {
+                        array_push(_arcane_patrons, p);
+                    }
+                }
+                if (array_length(_arcane_patrons) > 0) {
+                    var _arcane_pick = _arcane_patrons[irandom(array_length(_arcane_patrons) - 1)];
+                    var _patron = state.patrons[_arcane_pick];
+                    add_log("World pulse: Arcane College of the Silver Flame requests arcane research assistance.");
+                }
+            }
         break;
     }
 }

@@ -1206,7 +1206,8 @@ init_patrons = function() {
         { id: 7, name: "Guildmaster Olin Brass", personality: "transactional", contact: "clerk dispatch", pay_profile: "steady", bonus_profile: "rare", risk_profile: "moderate", temperament_note: "Treats every arrangement like a ledger entry.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50 },
         { id: 8, name: "Envoy Seris Dawn", personality: "polished", contact: "embassy aide", pay_profile: "high", bonus_profile: "often", risk_profile: "measured", temperament_note: "Refined, image-conscious, and willing to pay for discretion.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50 },
         { id: 9, name: "Warden Petra Stone", personality: "direct", contact: "watch courier", pay_profile: "steady", bonus_profile: "rare", risk_profile: "high", temperament_note: "Blunt, dependable, and more concerned with results than manners.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50 },
-        { id: 10, name: "Temple of the Sacred Flame", personality: "devout", contact: "holy messenger", pay_profile: "high", bonus_profile: "sometimes", risk_profile: "low", temperament_note: "Deeply spiritual, expects sacred service and oaths.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50, oath_type: "sacred_service", oath_vow: "I swear to serve the flame and protect the innocent." }
+        { id: 10, name: "Temple of the Sacred Flame", personality: "devout", contact: "holy messenger", pay_profile: "high", bonus_profile: "sometimes", risk_profile: "low", temperament_note: "Deeply spiritual, expects sacred service and oaths.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50, oath_type: "sacred_service", oath_vow: "I swear to serve the flame and protect the innocent." },
+        { id: 11, name: "Arcane College of the Silver Flame", personality: "scholarly", contact: "arcane correspondence", pay_profile: "high", bonus_profile: "sometimes", risk_profile: "measured", temperament_note: "Seeks arcane knowledge and magical research. Values scholarly rigor.", research_hits: 0, contracts_seen: 0, jobs_completed: 0, jobs_partial: 0, jobs_failed: 0, total_patron_pay: 0, total_risk_observed: 0, total_reward_observed: 0, satisfaction: 50, patron_class: "arcane_college" }
     ];
 };
 
@@ -1421,7 +1422,7 @@ patron_satisfaction_label = function(_score) {
 patron_is_temple = function(_patron_index) {
     if (_patron_index < 0 || _patron_index >= array_length(state.patrons)) return false;
     var _patron = state.patrons[_patron_index];
-    return variable_struct_exists(_patron, "oath_type") && _patron.oath_type == "sacred_service";
+    return variable_struct_exists(_patron, "oath_type") && _patron.oath_type == "sacred_service" && (!variable_struct_exists(_patron, "patron_class") || _patron.patron_class != "arcane_college");
 };
 
 patron_is_temple_by_name = function(_patron_name) {
