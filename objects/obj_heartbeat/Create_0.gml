@@ -1403,6 +1403,23 @@ record_patron_job_result = function(_contract_index, _result, _gross_patron_pay)
             }
         break;
         default:
+        // Check for blacklisting and sanctions
+        if (_patron.jobs_failed >= 3 && _patron.jobs_completed + _patron.jobs_partial < 2) {
+            _patron.blacklisted = true;
+            add_log("Patron blacklisted: " + _patron.name);
+        }
+
+        // Check for sanctions
+        if (_patron.jobs_failed >= 2 && _patron.jobs_completed < 1) {
+            _patron.sanctioned = true;
+            add_log("Patron sanctioned: " + _patron.name);
+        }
+
+        // Check for noble favor
+        if (_patron.jobs_completed >= 5 && _patron.satisfaction >= 90) {
+            _patron.noble_favor = 15;
+            add_log("Noble favor gained: " + _patron.name);
+        }
             _patron.jobs_failed += 1;
             // Temple patrons have special satisfaction handling
             if (patron_is_temple(_pidx)) {
