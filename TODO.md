@@ -27,15 +27,15 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Idle time
 - [x] Mission success/failure
 - [x] Injury outcomes
-- [ ] Pay quality
-- [ ] Patron fit
+- [x] Pay quality
+- [x] Patron fit
 - [x] Add renegotiation flow for existing clients
 - [ ] Medieval fantasy dressing:
 - [x] Guild charters
 - [x] Sworn retainerships
-- [ ] Temple service oaths
-- [ ] Mercenary letters
-- [ ] Bardic sponsorship agreements
+- [x] Temple service oaths
+- [x] Mercenary letters
+- [x] Bardic sponsorship agreements
 
 ## 2. Morale, Usage Pressure, and Defection Risk
 - [x] Expand idle-time complaints into escalating client pressure
@@ -57,10 +57,10 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Add equipment impact on mission scoring and injury reduction
 - [ ] Medieval fantasy dressing:
 - [x] Rune-etched shields
-- [ ] Abbey relics
-- [ ] Hedge charms
-- [ ] Dwarf-forged arms
-- [ ] Noble travel attire
+- [x] Abbey relics
+- [x] Hedge charms
+- [x] Dwarf-forged arms
+- [x] Noble travel attire
 
 ## 4. Party Chemistry and Personality Synergy
 - [ ] Add pair and party chemistry modifiers
