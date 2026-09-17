@@ -3802,7 +3802,7 @@ process_command = function(_raw) {
 
     switch (_cmd) {
         case "HELP":
-            add_log("Commands: HELP, CARDS, MARKET, TARGET <n>, BONUS <g>, RATE <g>, COMM <pct>, OFFER, ACCEPTCOUNTER, DECLINECOUNTER, PATRONS, PATRON <n>, MISSIONS, ADVENTURERS, START, NEXTDAY, MISSION <n>, PARTY <n>, CASINO, WAGER <g>, GAME <CRAPS|WHEEL|DRAGON21>, ROLL, SPIN, DEAL, HIT, STAND, RESEARCH, RECRUIT, SCOUT, COUNTER, MODE <name>");
+            add_log("Commands: HELP, CARDS, MARKET, TARGET <n>, BONUS <g>, RATE <g>, COMM <pct>, OFFER, ACCEPTCOUNTER, DECLINECOUNTER, PATRONS, PATRON <n>, MISSIONS, ADVENTURERS, START, NEXTDAY, MISSION <n>, PARTY <n>, CASINO, WAGER <g>, GAME <CRAPS|WHEEL|DRAGON21>, ROLL, SPIN, DEAL, HIT, STAND, RESEARCH, RECRUIT, SCOUT, COUNTER, SIMULATE, DICE, MODE <name>");
             add_log("New patron type: Temple of the Sacred Flame; Oath-based contract; Sacred service");
         break;
 
