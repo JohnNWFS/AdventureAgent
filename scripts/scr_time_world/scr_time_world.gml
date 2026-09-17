@@ -37,6 +37,24 @@ function process_world_pulse() {
     if (state.game_over) return;
     if (state.world_pulse_last_hour == state.absolute_hour) return;
     state.world_pulse_last_hour = state.absolute_hour;
+    // Winter pass escort mission check
+    if (state.season == "Winter" && irandom(99) < 10) {
+        var _escort_mission = {
+            title: "Winter Pass Escorts",
+            description: "Escort a noble caravan through the snow-covered passes.",
+            difficulty: 3,
+            reward: 150,
+            risk: 2,
+            location: "Snowy Passes",
+            expires_hour: state.absolute_hour + 48,
+            unlocked: true,
+            accepted: false,
+            expired: false,
+            seasonal: true
+        };
+        array_push(state.contracts, _escort_mission);
+        add_log("Seasonal content: Winter Pass Escorts");
+    }
 
     // Global world pulse every 3 in-game hours, regardless of current mode.
     if ((state.absolute_hour mod 3) != 0) return;

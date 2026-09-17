@@ -124,7 +124,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 ## 10. Regional and Seasonal World Structure
 - [ ] Add regions with different danger, patron, and gear profiles
 - [ ] Add seasonal content gates:
-- [ ] Winter pass escorts
+- [x] Winter pass escorts
 - [ ] Spring goblin raids
 - [ ] Harvest protection
 - [ ] Dry-season ruin delves
