@@ -389,6 +389,17 @@ function end_day() {
     run_overnight_maintenance();
 
     add_log("Office opens for day " + string(state.day) + " at " + format_hh00(state.hour) + ".");
+    // Patron satisfaction summary
+    var _favored = 0, _warm = 0, _neutral = 0, _strained = 0, _hostile = 0;
+    for (var i = 0; i < array_length(state.patrons); i++) {
+        var _satisfaction = state.patrons[i].satisfaction;
+        if (_satisfaction >= 75) _favored++;
+        else if (_satisfaction >= 60) _warm++;
+        else if (_satisfaction >= 40) _neutral++;
+        else if (_satisfaction >= 25) _strained++;
+        else _hostile++;
+    }
+    add_log("Patron satisfaction summary: Favored: " + string(_favored) + ", Warm: " + string(_warm) + ", Neutral: " + string(_neutral) + ", Strained: " + string(_strained) + ", Hostile: " + string(_hostile) + ".");
     state.status_line = "A new day begins in " + state.season + ", Y" + string(state.year) + ".";
 
     var _can_open = !is_struct(state.last_result) ||
