@@ -257,6 +257,23 @@ function process_hour_tick() {
         state.pending_signing = undefined;
     }
     process_world_pulse();
+    // Check for apprentice training initiation
+    for (var i = 0; i < array_length(state.adventurers); i++) {
+        var _a = state.adventurers[i];
+        if (variable_struct_exists(_a, "academy_affiliation") && _a.academy_affiliation == "none" && _a.status == "available") {
+            // 10% chance per hour to initiate training for a random available adventurer
+            if (irandom(99) < 10) {
+                var _training_focus = choose("combat", "magic", "stealth", "diplomacy");
+                var _growth_path = choose("squire", "acolyte", "hedge_apprentice", "warden");
+
+                _a.training_focus = _training_focus;
+                _a.growth_path = _growth_path;
+                _a.academy_affiliation = "guild_academy";
+
+                add_log("Apprentice program initiated for " + _a.name);
+            }
+        }
+    }
     // Check for academy training completion
     for (var i = 0; i < array_length(state.adventurers); i++) {
         var _a = state.adventurers[i];
