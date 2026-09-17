@@ -178,10 +178,11 @@ function text_ui_emit_state(_last) {
     var _items = text_ui_items();
     for (var _i = 0; _i < min(30, array_length(_items)); _i++) array_push(_labels, _items[_i].label);
 
-    // Last console lines, verbatim: screen OCR truncates long lines, so tests read them from here.
+    // Last console lines, verbatim: OCR truncates, and LOOK floods the log with a button list,
+    // so keep a deep enough window that the feature output is still in it.
     var _recent = [];
     var _log_count = array_length(state.logs);
-    for (var _l = max(0, _log_count - 12); _l < _log_count; _l++) array_push(_recent, state.logs[_l]);
+    for (var _l = max(0, _log_count - 40); _l < _log_count; _l++) array_push(_recent, state.logs[_l]);
     var _data = {
         "run_id": aa_storm_run_id,
         "last_command": _last,
