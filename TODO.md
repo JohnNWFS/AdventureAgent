@@ -127,7 +127,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Winter pass escorts
 - [ ] Spring goblin raids
 - [ ] Harvest protection
-- [ ] Dry-season ruin delves
+- [x] Dry-season ruin delves
 - [ ] Add regional reputation and travel flavor
 
 ## 11. Expanded Adventure Debriefs and Post-Contract Fallout

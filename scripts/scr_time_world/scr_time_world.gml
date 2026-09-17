@@ -39,6 +39,23 @@ function process_world_pulse() {
     state.world_pulse_last_hour = state.absolute_hour;
     // Winter pass escort mission check
     if (state.season == "Winter" && irandom(99) < 10) {
+    var _ruin_delve_mission = {
+        title: "Dry-Season Ruin Delve",
+        description: "Explore ancient ruins now exposed by the winter drought.",
+        difficulty: 4,
+        reward: 200,
+        risk: 3,
+        location: "Ancient Ruins",
+        expires_hour: state.absolute_hour + 72,
+        unlocked: true,
+        accepted: false,
+        expired: false,
+        seasonal: true
+    };
+    array_push(state.contracts, _ruin_delve_mission);
+    add_log("Seasonal content: Dry-Season Ruin Delve");
+    add_log("Winter's grip tightens the ruins' hold.");
+    add_log("Ruin Delve contracts available.");
         var _escort_mission = {
             title: "Winter Pass Escorts",
             description: "Escort a noble caravan through the snow-covered passes.",
