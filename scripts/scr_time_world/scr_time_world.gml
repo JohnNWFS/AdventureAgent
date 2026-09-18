@@ -1101,6 +1101,37 @@ function end_day() {
     // Print reputation summary
     add_log("Agency reputation: " + string(state.reputation));
     add_log("Fame level: " + string(state.reputation));
+    // Initialize patron satisfaction telemetry if not exists
+    if (!variable_struct_exists(state, "patron_satisfaction_telemetry")) {
+        state.patron_satisfaction_telemetry = {
+            favored: 0,
+            warm: 0,
+            neutral: 0,
+            strained: 0,
+            hostile: 0
+        };
+    }
+
+    // Update patron satisfaction distribution
+    var _favored = 0, _warm = 0, _neutral = 0, _strained = 0, _hostile = 0;
+    for (var i = 0; i < array_length(state.patrons); i++) {
+        var _satisfaction = state.patrons[i].satisfaction;
+        if (_satisfaction >= 75) _favored++;
+        else if (_satisfaction >= 60) _warm++;
+        else if (_satisfaction >= 40) _neutral++;
+        else if (_satisfaction >= 25) _strained++;
+        else _hostile++;
+    }
+
+    // Store the distribution
+    state.patron_satisfaction_telemetry.favored = _favored;
+    state.patron_satisfaction_telemetry.warm = _warm;
+    state.patron_satisfaction_telemetry.neutral = _neutral;
+    state.patron_satisfaction_telemetry.strained = _strained;
+    state.patron_satisfaction_telemetry.hostile = _hostile;
+
+    // Print patron satisfaction summary
+    add_log("Patron satisfaction summary: Favored: " + string(_favored) + ", Warm: " + string(_warm) + ", Neutral: " + string(_neutral) + ", Strained: " + string(_strained) + ", Hostile: " + string(_hostile) + ".");
     // Initialize client earnings telemetry if not exists
     if (!variable_struct_exists(state, "client_earnings_telemetry")) {
         state.client_earnings_telemetry = {

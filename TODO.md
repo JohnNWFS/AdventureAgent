@@ -187,7 +187,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Add telemetry for:
 - [x] Retention rates
 - [x] Average client earnings
-- [ ] Patron satisfaction distribution
+- [x] Patron satisfaction distribution
 - [x] Injury rate by mission type
 - [x] Tune economy, morale decay, and rival pressure with data
 
