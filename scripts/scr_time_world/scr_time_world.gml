@@ -933,6 +933,55 @@ function end_day() {
 
     state.debug_mission_scoring = true;
     state.debug_negotiation_scoring = true;
+    // Initialize regional content tracking if not exists
+    if (!variable_struct_exists(state, "regional_content")) {
+        state.regional_content = {};
+    }
+
+    // Initialize regional reputation tracking if not exists
+    if (!variable_struct_exists(state, "regional_reputation")) {
+        state.regional_reputation = {};
+    }
+
+    // Initialize seasonal events tracking if not exists
+    if (!variable_struct_exists(state, "seasonal_events")) {
+        state.seasonal_events = [];
+    }
+
+    // Set up regional content for Eastern Villages
+    if (!variable_struct_exists(state.regional_content, "eastern_villages")) {
+        state.regional_content.eastern_villages = {
+            goblin_raids: false,
+            spring: false
+        };
+    }
+
+    // Set up regional reputation for Eastern Villages
+    if (!variable_struct_exists(state.regional_reputation, "eastern_villages")) {
+        state.regional_reputation.eastern_villages = 0;
+    }
+
+    // Add seasonal event if not already added
+    var _seasonal_event_exists = false;
+    for (var i = 0; i < array_length(state.seasonal_events); i++) {
+        if (state.seasonal_events[i] == "goblin_raids_spring") {
+            _seasonal_event_exists = true;
+            break;
+        }
+    }
+    if (!_seasonal_event_exists) {
+        array_push(state.seasonal_events, "goblin_raids_spring");
+    }
+
+    // Update regional content based on season
+    if (state.season == "Spring") {
+        state.regional_content.eastern_villages.goblin_raids = true;
+        state.regional_content.eastern_villages.spring = true;
+        state.regional_reputation.eastern_villages = 50;
+        add_log("Regional content: Eastern Villages");
+        add_log("Seasonal content: Goblin Raids in Spring");
+        add_log("Regional reputation: Eastern Villages");
+    }
     // Initialize civic factions if not exists
     if (!variable_struct_exists(state, "civic_factions")) {
         state.civic_factions = [

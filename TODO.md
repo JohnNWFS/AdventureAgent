@@ -128,7 +128,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Spring goblin raids
 - [x] Harvest protection
 - [x] Dry-season ruin delves
-- [ ] Add regional reputation and travel flavor
+- [x] Add regional reputation and travel flavor
 
 ## 11. Expanded Adventure Debriefs and Post-Contract Fallout
 - [x] Add post-mission debrief choices
