@@ -3304,6 +3304,30 @@ resolve_active_mission = function(_active) {
     }
         var _inj_idx = get_adv_index(_result.injured_adv_id);
         if (_inj_idx >= 0) {
+        state.adventurers[_inj_idx].status = "injured";
+        change_adventurer_morale(_result.injured_adv_id, -6, "injured on contract");
+        change_adventurer_trust(_result.injured_adv_id, -2, "dangerous assignment aftermath");
+
+        // Add long-term consequences for injuries
+        if (variable_struct_exists(state.adventurers[_inj_idx], "injury_tier")) {
+            var _tier = state.adventurers[_inj_idx].injury_tier;
+            if (_tier == "minor") {
+                state.adventurers[_inj_idx].injury_tier = "moderate";
+                add_log("Injury tier: moderate");
+            } else if (_tier == "moderate") {
+                state.adventurers[_inj_idx].injury_tier = "severe";
+                add_log("Injury tier: severe");
+            } else if (_tier == "severe") {
+                state.adventurers[_inj_idx].injury_tier = "cursed";
+                add_log("Injury tier: cursed");
+                // Apply stat penalty for cursed injuries
+                state.adventurers[_inj_idx].combat -= 1;
+                add_log("Stat penalty: combat -1");
+            }
+        } else {
+            state.adventurers[_inj_idx].injury_tier = "minor";
+            add_log("Injury tier: minor");
+        }
             state.adventurers[_inj_idx].status = "injured";
             change_adventurer_morale(_result.injured_adv_id, -6, "injured on contract");
             change_adventurer_trust(_result.injured_adv_id, -2, "dangerous assignment aftermath");

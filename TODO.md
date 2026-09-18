@@ -97,7 +97,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Herbal care
 - [ ] Costly magical restoration
 - [ ] Rest and rehab
-- [ ] Add long-term scars, stat penalties, or early retirement risks
+- [x] Add long-term scars, stat penalties, or early retirement risks
 
 ## 7. Rival Agencies with Distinct Identities
 - [ ] Add named rival agencies with strategy profiles
