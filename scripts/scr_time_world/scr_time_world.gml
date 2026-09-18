@@ -709,6 +709,14 @@ function run_overnight_maintenance() {
         add_log(string(_lured) + " high-value adventurer(s) became unavailable to rival offers.");
     }
     add_log(state.rival_activity);
+    // Telemetry: Track injury rates by mission type
+    if (!variable_struct_exists(state, "injury_telemetry")) {
+        state.injury_telemetry = {
+            security: { total: 0, injured: 0 },
+            recovery: { total: 0, injured: 0 },
+            diplomatic: { total: 0, injured: 0 }
+        };
+    }
     // Telemetry: Track morale decay and rival pressure
     if (!variable_struct_exists(state, "morale_telemetry")) {
         state.morale_telemetry = {
@@ -822,4 +830,11 @@ function end_day() {
     }
 
     rebuild_buttons();
+    // Log injury telemetry
+    if (variable_struct_exists(state, "injury_telemetry")) {
+        var _telemetry = state.injury_telemetry;
+        add_log("Injury Telemetry: Mission type Security - " + string(_telemetry.security.injured) + "/" + string(_telemetry.security.total) + " injured");
+        add_log("Injury Telemetry: Mission type Recovery - " + string(_telemetry.recovery.injured) + "/" + string(_telemetry.recovery.total) + " injured");
+        add_log("Injury Telemetry: Mission type Diplomatic - " + string(_telemetry.diplomatic.injured) + "/" + string(_telemetry.diplomatic.total) + " injured");
+    }
 }

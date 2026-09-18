@@ -188,7 +188,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Retention rates
 - [ ] Average client earnings
 - [ ] Patron satisfaction distribution
-- [ ] Injury rate by mission type
+- [x] Injury rate by mission type
 - [x] Tune economy, morale decay, and rival pressure with data
 
 ## Immediate Build Order

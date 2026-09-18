@@ -3256,6 +3256,26 @@ resolve_active_mission = function(_active) {
     }
 
     if (_result.injury_happened) {
+    // Update injury telemetry
+    if (variable_struct_exists(state, "injury_telemetry")) {
+        var _mission_type = _mission.type;
+        if (_mission_type == "security") {
+            state.injury_telemetry.security.total += array_length(_active.party_ids);
+            if (_result.injury_happened) {
+                state.injury_telemetry.security.injured += 1;
+            }
+        } else if (_mission_type == "recovery") {
+            state.injury_telemetry.recovery.total += array_length(_active.party_ids);
+            if (_result.injury_happened) {
+                state.injury_telemetry.recovery.injured += 1;
+            }
+        } else if (_mission_type == "diplomatic") {
+            state.injury_telemetry.diplomatic.total += array_length(_active.party_ids);
+            if (_result.injury_happened) {
+                state.injury_telemetry.diplomatic.injured += 1;
+            }
+        }
+    }
         var _inj_idx = get_adv_index(_result.injured_adv_id);
         if (_inj_idx >= 0) {
             state.adventurers[_inj_idx].status = "injured";
