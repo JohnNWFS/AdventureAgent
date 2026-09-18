@@ -149,7 +149,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Add guild license systems, dues, and inspections
 - [ ] Add contract disputes and arbitration
 - [x] Add blacklisting, sanctions, and noble favoritism
-- [ ] Add civic / church / guild political factions
+- [x] Add civic / church / guild political factions
 
 ## 14. World Customization and XML Content Packs
 - [x] Add XML-driven content packs for:

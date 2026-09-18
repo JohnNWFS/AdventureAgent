@@ -899,6 +899,43 @@ function end_day() {
 
     state.debug_mission_scoring = true;
     state.debug_negotiation_scoring = true;
+    // Initialize civic factions if not exists
+    if (!variable_struct_exists(state, "civic_factions")) {
+        state.civic_factions = [
+            {
+                name: "Guild of the Silver Flame",
+                influence: 0,
+                description: "A powerful guild of mages and clerics who influence political decisions in the city."
+            }
+        ];
+    }
+
+    // Initialize patron guild influence if not exists
+    for (var i = 0; i < array_length(state.patrons); i++) {
+        var _patron = state.patrons[i];
+        if (!variable_struct_exists(_patron, "patron_guild_influence")) {
+            _patron.patron_guild_influence = 0;
+        }
+    }
+
+    // Add faction influence telemetry
+    if (!variable_struct_exists(state, "faction_influence_telemetry")) {
+        state.faction_influence_telemetry = {
+            total_faction_influence: 0
+        };
+    }
+
+    // Print civic faction information
+    add_log("Civic faction: Guild of the Silver Flame");
+    add_log("Political influence: Guild of the Silver Flame");
+
+    // Set patron guild influence for Lady Merrow Vale
+    var _lady_merrow_index = get_patron_index_by_name("Lady Merrow Vale");
+    if (_lady_merrow_index >= 0) {
+        state.patrons[_lady_merrow_index].patron_guild_influence = 50;
+        state.patrons[_lady_merrow_index].patron_class = "guild";
+        add_log("Patron: Lady Merrow Vale - Guild of the Silver Flame");
+    }
     // Bardic rumor event
     if (irandom(99) < 30) {
         state.reputation += 5;
