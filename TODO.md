@@ -71,7 +71,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 
 ## 5. Patron Depth and Patron Negotiation
 - [x] Add patron satisfaction tracking
-- [ ] Add patron payment reliability and dispute likelihood
+- [x] Add patron payment reliability and dispute likelihood
 - [ ] Add pre-launch negotiation for:
 - [ ] Hazard premium
 - [ ] Urgency premium

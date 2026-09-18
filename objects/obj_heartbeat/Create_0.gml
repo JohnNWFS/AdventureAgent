@@ -1531,6 +1531,47 @@ log_patron_research_report = function(_patron_index) {
     add_log("Temperament: " + _p.temperament_note);
     add_log("Relationship standing: " + patron_satisfaction_label(_p.satisfaction) + " (" + string(_p.satisfaction) + "/100).");
     add_log("Patron payment quality: " + _p.pay_profile + ".");
+    // Payment reliability and dispute likelihood indicators
+    var _reliability = "unknown";
+    var _dispute_likelihood = "unknown";
+    var _payment_quality = "unknown";
+
+    if (variable_struct_exists(_p, "total_patron_pay") && variable_struct_exists(_p, "jobs_completed")) {
+        if (_p.jobs_completed > 0) {
+            var _avg_payment = floor(_p.total_patron_pay / _p.jobs_completed);
+            if (_avg_payment >= 100) {
+                _payment_quality = "high";
+            } else if (_avg_payment >= 50) {
+                _payment_quality = "medium";
+            } else {
+                _payment_quality = "low";
+            }
+        }
+
+        if (variable_struct_exists(_p, "jobs_failed") && variable_struct_exists(_p, "jobs_completed")) {
+            var _total_jobs = _p.jobs_completed + _p.jobs_failed;
+            if (_total_jobs > 0) {
+                var _failure_rate = _p.jobs_failed / _total_jobs;
+                if (_failure_rate < 0.2) {
+                    _reliability = "high";
+                } else if (_failure_rate < 0.5) {
+                    _reliability = "medium";
+                } else {
+                    _reliability = "low";
+                }
+
+                if (_failure_rate < 0.1) {
+                    _dispute_likelihood = "low";
+                } else if (_failure_rate < 0.3) {
+                    _dispute_likelihood = "medium";
+                } else {
+                    _dispute_likelihood = "high";
+                }
+            }
+        }
+    }
+
+    add_log("Payment reliability: " + _reliability + " | Dispute likelihood: " + _dispute_likelihood + " | Payment quality: " + _payment_quality + ".");
 
     if (_worked > 0) {
         add_log("Agency history: worked " + string(_worked) + " contract(s) | success " + string(_p.jobs_completed) + ", partial " + string(_p.jobs_partial) + ", failed " + string(_p.jobs_failed) + ".");
