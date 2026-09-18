@@ -372,6 +372,23 @@ function process_hour_tick() {
     state.absolute_hour += 1;
     update_clock_from_absolute();
     expire_contracts();
+    // Check for adventurer injury status transitions
+    for (var i = 0; i < array_length(state.adventurers); i++) {
+        var _a = state.adventurers[i];
+        if (variable_struct_exists(_a, "injury_days") && _a.injury_days > 0) {
+            _a.injury_days -= 1;
+            if (_a.injury_days <= 0) {
+                if (_a.status == "injured") {
+                    _a.status = "lingering";
+                    _a.injury_days = irandom_range(2, 3);
+                    add_log("Injury tier: lingering");
+                } else if (_a.status == "lingering") {
+                    _a.status = "available";
+                    add_log("Injury tier: recovered");
+                }
+            }
+        }
+    }
     process_daily_finance();
     resolve_pending_signing();
     if (is_struct(state.pending_signing) &&
