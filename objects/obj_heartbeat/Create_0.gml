@@ -2253,6 +2253,27 @@ finish_party_assignment = function() {
     }
 
     state.contracting_stage = "confirm";
+    // Check if patron allows flexible staffing
+    if (state.selected_patron_index >= 0 && state.selected_patron_index < array_length(state.patrons)) {
+        var _patron = state.patrons[state.selected_patron_index];
+        if (variable_struct_exists(_patron, "flexible_staffing_allowed") && _patron.flexible_staffing_allowed) {
+            // Check if we're exceeding the patron's stated max party size
+            var _contract = get_selected_contract();
+            if (is_struct(_contract) && variable_struct_exists(_contract, "mission") && variable_struct_exists(_contract.mission, "patron_max_party")) {
+                var _patron_max = _contract.mission.patron_max_party;
+                var _party_size = array_length(selected_party());
+
+                if (_party_size > _patron_max) {
+                    // Patron allows flexible staffing
+                    state.flexible_staffing_approved = true;
+                    state.flexible_staffing_cap = _party_size;
+                    state.contracting_stage = "flexible_staffing";
+                    add_log("Patron allows flexible staffing: up to " + string(_party_size) + " adventurers");
+                    return;
+                }
+            }
+        }
+    }
     state.status_line = "Ready to launch " + _contract.mission.title + ".";
 };
 

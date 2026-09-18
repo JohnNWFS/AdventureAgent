@@ -76,7 +76,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Hazard premium
 - [ ] Urgency premium
 - [ ] Secrecy premium
-- [ ] Staffing cap flexibility
+- [x] Staffing cap flexibility
 - [ ] Add patron memory of prior wins, failures, and late deliveries
 - [ ] Expand patron classes:
 - [ ] Abbots
