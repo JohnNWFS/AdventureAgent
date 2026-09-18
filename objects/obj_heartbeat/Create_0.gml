@@ -2476,6 +2476,15 @@ unlock_patron_contracts = function(_patron_index) {
                 add_log("Contract unlocked: " + state.contracts[i].mission.title + " (expires in " + format_duration_hours(max(1, state.contracts[i].expires_hour - state.absolute_hour)) + ").");
             }
             add_log("Ask: " + state.contracts[i].ask_text);
+            // Check for confidential work request
+            if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "temple") {
+                if (irandom(99) < 30) { // 30% chance for confidential work
+                    state.contracts[i].mission.reward += 15;
+                    state.contracts[i].confidential_work = true;
+                    add_log("Confidential work requested: " + state.contracts[i].mission.title);
+                    add_log("Secrecy premium +15g");
+                }
+            }
         }
     }
 

@@ -268,12 +268,31 @@ function process_world_pulse() {
                 }
 
                 // Track elite magical talent event
+                var _elite_magical_talent = false;
+                var _arcane_patrons = [];
+                for (var p = 0; p < array_length(state.patrons); p++) {
+                    var _patron = state.patrons[p];
+                    if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "arcane_college") {
+                        array_push(_arcane_patrons, p);
+                    }
+                }
+                if (array_length(_arcane_patrons) > 0) {
+                    _elite_magical_talent = true;
+                }
+
                 if (_elite_magical_talent && irandom(99) < 25) {
                     state.rival_telemetry.total_rival_pressure += 1;
                     add_log("Rival Telemetry: Rival agencies are aggressively courting elite magical talent.");
                 }
 
                 // Log patron pressure
+                var _temple_patrons = [];
+                for (var p = 0; p < array_length(state.patrons); p++) {
+                    if (patron_is_temple(p)) {
+                        array_push(_temple_patrons, p);
+                    }
+                }
+
                 if (array_length(_temple_patrons) > 0) {
                     state.rival_telemetry.total_patron_pressure += 1;
                 }

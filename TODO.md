@@ -75,7 +75,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Add pre-launch negotiation for:
 - [ ] Hazard premium
 - [x] Urgency premium
-- [ ] Secrecy premium
+- [x] Secrecy premium
 - [x] Staffing cap flexibility
 - [x] Add patron memory of prior wins, failures, and late deliveries
 - [ ] Expand patron classes:
