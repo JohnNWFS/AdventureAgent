@@ -382,6 +382,18 @@ function process_world_pulse() {
     if (_elite_magical_talent && irandom(99) < 25) {
         add_log("World pulse: Rival agencies are aggressively courting elite magical talent.");
     }
+    // Add Grim Mercenary patron class
+    var _grim_mercenary_patrons = [];
+    for (var p = 0; p < array_length(state.patrons); p++) {
+        var _patron = state.patrons[p];
+        if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "grim_mercenary") {
+            array_push(_grim_mercenary_patrons, p);
+        }
+    }
+
+    if (array_length(_grim_mercenary_patrons) > 0) {
+        add_log("Grim Mercenary patron appears");
+    }
 }
 
 function process_rival_offer() {

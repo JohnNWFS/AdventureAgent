@@ -165,7 +165,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Add example packs:
 - [ ] Generic medieval fantasy
 - [ ] Tolkien-esque inspired naming and place flavor
-- [ ] Grim mercenary variant
+- [x] Grim mercenary variant
 - [x] Keep simulation math in code while externalizing flavor/content data
 
 ## 15. Save/Load and Content Versioning

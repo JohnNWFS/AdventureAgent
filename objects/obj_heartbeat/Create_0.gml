@@ -385,6 +385,7 @@ apply_world_content_xml = function(_text) {
     if (_text == "") return;
 
     var _map = [
+    ["patron_title_grim_mercenary", "patron_titles_grim_mercenary"],
     ["rival_agency", "rival_agencies"],
         ["adventurer_first", "adventurer_first"],
         ["adventurer_last", "adventurer_last"],
