@@ -183,7 +183,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Add tooltips / glossary for morale, trust, and contract terms
 
 ## 17. Balancing and Debugging
-- [ ] Add debug overlays for mission scoring and negotiation scoring
+- [x] Add debug overlays for mission scoring and negotiation scoring
 - [ ] Add telemetry for:
 - [ ] Retention rates
 - [ ] Average client earnings

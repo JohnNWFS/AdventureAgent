@@ -413,6 +413,8 @@ function end_day() {
     run_overnight_maintenance();
 
     add_log("Office opens for day " + string(state.day) + " at " + format_hh00(state.hour) + ".");
+    state.debug_mission_scoring = true;
+    state.debug_negotiation_scoring = true;
     // Patron satisfaction summary
     var _favored = 0, _warm = 0, _neutral = 0, _strained = 0, _hostile = 0;
     for (var i = 0; i < array_length(state.patrons); i++) {

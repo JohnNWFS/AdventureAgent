@@ -2973,6 +2973,11 @@ simulate_mission = function(_mission, _party, _delay_hours) {
     var _delay_penalty = min(12, floor(_delay_hours / 6) * 2);
     var _score = (_raw_power * _rel_mod + _roll) - _delay_penalty;
     var _margin = round(_score - _target);
+    if (state.debug_mission_scoring) {
+        add_log("DEBUG: Mission scoring details");
+        add_log("DEBUG: Party composition score: " + string(_raw_power));
+        add_log("DEBUG: Outcome probability: " + string(_margin));
+    }
 
     var _outcome = "failure";
     var _gold = 0;
