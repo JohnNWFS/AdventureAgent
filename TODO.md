@@ -155,7 +155,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Add XML-driven content packs for:
 - [x] Adventurer names
 - [ ] Patron names and titles
-- [ ] Place names
+- [x] Place names
 - [ ] Weapons
 - [x] Outfits
 - [ ] Relics and spell names

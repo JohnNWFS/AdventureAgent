@@ -397,7 +397,8 @@ apply_world_content_xml = function(_text) {
         ["location_forest", "locations_forest"],
         ["gear_weapon", "gear_weapons"],
         ["gear_outfit", "gear_outfits"],
-        ["magic_name", "magic_names"]
+        ["magic_name", "magic_names"],
+        ["location_name", "location_names"]
     ];
 
     for (var i = 0; i < array_length(_map); i++) {
@@ -422,6 +423,13 @@ load_world_content_xml = function() {
         var _txt = read_text_file(_paths[i]);
         if (_txt != "") {
             apply_world_content_xml(_txt);
+            // Load location content pack if available
+            var _location_path = working_directory + "datafiles/location_content.xml";
+            var _location_txt = read_text_file(_location_path);
+            if (_location_txt != "") {
+                apply_world_content_xml(_location_txt);
+                add_log("Location content pack loaded from XML");
+            }
             // Load outfit content pack if available
             var _outfit_path = working_directory + "datafiles/outfit_content.xml";
             var _outfit_txt = read_text_file(_outfit_path);
