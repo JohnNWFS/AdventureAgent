@@ -185,7 +185,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 ## 17. Balancing and Debugging
 - [x] Add debug overlays for mission scoring and negotiation scoring
 - [ ] Add telemetry for:
-- [ ] Retention rates
+- [x] Retention rates
 - [ ] Average client earnings
 - [ ] Patron satisfaction distribution
 - [ ] Injury rate by mission type

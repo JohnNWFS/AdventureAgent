@@ -427,6 +427,23 @@ function run_overnight_maintenance() {
         add_log(string(_lured) + " high-value adventurer(s) became unavailable to rival offers.");
     }
     add_log(state.rival_activity);
+
+    // Retention tracking
+    if (!variable_struct_exists(state, "retention_tracking")) {
+        state.retention_tracking = { total_hires: 0, retained_count: 0 };
+    }
+    if (state.day == 1) {
+        // Initialize retention tracking on first day
+        state.retention_tracking.total_hires = array_length(state.adventurers);
+    }
+    // Count retained adventurers (available or on mission)
+    var _retained = 0;
+    for (var i = 0; i < array_length(state.adventurers); i++) {
+        if (state.adventurers[i].status == "available" || state.adventurers[i].status == "on_mission") {
+            _retained += 1;
+        }
+    }
+    state.retention_tracking.retained_count = _retained;
 }
 
 function end_day() {
@@ -439,6 +456,12 @@ function end_day() {
     run_overnight_maintenance();
 
     add_log("Office opens for day " + string(state.day) + " at " + format_hh00(state.hour) + ".");
+    if (variable_struct_exists(state, "retention_tracking")) {
+        var _total = state.retention_tracking.total_hires;
+        var _retained = state.retention_tracking.retained_count;
+        var _rate = _total > 0 ? floor((_retained / _total) * 100) : 0;
+        add_log("Retention rates: " + string(_rate) + "% (" + string(_retained) + "/" + string(_total) + ")");
+    }
     state.debug_mission_scoring = true;
     state.debug_negotiation_scoring = true;
     // Patron satisfaction summary
