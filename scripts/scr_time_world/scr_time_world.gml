@@ -257,6 +257,16 @@ function process_hour_tick() {
         state.pending_signing = undefined;
     }
     process_world_pulse();
+    // Check for lingering injury completion
+    for (var i = 0; i < array_length(state.adventurers); i++) {
+        if (state.adventurers[i].status == "lingering" && variable_struct_exists(state.adventurers[i], "injury_days") && state.adventurers[i].injury_days > 0) {
+            state.adventurers[i].injury_days -= 1;
+            if (state.adventurers[i].injury_days <= 0) {
+                state.adventurers[i].status = "available";
+                add_log("Injury tier: lingering");
+            }
+        }
+    }
     // Check for apprentice training initiation
     for (var i = 0; i < array_length(state.adventurers); i++) {
         var _a = state.adventurers[i];
@@ -338,6 +348,20 @@ function advance_hours(_hours) {
 function run_overnight_maintenance() {
     var _recovered = 0;
     var _lured = 0;
+    var _lingering = 0;
+    for (var i = 0; i < array_length(state.adventurers); i++) {
+        if (variable_struct_exists(state.adventurers[i], "injury_days") && state.adventurers[i].injury_days > 0) {
+            state.adventurers[i].injury_days -= 1;
+            if (state.adventurers[i].injury_days <= 0) {
+                state.adventurers[i].status = "lingering";
+                state.adventurers[i].injury_days = irandom_range(2, 3);
+                _lingering += 1;
+            }
+        }
+    }
+    if (_lingering > 0) {
+        add_log(string(_lingering) + " injured adventurer(s) transitioned to lingering status.");
+    }
     process_idle_adventurer_pressure();
     process_client_contract_pressure();
     for (var i = 0; i < array_length(state.adventurers); i++) {

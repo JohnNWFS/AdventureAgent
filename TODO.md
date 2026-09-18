@@ -90,7 +90,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Add injury tiers:
 - [ ] Minor
 - [ ] Serious
-- [ ] Lingering
+- [x] Lingering
 - [ ] Cursed
 - [ ] Add treatment options:
 - [ ] Temple healing
