@@ -146,7 +146,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Add office upgrade effects on recruitment, recovery, and patron trust
 
 ## 13. Law, Guild, and Politics
-- [ ] Add guild license systems, dues, and inspections
+- [x] Add guild license systems, dues, and inspections
 - [ ] Add contract disputes and arbitration
 - [x] Add blacklisting, sanctions, and noble favoritism
 - [ ] Add civic / church / guild political factions

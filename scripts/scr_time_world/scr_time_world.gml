@@ -975,6 +975,19 @@ function end_day() {
     }
     add_log("Patron satisfaction summary: Favored: " + string(_favored) + ", Warm: " + string(_warm) + ", Neutral: " + string(_neutral) + ", Strained: " + string(_strained) + ", Hostile: " + string(_hostile) + ".");
     state.status_line = "A new day begins in " + state.season + ", Y" + string(state.year) + ".";
+    // Initialize guild license state if not exists
+    if (!variable_struct_exists(state, "guild_license_status")) {
+        state.guild_license_status = "active";
+        state.guild_dues_due = 120;
+        state.guild_inspection_scheduled = true;
+    }
+
+    // Print guild license summary
+    add_log("Guild license status: " + state.guild_license_status);
+    add_log("Annual guild dues: " + string(state.guild_dues_due) + "g due");
+    if (state.guild_inspection_scheduled) {
+        add_log("Guild inspection scheduled");
+    }
     // Initialize office upgrade state if not exists
     if (!variable_struct_exists(state, "office_upgrade_level")) {
         state.office_upgrade_level = 0;
