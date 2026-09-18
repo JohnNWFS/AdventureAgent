@@ -1398,6 +1398,41 @@ record_patron_job_result = function(_contract_index, _result, _gross_patron_pay)
     if (_pidx < 0) return;
 
     var _patron = state.patrons[_pidx];
+    if (!variable_struct_exists(_patron, "job_history")) {
+        _patron.job_history = [];
+    }
+
+    var _job_result = {
+        outcome: _result.outcome,
+        late_delivery: _result.late_delivery || false
+    };
+    array_push(_patron.job_history, _job_result);
+
+    if (_result.late_delivery) {
+        if (!variable_struct_exists(_patron, "late_delivery_count")) {
+            _patron.late_delivery_count = 0;
+        }
+        _patron.late_delivery_count += 1;
+    }
+
+    // Update memory summary for research reports
+    if (!variable_struct_exists(_patron, "memory_summary")) {
+        _patron.memory_summary = {
+            completed: 0,
+            failed: 0,
+            late_deliveries: 0
+        };
+    }
+
+    if (_result.outcome == "success") {
+        _patron.memory_summary.completed += 1;
+    } else if (_result.outcome == "failed") {
+        _patron.memory_summary.failed += 1;
+    }
+
+    if (_result.late_delivery) {
+        _patron.memory_summary.late_deliveries += 1;
+    }
     _patron.total_patron_pay += _gross_patron_pay;
 
     switch (_result.outcome) {
@@ -1592,6 +1627,10 @@ log_patron_research_report = function(_patron_index) {
 
     add_log("Known requests on file: " + string(_p.contracts_seen) + " seen so far, " + string(_open_requests) + " currently visible from View Patron Requests.");
     add_log("Offer pattern: average listed pay " + string(_avg_offer_pay) + "g, average listed risk " + string(_avg_offer_risk) + ".");
+    // Patron memory summary
+    if (variable_struct_exists(_p, "memory_summary")) {
+        add_log("Patron memory: " + string(_p.memory_summary.completed) + " completed, " + string(_p.memory_summary.failed) + " failed, " + string(_p.memory_summary.late_deliveries) + " late deliveries.");
+    }
 
     // Special handling for temple patrons
     if (patron_is_temple(_patron_index)) {
