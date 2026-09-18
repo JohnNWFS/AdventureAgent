@@ -175,6 +175,29 @@ function process_world_pulse() {
     if (irandom(99) >= 42) return;
 
     var _event_roll = irandom_range(0, 5);
+    // Patron urgency premium for contract deadline tightening
+    if (state.season == "Spring" && irandom(99) < 15) {
+        var _open = [];
+        for (var c = 0; c < array_length(state.contracts); c++) {
+            var _ct = state.contracts[c];
+            if (_ct.unlocked && !_ct.accepted && !_ct.expired && state.absolute_hour < _ct.expires_hour) {
+                array_push(_open, c);
+            }
+        }
+        if (array_length(_open) > 0) {
+            var _ci = _open[irandom(array_length(_open) - 1)];
+            var _trim = irandom_range(2, 6);
+            state.contracts[_ci].expires_hour = max(state.absolute_hour + 2, state.contracts[_ci].expires_hour - _trim);
+
+            // Apply urgency premium
+            if (variable_struct_exists(state.contracts[_ci], "mission") && variable_struct_exists(state.contracts[_ci].mission, "reward")) {
+                state.contracts[_ci].mission.reward = max(50, state.contracts[_ci].mission.reward + 15);
+            }
+
+            refresh_mission_board();
+            add_log("Patron urgency increased for " + state.contracts[_ci].title + ". Deadline tightened. Urgency premium applied.");
+        }
+    }
     switch (_event_roll) {
         case 0:
             var _targets = [];

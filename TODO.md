@@ -74,7 +74,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Add patron payment reliability and dispute likelihood
 - [ ] Add pre-launch negotiation for:
 - [ ] Hazard premium
-- [ ] Urgency premium
+- [x] Urgency premium
 - [ ] Secrecy premium
 - [x] Staffing cap flexibility
 - [x] Add patron memory of prior wins, failures, and late deliveries
