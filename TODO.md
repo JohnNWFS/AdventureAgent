@@ -166,7 +166,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Generic medieval fantasy
 - [ ] Tolkien-esque inspired naming and place flavor
 - [ ] Grim mercenary variant
-- [ ] Keep simulation math in code while externalizing flavor/content data
+- [x] Keep simulation math in code while externalizing flavor/content data
 
 ## 15. Save/Load and Content Versioning
 - [ ] Save roster contracts, morale, trust, client assets, and world content pack choice
