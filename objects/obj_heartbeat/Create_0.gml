@@ -1730,6 +1730,17 @@ process_idle_adventurer_pressure = function() {
 
             var _should_notice = (_a.idle_days >= 3) && ((_a.idle_days == 3) || ((_a.idle_days mod 2) == 1));
             if (_should_notice && _a.last_idle_notice_day != state.day) {
+            if (_a.idle_days == 3) {
+                add_log(_a.name + " has been idle for 3 days.");
+            }
+
+            if (_a.idle_days == 5) {
+                add_log(_a.name + " has been idle for 5 days.");
+            }
+
+            if (_a.idle_days == 10) {
+                add_log(_a.name + " has been idle for 10 days.");
+            }
                 _a.last_idle_notice_day = state.day;
                 add_log(_a.name + " is getting restless after " + string(_a.idle_days) + " idle day(s) without a contract.");
             }
@@ -1847,6 +1858,20 @@ process_client_contract_pressure = function() {
         if (_a.promised_work_by_day > 0) _risk -= 8;
         if (_a.contract_days_remaining <= 5) _risk += 8;
         if (_a.contract_days_remaining <= 0) _risk += 15;
+        if (_a.idle_days >= 5) {
+            change_adventurer_morale(_a.id, -1, "idle for too many days");
+            _risk += 5;
+        }
+
+        if (_a.idle_days >= 10) {
+            change_adventurer_morale(_a.id, -2, "extremely idle");
+            _risk += 10;
+        }
+
+        if (_a.contract_days_remaining <= 0 && _a.idle_days >= 3) {
+            change_adventurer_morale(_a.id, -1, "contract expired and idle");
+            _risk += 5;
+        }
         _a.defection_risk = clamp(_risk, 0, 100);
 
         if (_a.defection_risk >= 45 && !_a.departure_warning) {

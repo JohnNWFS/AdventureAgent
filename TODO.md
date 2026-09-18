@@ -41,7 +41,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Expand idle-time complaints into escalating client pressure
 - [x] Add "poachable star" behavior for famous or powerful clients
 - [x] Add rival offers from lords, towers, temples, mercenary bands, and trade houses
-- [ ] Add burnout from overuse and resentment from repeated benching
+- [x] Add burnout from overuse and resentment from repeated benching
 - [x] Add departure warnings before a client leaves
 
 ## 3. Equipment, Kit, and Magic Inventory
