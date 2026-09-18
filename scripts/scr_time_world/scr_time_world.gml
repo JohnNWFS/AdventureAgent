@@ -662,6 +662,7 @@ function process_hour_tick() {
     state.absolute_hour += 1;
     update_clock_from_absolute();
     expire_contracts();
+    process_city_transfers();
     // Check for adventurer injury status transitions
     for (var i = 0; i < array_length(state.adventurers); i++) {
         var _a = state.adventurers[i];
@@ -1259,6 +1260,7 @@ function normalize_contracts() {
         state.contracts[i] = {
             id: i,
             title: _title,
+            city_id: variable_struct_exists(_c, "city_id") ? _c.city_id : home_city_id(),
             patron_id: variable_struct_exists(_c, "patron_id") ? _c.patron_id : -1,
             unlocked: variable_struct_exists(_c, "unlocked") ? _c.unlocked : true,
             accepted: variable_struct_exists(_c, "accepted") ? _c.accepted : false,
@@ -1268,7 +1270,7 @@ function normalize_contracts() {
             mission: {
                 id: i,
                 title: _title,
-                type: "contract",
+                type: "Security",
                 difficulty: variable_struct_exists(_c, "difficulty") ? clamp(_c.difficulty, 10, 85) : 40,
                 reward: variable_struct_exists(_c, "reward") ? _c.reward : 100,
                 duration_hours: 24,
@@ -1281,4 +1283,5 @@ function normalize_contracts() {
             }
         };
     }
+    ensure_city_fields();
 }

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_cities",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_cities",
+  "parent":{
+    "name":"AdventureAgent",
+    "path":"AdventureAgent.yyp",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

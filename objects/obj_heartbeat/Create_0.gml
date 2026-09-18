@@ -3119,6 +3119,7 @@ toggle_party = function(_id) {
         }
         array_push(state.selected_party_ids, _id);
         add_log(_adv.name + " added to party.");
+        city_note_party_member(_adv);
     }
 };
 
@@ -3336,6 +3337,7 @@ resolve_active_mission = function(_active) {
         }
     }
 
+    city_stage_party(_active);
     for (var p = 0; p < array_length(_active.party_ids); p++) {
         var _ret_id = _active.party_ids[p];
         var _ret_idx = get_adv_index(_ret_id);
@@ -3568,6 +3570,8 @@ resolve_active_mission = function(_active) {
     if (_can_open) {
         open_next_report();
     }
+    // Only an injured adventurer has an injury tier to move; _inj_idx exists only after an injury.
+    if (!_result.injury_happened || _inj_idx < 0) return;
     if (variable_struct_exists(state.adventurers[_inj_idx], "injury_tier")) {
         var _tier = state.adventurers[_inj_idx].injury_tier;
         if (_tier == "minor") {
@@ -3615,6 +3619,14 @@ start_mission = function() {
     var _mission = state.missions[state.selected_mission_index];
     var _one_way = max(1, _mission.duration_hours + irandom_range(-2, 2));
     var _round_trip = _one_way * 2;
+    // Party members based in another city travel to the job and pay road and lodging costs.
+    var _trip = city_mission_trip(_mission, _party, _round_trip);
+    if (_trip.cost > state.gold) {
+        add_log("Travel and lodging for this party cost " + string(_trip.cost) + "g; the agency cannot cover it.");
+        return;
+    }
+    _one_way += _trip.hours;
+    _round_trip += _trip.hours;
 
     var _party_ids = [];
     for (var i = 0; i < array_length(_party); i++) {
@@ -3686,6 +3698,7 @@ start_mission = function() {
     };
 
     array_push(state.active_missions, _assignment);
+    if (_trip.cost > 0) spend_gold(_trip.cost, "Road and lodging for the party to " + city_name(_trip.city_id) + ".");
 
     if (_mission.contract_index >= 0 && _mission.contract_index < array_length(state.contracts)) {
         state.contracts[_mission.contract_index].accepted = true;
@@ -4311,7 +4324,7 @@ process_command = function(_raw) {
 
     switch (_cmd) {
         case "HELP":
-            add_log("Commands: HELP, CARDS, MARKET, TARGET <n>, BONUS <g>, RATE <g>, COMM <pct>, OFFER, ACCEPTCOUNTER, DECLINECOUNTER, PATRONS, PATRON <n>, MISSIONS, ADVENTURERS, START, NEXTDAY, MISSION <n>, PARTY <n>, CASINO, WAGER <g>, GAME <CRAPS|WHEEL|DRAGON21>, ROLL, SPIN, DEAL, HIT, STAND, RESEARCH, RECRUIT, SCOUT, COUNTER, SIMULATE, DICE, MODE <name>");
+            add_log("Commands: HELP, CARDS, MARKET, TARGET <n>, BONUS <g>, RATE <g>, COMM <pct>, OFFER, ACCEPTCOUNTER, DECLINECOUNTER, PATRONS, PATRON <n>, MISSIONS, ADVENTURERS, START, NEXTDAY, MISSION <n>, PARTY <n>, CITIES, TRANSFER <n> <city>, CASINO, WAGER <g>, GAME <CRAPS|WHEEL|DRAGON21>, ROLL, SPIN, DEAL, HIT, STAND, RESEARCH, RECRUIT, SCOUT, COUNTER, SIMULATE, DICE, MODE <name>");
             add_log("New patron type: Temple of the Sacred Flame; Oath-based contract; Sacred service");
         break;
 
@@ -4325,6 +4338,15 @@ process_command = function(_raw) {
 
         case "PATRONS":
             open_contracting_patron_list();
+        break;
+
+        case "CITIES":
+            print_cities();
+        break;
+
+        case "TRANSFER":
+            if (array_length(_parts) > 2) start_city_transfer(real("0" + string_digits(_parts[1])) - 1, real("0" + string_digits(_parts[2])), array_length(_parts) > 3 && _parts[3] == "PAY");
+            else add_log("Usage: TRANSFER <adventurer 1-" + string(array_length(state.adventurers)) + "> <city number from CITIES> [PAY]");
         break;
 
         case "MARKET":
@@ -4519,6 +4541,7 @@ state.adventurers = init_adventurers();
 var _mission_templates = init_missions();
 state.patrons = init_patrons();
 state.contracts = init_contracts(state.patrons, _mission_templates);
+ensure_city_fields();
 for (var fa_seed = 0; fa_seed < 5; fa_seed++) {
     array_push(state.free_agents, build_market_candidate());
 }

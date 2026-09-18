@@ -98,6 +98,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Costly magical restoration
 - [ ] Rest and rehab
 - [x] Add long-term scars, stat penalties, or early retirement risks
+- [ ] Fix double escalation: resolve_active_mission raises the injury tier twice for one injury (once in the injury block, again after the report); keep one
 
 ## 7. Rival Agencies with Distinct Identities
 - [x] Add named rival agencies with strategy profiles
@@ -122,7 +123,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Add graduation into represented clients
 
 ## 10. Regional and Seasonal World Structure
-- [ ] Add regions with different danger, patron, and gear profiles
+- [ ] Add regions with different danger, patron, and gear profiles (a region is the country around a city in scr_cities; use its danger and patron_wealth)
 - [ ] Add seasonal content gates:
 - [x] Winter pass escorts
 - [x] Spring goblin raids
@@ -191,6 +192,39 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Injury rate by mission type
 - [x] Tune economy, morale decay, and rival pressure with data
 
+## 18. Cities and Career Expansion
+Foundation: scripts/scr_cities (state.cities, city_id on adventurers/patrons/contracts, travel,
+transfers, expedition costs, CITIES and TRANSFER commands). Build on its helpers
+(mark_city_known, add_city_contract, add_city_patron, start_city_transfer, adventurer_city_id,
+contract_city_id, city_name); never hand-build city, contract, or patron structs.
+- [x] City data: home city plus three rumored cities with theme, prestige requirement, travel days and cost, lodging, patron wealth, and danger
+- [x] Every adventurer, patron, and contract carries a city_id (defaults to the home city)
+- [x] Transfers between cities with travel time and road cost (TRANSFER <n> <city>)
+- [x] Relocation willingness from morale, trust, ambition, and annoyance; reluctant clients need a relocation purse (TRANSFER <n> <city> PAY)
+- [x] Expeditions: party members based elsewhere pay road and lodging, travel time is added, and they stay staged in the contract city afterwards
+- [x] CITIES command lists known cities, their costs, and who is based where
+- [ ] Stage 1 - Rumors:
+- [ ] Correspondence and field reports mention other cities; call mark_city_known the first time each is heard of
+- [ ] Patron gossip about other cities during patron research and contract review
+- [ ] Rival news from other cities (a rival agency expands there, a city event changes its demand)
+- [ ] Bardic and herald notices carry the agency's fame to known cities
+- [ ] Stage 2 - Expeditions:
+- [ ] Known cities send contracts once agency reputation reaches the city's prestige_required (use add_city_contract)
+- [ ] Each city's contracts follow its theme (frontier hazard work, canal trade escorts, temple archive recoveries)
+- [ ] City danger raises mission risk and injury chance for missions in that city
+- [ ] Post-mission choice for an away party: stay staged in that city or travel home (start_city_transfer)
+- [ ] Stage 3 - Outposts:
+- [ ] Mission board and party selection show which city each contract and adventurer is in
+- [ ] Adventurer cards show where the client is based and any travel in progress
+- [ ] Local patrons for each city (use add_city_patron); new-city patrons start with lower satisfaction and less trust
+- [ ] Morale pressure for clients left far from home too long
+- [ ] Recruit local free agents in the city where your staged clients are
+- [ ] Stage 4 - Branch offices and relocation:
+- [ ] Open a branch office in a known city once prestige allows (setup cost and daily upkeep)
+- [ ] Branch delegation policies instead of duplicate micromanagement
+- [ ] Relocate the agency headquarters (change home_city_id) as a fresh start; clients decide whether to follow
+- [ ] Cities in XML content packs (names, themes, descriptions)
+
 ## Immediate Build Order
 1. Client contracts and relationship depth
 2. Morale / usage pressure / defection risk
@@ -198,3 +232,4 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 4. Party chemistry and personality synergy
 5. Patron depth and patron-side negotiation
 6. XML content pack scaffold and first externalized flavor pools
+7. Cities stage 1 (rumors), then stages 2-4 in order
