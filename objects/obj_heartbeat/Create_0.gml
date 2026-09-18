@@ -2322,6 +2322,25 @@ unlock_patron_contracts = function(_patron_index) {
 
     if (!_unlocked_any) {
         add_log("No new contracts from this patron right now.");
+        // Add fame-based patron benefits
+        if (variable_struct_exists(state, "reputation")) {
+            var _fame = state.reputation;
+            add_log("Fame level: " + string(_fame));
+
+            // Apply reputation-based contract quality
+            if (_fame >= 50) {
+                _patron.pay_profile = "prestigious";
+                _patron.satisfaction = min(100, _patron.satisfaction + 5);
+                _patron.flexible_staffing_allowed = true;
+                add_log("Prestige patron requests: " + _patron.name + " now offers higher-quality contracts.");
+            } else if (_fame >= 30) {
+                _patron.pay_profile = "established";
+                _patron.satisfaction = min(100, _patron.satisfaction + 2);
+                add_log("Established patron requests: " + _patron.name + " now offers better rewards.");
+            } else {
+                _patron.pay_profile = "standard";
+            }
+        }
     }
 
     _patron.contracts_seen = max(_patron.contracts_seen, count_patron_seen_contracts(_patron_index));

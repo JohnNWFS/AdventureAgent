@@ -112,7 +112,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 ## 8. Fame, Prestige, and Marketability
 - [ ] Add client fame and agency brand prestige
 - [ ] Add bardic rumor / tavern song / herald notice events
-- [ ] Add fame-driven patron offers and increased client demands
+- [x] Add fame-driven patron offers and increased client demands
 - [ ] Add endorsements, sponsorships, and ceremonial invitations
 
 ## 9. Apprentice and Academy Pipeline
