@@ -3509,6 +3509,17 @@ resolve_active_mission = function(_active) {
     ];
 
     add_log("Mission team returned: " + _mission.title + ". Report delivered to desk.");
+    // Patron reaction consequences after debrief
+    var _patron = state.patrons[_active.contract_index];
+    if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "temple") {
+        // Improve patron relationship based on debrief choice
+        if (variable_struct_exists(_result, "debrief_choice") && _result.debrief_choice == "Share victory celebration with team (+2 morale, +1 trust)") {
+            _patron.satisfaction = clamp(_patron.satisfaction + 5, 0, 100);
+            _patron.future_work_opportunities = variable_struct_exists(_patron, "future_work_opportunities") ? _patron.future_work_opportunities + 1 : 2;
+            _patron.relationship_improvement = variable_struct_exists(_patron, "relationship_improvement") ? _patron.relationship_improvement + 1 : 1;
+            add_log("Patron relationship improved: Lady Merrow Vale now offers more contracts and higher satisfaction.");
+        }
+    }
     _result.debrief_choices_available = true;
     _result.debrief_options = [
         {
