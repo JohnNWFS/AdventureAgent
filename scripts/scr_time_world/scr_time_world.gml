@@ -808,6 +808,60 @@ function end_day() {
 
     state.debug_mission_scoring = true;
     state.debug_negotiation_scoring = true;
+    // Add reputation tracking
+    if (!variable_struct_exists(state, "reputation")) {
+        state.reputation = 0;
+    }
+
+    // Update patron pay profiles based on reputation
+    for (var i = 0; i < array_length(state.patrons); i++) {
+        var _patron = state.patrons[i];
+
+        // Set patron to prestigious profile based on reputation
+        if (state.reputation >= 50 && !variable_struct_exists(_patron, "pay_profile")) {
+            _patron.pay_profile = "prestigious";
+        }
+
+        // Allow flexible staffing for prestigious patrons
+        if (state.reputation >= 50 && !variable_struct_exists(_patron, "flexible_staffing_allowed")) {
+            _patron.flexible_staffing_allowed = true;
+        }
+
+        // Adjust patron satisfaction based on reputation
+        if (state.reputation >= 50) {
+            _patron.satisfaction = clamp(_patron.satisfaction + 5, 0, 100);
+        }
+    }
+
+    // Print reputation summary
+    add_log("Agency reputation: " + string(state.reputation));
+    add_log("Fame level: " + string(state.reputation));
+
+    // Check for prestige patron events
+    var _prestige_patrons = [];
+    for (var p = 0; p < array_length(state.patrons); p++) {
+        var _patron = state.patrons[p];
+        if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "temple") {
+            array_push(_prestige_patrons, p);
+        }
+    }
+
+    if (array_length(_prestige_patrons) > 0 && state.reputation >= 50) {
+        var _patron_pick = _prestige_patrons[irandom(array_length(_prestige_patrons) - 1)];
+        var _patron = state.patrons[_patron_pick];
+
+        // Set patron to prestigious profile
+        if (!variable_struct_exists(_patron, "pay_profile")) {
+            _patron.pay_profile = "prestigious";
+        }
+
+        // Allow flexible staffing for prestigious patrons
+        if (!variable_struct_exists(_patron, "flexible_staffing_allowed")) {
+            _patron.flexible_staffing_allowed = true;
+        }
+
+        add_log("Prestige patron requests: Lady Merrow Vale now offers higher-quality contracts.");
+    }
     // Patron satisfaction summary
     var _favored = 0, _warm = 0, _neutral = 0, _strained = 0, _hostile = 0;
     for (var i = 0; i < array_length(state.patrons); i++) {
