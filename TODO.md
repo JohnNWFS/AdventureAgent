@@ -91,7 +91,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Minor
 - [ ] Serious
 - [x] Lingering
-- [ ] Cursed
+- [x] Cursed
 - [ ] Add treatment options:
 - [ ] Temple healing
 - [ ] Herbal care

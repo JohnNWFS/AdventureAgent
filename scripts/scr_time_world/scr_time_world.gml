@@ -548,8 +548,9 @@ function process_hour_tick() {
                     _a.injury_days = irandom_range(2, 3);
                     add_log("Injury tier: lingering");
                 } else if (_a.status == "lingering") {
-                    _a.status = "available";
-                    add_log("Injury tier: recovered");
+                    _a.status = "cursed";
+                    _a.cursed_days = 3;
+                    add_log("Injury tier: cursed");
                 }
             }
         }
