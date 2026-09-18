@@ -3520,6 +3520,31 @@ resolve_active_mission = function(_active) {
     if (_can_open) {
         open_next_report();
     }
+    if (variable_struct_exists(state.adventurers[_inj_idx], "injury_tier")) {
+        var _tier = state.adventurers[_inj_idx].injury_tier;
+        if (_tier == "minor") {
+            state.adventurers[_inj_idx].injury_tier = "moderate";
+            add_log("Injury tier: moderate");
+        } else if (_tier == "moderate") {
+            state.adventurers[_inj_idx].injury_tier = "serious";
+            add_log("Injury tier: serious");
+            // Apply stat penalty for serious injuries
+            state.adventurers[_inj_idx].combat -= 1;
+            add_log("Stat penalty: combat -1");
+        } else if (_tier == "serious") {
+            state.adventurers[_inj_idx].injury_tier = "severe";
+            add_log("Injury tier: severe");
+        } else if (_tier == "severe") {
+            state.adventurers[_inj_idx].injury_tier = "cursed";
+            add_log("Injury tier: cursed");
+            // Apply stat penalty for cursed injuries
+            state.adventurers[_inj_idx].combat -= 1;
+            add_log("Stat penalty: combat -1");
+        }
+    } else {
+        state.adventurers[_inj_idx].injury_tier = "minor";
+        add_log("Injury tier: minor");
+    }
 };
 
 start_mission = function() {

@@ -89,7 +89,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 ## 6. Injury, Recovery, and Care
 - [ ] Add injury tiers:
 - [x] Minor
-- [ ] Serious
+- [x] Serious
 - [x] Lingering
 - [x] Cursed
 - [ ] Add treatment options:
