@@ -470,6 +470,42 @@ function process_world_pulse() {
     if (array_length(_grim_mercenary_patrons) > 0) {
         add_log("Grim Mercenary patron appears");
     }
+    // Add herbal care treatment option
+    if (!variable_struct_exists(state, "herbal_care_available")) {
+        state.herbal_care_available = true;
+        add_log("Herbal care available");
+    }
+
+    // Apply herbal care to injured adventurers
+    if (state.herbal_care_available) {
+        for (var i = 0; i < array_length(state.adventurers); i++) {
+            var _adv = state.adventurers[i];
+            if (variable_struct_exists(_adv, "injury_days") && _adv.injury_days > 0) {
+                // Check if temple patron is available for healing
+                for (var p = 0; p < array_length(state.patrons); p++) {
+                    var _patron = state.patrons[p];
+                    if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "temple" && variable_struct_exists(_patron, "temple_healing_available") && _patron.temple_healing_available) {
+                        // Apply herbal care treatment
+                        _adv.injury_days = 0;
+                        _adv.status = "available";
+                        add_log("Injury treatment: Herbal remedies");
+
+                        // Update telemetry
+                        if (!variable_struct_exists(state, "injury_telemetry")) {
+                            state.injury_telemetry = {
+                                security: { total: 0, injured: 0 },
+                                recovery: { total: 0, injured: 0 },
+                                diplomatic: { total: 0, injured: 0 },
+                                herbal_care_treatments: 0
+                            };
+                        }
+                        state.injury_telemetry.herbal_care_treatments += 1;
+                        break;
+                    }
+                }
+            }
+        }
+    }
 }
 
 function process_rival_offer() {
