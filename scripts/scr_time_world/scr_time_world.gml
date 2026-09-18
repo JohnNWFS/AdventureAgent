@@ -266,6 +266,75 @@ function process_rival_offer() {
     }
 
     var _org = _organizations[irandom(array_length(_organizations) - 1)];
+    // Add new rival organizations to the list
+    var _new_organizations = [
+        "Lord Aldric's Tower",
+        "Temple of the Sacred Flame",
+        "Mercenary Band of the Iron Fist",
+        "Trade House of the Silver Merchant",
+        "Arcane Order of the Silver Flame"
+    ];
+
+    // Add elite magical talent as a possible rival specialty
+    var _elite_magical_talent = false;
+    var _arcane_patrons = [];
+    for (var p = 0; p < array_length(state.patrons); p++) {
+        var _patron = state.patrons[p];
+        if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "arcane_college") {
+            array_push(_arcane_patrons, p);
+        }
+    }
+    if (array_length(_arcane_patrons) > 0) {
+        _elite_magical_talent = true;
+    }
+
+    // If we have elite magical talent, add the Arcane Order
+    if (_elite_magical_talent) {
+        array_push(_organizations, "Arcane Order of the Silver Flame");
+    }
+
+    // Add the new organizations to the list
+    for (var i = 0; i < array_length(_new_organizations); i++) {
+        array_push(_organizations, _new_organizations[i]);
+    }
+
+    // Select a rival organization from the updated list
+    _org = _organizations[irandom(array_length(_organizations) - 1)];
+
+    // Check if the selected organization has elite magical talent
+    _has_elite_magical_talent = false;
+    if (_org == "Arcane Order of the Silver Flame") {
+        _has_elite_magical_talent = true;
+    }
+
+    // Add log message for elite magical talent
+    if (_has_elite_magical_talent) {
+        add_log("Rival agency: Arcane Order of the Silver Flame");
+        state.rival_activity = "Rival agents were seen at the arcane district.";
+    }
+
+    // Add log message for Lord Aldric's Tower
+    if (_org == "Lord Aldric's Tower") {
+        add_log("Rival agency: Lord Aldric's Tower");
+    }
+
+    // Add log message for Temple of the Sacred Flame
+    if (_org == "Temple of the Sacred Flame") {
+        add_log("Rival offer from Temple of the Sacred Flame");
+    }
+
+    // Add log message for Mercenary Band of the Iron Fist
+    if (_org == "Mercenary Band of the Iron Fist") {
+        add_log("Rival agency: Mercenary Band of the Iron Fist");
+    }
+
+    // Add log message for Trade House of the Silver Merchant
+    if (_org == "Trade House of the Silver Merchant") {
+        add_log("Rival agency: Trade House of the Silver Merchant");
+    }
+
+    // Add log message for the general rival offer
+    add_log("Rival offer from " + _org + "; " + _adventurer.name + " accepted a rival agency offer.");
     // Check if the selected organization has elite magical talent
     var _has_elite_magical_talent = false;
     if (_org == "Arcane Order of the Silver Flame") {

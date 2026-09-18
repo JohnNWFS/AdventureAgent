@@ -40,7 +40,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 ## 2. Morale, Usage Pressure, and Defection Risk
 - [x] Expand idle-time complaints into escalating client pressure
 - [x] Add "poachable star" behavior for famous or powerful clients
-- [ ] Add rival offers from lords, towers, temples, mercenary bands, and trade houses
+- [x] Add rival offers from lords, towers, temples, mercenary bands, and trade houses
 - [ ] Add burnout from overuse and resentment from repeated benching
 - [x] Add departure warnings before a client leaves
 
