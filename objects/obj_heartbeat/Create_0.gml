@@ -385,6 +385,7 @@ apply_world_content_xml = function(_text) {
     if (_text == "") return;
 
     var _map = [
+    ["rival_agency", "rival_agencies"],
         ["adventurer_first", "adventurer_first"],
         ["adventurer_last", "adventurer_last"],
         ["patron_title_noble", "patron_titles_noble"],
@@ -426,6 +427,13 @@ load_world_content_xml = function() {
             var _example_txt = read_text_file(_example_path);
             if (_example_txt != "") {
                 apply_world_content_xml(_example_txt);
+                // Load rival agency names from XML
+                var _rival_agency_path = working_directory + "datafiles/rival_agencies.xml";
+                var _rival_agency_txt = read_text_file(_rival_agency_path);
+                if (_rival_agency_txt != "") {
+                    apply_world_content_xml(_rival_agency_txt);
+                    add_log("Rival agencies XML content pack loaded");
+                }
                 add_log("Example XML content pack loaded");
             }
             return;

@@ -160,7 +160,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Outfits
 - [ ] Relics and spell names
 - [ ] Mission flavor text
-- [ ] Rival agency names
+- [x] Rival agency names
 - [ ] Support base world + optional theme packs
 - [ ] Add example packs:
 - [ ] Generic medieval fantasy
