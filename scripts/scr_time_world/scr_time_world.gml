@@ -195,7 +195,7 @@ function process_world_pulse() {
             }
 
             refresh_mission_board();
-            add_log("Patron urgency increased for " + state.contracts[_ci].title + ". Deadline tightened. Urgency premium applied.");
+            add_log("Patron urgency increased for " + state.contracts[_ci].mission.title + ". Deadline tightened. Urgency premium applied.");
         }
     }
     switch (_event_roll) {
@@ -506,6 +506,7 @@ function process_world_pulse() {
             }
         }
     }
+    normalize_contracts();
 }
 
 function process_rival_offer() {
@@ -1241,5 +1242,43 @@ function end_day() {
         add_log("Injury Telemetry: Mission type Security - " + string(_telemetry.security.injured) + "/" + string(_telemetry.security.total) + " injured");
         add_log("Injury Telemetry: Mission type Recovery - " + string(_telemetry.recovery.injured) + "/" + string(_telemetry.recovery.total) + " injured");
         add_log("Injury Telemetry: Mission type Diplomatic - " + string(_telemetry.diplomatic.injured) + "/" + string(_telemetry.diplomatic.total) + " injured");
+    }
+}
+
+// Some world-pulse contracts are pushed as flat {title, reward, risk, ...} records. Every contract reader
+// expects the init_contracts shape (patron_id, ask_text, mission struct), so wrap flat ones in place.
+function normalize_contracts() {
+    for (var i = 0; i < array_length(state.contracts); i++) {
+        var _c = state.contracts[i];
+        if (variable_struct_exists(_c, "mission")) {
+            if (!variable_struct_exists(_c, "title")) _c.title = _c.mission.title;
+            continue;
+        }
+        var _title = variable_struct_exists(_c, "title") ? _c.title : "Open Contract";
+        var _desc = variable_struct_exists(_c, "description") ? _c.description : _title;
+        state.contracts[i] = {
+            id: i,
+            title: _title,
+            patron_id: variable_struct_exists(_c, "patron_id") ? _c.patron_id : -1,
+            unlocked: variable_struct_exists(_c, "unlocked") ? _c.unlocked : true,
+            accepted: variable_struct_exists(_c, "accepted") ? _c.accepted : false,
+            expired: variable_struct_exists(_c, "expired") ? _c.expired : false,
+            expires_hour: variable_struct_exists(_c, "expires_hour") ? _c.expires_hour : state.absolute_hour + 48,
+            ask_text: _desc,
+            mission: {
+                id: i,
+                title: _title,
+                type: "contract",
+                difficulty: variable_struct_exists(_c, "difficulty") ? clamp(_c.difficulty, 10, 85) : 40,
+                reward: variable_struct_exists(_c, "reward") ? _c.reward : 100,
+                duration_hours: 24,
+                risk: variable_struct_exists(_c, "risk") ? clamp(_c.risk, 10, 85) : 30,
+                preferred_role: "Warrior",
+                weights: { combat: 0.40, magic: 0.20, stealth: 0.20, diplomacy: 0.20 },
+                description: _desc,
+                patron_name: "Open market",
+                patron_max_party: 3
+            }
+        };
     }
 }

@@ -1446,6 +1446,8 @@ record_patron_job_result = function(_contract_index, _result, _gross_patron_pay)
         _patron.job_history = [];
     }
 
+    if (!variable_struct_exists(_result, "late_delivery")) _result.late_delivery = false;
+
     var _job_result = {
         outcome: _result.outcome,
         late_delivery: _result.late_delivery || false
@@ -1961,6 +1963,7 @@ apply_client_profile_from_negotiation_style = function(_a) {
 };
 
 refresh_mission_board = function() {
+    normalize_contracts();
     state.missions = [];
 
     for (var i = 0; i < array_length(state.contracts); i++) {
@@ -2516,6 +2519,7 @@ unlock_patron_contracts = function(_patron_index) {
 };
 
 expire_contracts = function() {
+    normalize_contracts();
     var _changed = false;
 
     for (var i = 0; i < array_length(state.contracts); i++) {
