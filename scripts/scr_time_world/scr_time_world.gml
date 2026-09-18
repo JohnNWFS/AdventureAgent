@@ -121,6 +121,35 @@ function process_world_pulse() {
         seasonal: true
     };
     array_push(state.contracts, _ruin_delve_mission);
+    // Autumn harvest protection mission
+    if (state.season == "Autumn" && irandom(99) < 20) {
+        var _already_exists = false;
+        for (var i = 0; i < array_length(state.contracts); i++) {
+            if (state.contracts[i].title == "Harvest Protection") {
+                _already_exists = true;
+                break;
+            }
+        }
+        if (!_already_exists) {
+            var _harvest_contract = {
+                title: "Harvest Protection",
+                description: "Farmers seek protection from raiders.",
+                difficulty: 15,
+                reward: 180,
+                risk: 30,
+                location: "Eastern Farms",
+                expires_hour: state.absolute_hour + 48,
+                unlocked: true,
+                accepted: false,
+                expired: false,
+                seasonal: true
+            };
+            array_push(state.contracts, _harvest_contract);
+            add_log("Seasonal content: Harvest Protection");
+            add_log("Farmers seek protection from raiders.");
+            add_log("Harvest protection contracts available.");
+        }
+    }
     add_log("Seasonal content: Dry-Season Ruin Delve");
     add_log("Winter's grip tightens the ruins' hold.");
     add_log("Ruin Delve contracts available.");
