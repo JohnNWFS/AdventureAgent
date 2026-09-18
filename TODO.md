@@ -186,7 +186,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Add debug overlays for mission scoring and negotiation scoring
 - [ ] Add telemetry for:
 - [x] Retention rates
-- [ ] Average client earnings
+- [x] Average client earnings
 - [ ] Patron satisfaction distribution
 - [x] Injury rate by mission type
 - [x] Tune economy, morale decay, and rival pressure with data

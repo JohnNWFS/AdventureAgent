@@ -3279,6 +3279,16 @@ resolve_active_mission = function(_active) {
             state.adventurers[_m_idx].last_mission_payout = _client_take;
             state.adventurers[_m_idx].contract_days_remaining = state.adventurers[_m_idx].contract_term_days;
             add_log(state.adventurers[_m_idx].name + " received " + string(_client_take) + "g and now holds " + string(state.adventurers[_m_idx].purse_gold) + "g.");
+
+            // Update client earnings telemetry
+            if (!variable_struct_exists(state, "client_earnings_telemetry")) {
+                state.client_earnings_telemetry = {
+                    total_earnings: 0,
+                    total_clients: 0
+                };
+            }
+            state.client_earnings_telemetry.total_earnings += _client_take;
+            state.client_earnings_telemetry.total_clients += 1;
         }
     }
 

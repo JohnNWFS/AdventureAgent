@@ -982,6 +982,20 @@ function end_day() {
     // Print reputation summary
     add_log("Agency reputation: " + string(state.reputation));
     add_log("Fame level: " + string(state.reputation));
+    // Initialize client earnings telemetry if not exists
+    if (!variable_struct_exists(state, "client_earnings_telemetry")) {
+        state.client_earnings_telemetry = {
+            total_earnings: 0,
+            total_clients: 0
+        };
+    }
+
+    // Print average client earnings
+    var _avg_earnings = 0;
+    if (state.client_earnings_telemetry.total_clients > 0) {
+        _avg_earnings = floor(state.client_earnings_telemetry.total_earnings / state.client_earnings_telemetry.total_clients);
+    }
+    add_log("Average client earnings: " + string(_avg_earnings) + "g");
     // Apply temple healing to injured adventurers
     for (var i = 0; i < array_length(state.adventurers); i++) {
         var _adv = state.adventurers[i];
