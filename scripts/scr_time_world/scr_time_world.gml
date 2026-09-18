@@ -479,7 +479,7 @@ function process_rival_offer() {
     _org = _organizations[irandom(array_length(_organizations) - 1)];
 
     // Check if the selected organization has elite magical talent
-    _has_elite_magical_talent = false;
+    var _has_elite_magical_talent = false;
     if (_org == "Arcane Order of the Silver Flame") {
         _has_elite_magical_talent = true;
     }

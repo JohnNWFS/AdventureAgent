@@ -100,7 +100,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Add long-term scars, stat penalties, or early retirement risks
 
 ## 7. Rival Agencies with Distinct Identities
-- [ ] Add named rival agencies with strategy profiles
+- [x] Add named rival agencies with strategy profiles
 - [ ] Add rival specialties:
 - [x] Elite magical talent
 - [ ] Noble patronage

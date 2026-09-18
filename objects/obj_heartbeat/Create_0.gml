@@ -430,6 +430,13 @@ load_world_content_xml = function() {
                 add_log("Outfit content pack loaded from XML");
             }
             add_log("World content pack loaded from XML.");
+            // Load rival agencies from XML if available
+            var _rival_agency_path = working_directory + "datafiles/rival_agencies.xml";
+            var _rival_agency_txt = read_text_file(_rival_agency_path);
+            if (_rival_agency_txt != "") {
+                apply_world_content_xml(_rival_agency_txt);
+                add_log("Rival agencies XML content pack loaded");
+            }
             // Load example content pack if available
             var _example_path = working_directory + "datafiles/example_content.xml";
             var _example_txt = read_text_file(_example_path);
