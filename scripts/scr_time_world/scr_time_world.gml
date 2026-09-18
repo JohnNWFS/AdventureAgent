@@ -383,6 +383,35 @@ function process_world_pulse() {
         add_log("World pulse: Rival agencies are aggressively courting elite magical talent.");
     }
     // Add Grim Mercenary patron class
+    // Add Grim Mercenary patron class
+    var _grim_mercenary_patrons = [];
+    for (var p = 0; p < array_length(state.patrons); p++) {
+        var _patron = state.patrons[p];
+        if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "grim_mercenary") {
+            array_push(_grim_mercenary_patrons, p);
+        }
+    }
+
+    if (array_length(_grim_mercenary_patrons) > 0) {
+        add_log("Grim Mercenary patron appears");
+    }
+
+    // Add high-risk contract for Grim Mercenary
+    var _grim_mercenary_contract = {
+        title: "Bandit Camp Assault",
+        description: "Assault a heavily guarded bandit camp in the wilderness.",
+        difficulty: 35,
+        reward: 300,
+        risk: 70,
+        location: "Bandit Camp",
+        expires_hour: state.absolute_hour + 72,
+        unlocked: true,
+        accepted: false,
+        expired: false,
+        seasonal: false
+    };
+    array_push(state.contracts, _grim_mercenary_contract);
+    add_log("High-risk contract: Bandit Camp Assault");
     var _grim_mercenary_patrons = [];
     for (var p = 0; p < array_length(state.patrons); p++) {
         var _patron = state.patrons[p];
