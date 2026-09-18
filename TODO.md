@@ -119,7 +119,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Add low-cost prospects and trainees
 - [x] Add in-house development track for squires, acolytes, hedge apprentices, and wardens-in-training
 - [x] Add training focus areas and growth paths
-- [ ] Add graduation into represented clients
+- [x] Add graduation into represented clients
 
 ## 10. Regional and Seasonal World Structure
 - [ ] Add regions with different danger, patron, and gear profiles
