@@ -438,6 +438,20 @@ load_world_content_xml = function() {
                 add_log("Outfit content pack loaded from XML");
             }
             add_log("World content pack loaded from XML.");
+            // Load relic content pack if available
+            var _relic_path = working_directory + "datafiles/relic_content.xml";
+            var _relic_txt = read_text_file(_relic_path);
+            if (_relic_txt != "") {
+                apply_world_content_xml(_relic_txt);
+                add_log("Relic content pack loaded from XML");
+            }
+            // Load spell name content pack if available
+            var _spell_path = working_directory + "datafiles/spell_content.xml";
+            var _spell_txt = read_text_file(_spell_path);
+            if (_spell_txt != "") {
+                apply_world_content_xml(_spell_txt);
+                add_log("Spell name content pack loaded from XML");
+            }
             // Load rival agencies from XML if available
             var _rival_agency_path = working_directory + "datafiles/rival_agencies.xml";
             var _rival_agency_txt = read_text_file(_rival_agency_path);
