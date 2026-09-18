@@ -95,7 +95,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Add treatment options:
 - [x] Temple healing
 - [ ] Herbal care
-- [ ] Costly magical restoration
+- [x] Costly magical restoration
 - [ ] Rest and rehab
 - [x] Add long-term scars, stat penalties, or early retirement risks
 

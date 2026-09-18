@@ -800,6 +800,21 @@ function run_overnight_maintenance() {
         add_log(string(_lured) + " high-value adventurer(s) became unavailable to rival offers.");
     }
     add_log(state.rival_activity);
+    // Apply temple healing to injured adventurers
+    for (var i = 0; i < array_length(state.adventurers); i++) {
+        var _adv = state.adventurers[i];
+        if (variable_struct_exists(_adv, "injured") && _adv.injured) {
+            for (var p = 0; p < array_length(state.patrons); p++) {
+                var _patron = state.patrons[p];
+                if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "temple" && variable_struct_exists(_patron, "temple_healing_available") && _patron.temple_healing_available) {
+                    _adv.injured = false;
+                    _adv.status = "available";
+                    add_log("Healing service provided by Temple");
+                    break;
+                }
+            }
+        }
+    }
     // Telemetry: Track injury rates by mission type
     if (!variable_struct_exists(state, "injury_telemetry")) {
         state.injury_telemetry = {
