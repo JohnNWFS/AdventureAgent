@@ -143,7 +143,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Quartermasters
 - [ ] Healers
 - [ ] Negotiators
-- [ ] Add office upgrade effects on recruitment, recovery, and patron trust
+- [x] Add office upgrade effects on recruitment, recovery, and patron trust
 
 ## 13. Law, Guild, and Politics
 - [ ] Add guild license systems, dues, and inspections

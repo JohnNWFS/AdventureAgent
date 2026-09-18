@@ -886,6 +886,20 @@ function end_day() {
     }
     add_log("Patron satisfaction summary: Favored: " + string(_favored) + ", Warm: " + string(_warm) + ", Neutral: " + string(_neutral) + ", Strained: " + string(_strained) + ", Hostile: " + string(_hostile) + ".");
     state.status_line = "A new day begins in " + state.season + ", Y" + string(state.year) + ".";
+    // Initialize office upgrade state if not exists
+    if (!variable_struct_exists(state, "office_upgrade_level")) {
+        state.office_upgrade_level = 0;
+        state.recruitment_bonus = 0;
+        state.recovery_bonus = 0;
+        state.patron_trust_bonus = 0;
+    }
+
+    // Apply office upgrade effects
+    state.recruitment_bonus = state.office_upgrade_level * 5;
+    state.recovery_bonus = state.office_upgrade_level * 10;
+    state.patron_trust_bonus = state.office_upgrade_level * 3;
+
+    add_log("Office upgrade: Recruitment bonus " + string(state.recruitment_bonus) + "%, Recovery rate +" + string(state.recovery_bonus) + "%, Patron trust +" + string(state.patron_trust_bonus) + "%");
 
     var _can_open = !is_struct(state.last_result) ||
                     !variable_struct_exists(state.last_result, "acknowledged") ||
