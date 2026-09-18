@@ -39,6 +39,36 @@ function process_world_pulse() {
     state.world_pulse_last_hour = state.absolute_hour;
     // Winter pass escort mission check
     if (state.season == "Winter" && irandom(99) < 10) {
+    // Spring goblin raid contract check
+    if (state.season == "Spring" && irandom(99) < 15) {
+        // Check if contract already exists
+        var _already_exists = false;
+        for (var i = 0; i < array_length(state.contracts); i++) {
+            if (state.contracts[i].title == "Goblin Raids in Spring") {
+                _already_exists = true;
+                break;
+            }
+        }
+        if (!_already_exists) {
+            var _goblin_raid_contract = {
+                title: "Goblin Raids in Spring",
+                description: "Goblin raiders threaten the eastern villages.",
+                difficulty: 20,
+                reward: 120,
+                risk: 25,
+                location: "Eastern Villages",
+                expires_hour: state.absolute_hour + 48,
+                unlocked: true,
+                accepted: false,
+                expired: false,
+                seasonal: true
+            };
+            array_push(state.contracts, _goblin_raid_contract);
+            add_log("Seasonal content: Goblin Raids in Spring");
+            add_log("Goblin raiders threaten the eastern villages.");
+            add_log("Raid contracts available.");
+        }
+    }
     var _ruin_delve_mission = {
         title: "Dry-Season Ruin Delve",
         description: "Explore ancient ruins now exposed by the winter drought.",

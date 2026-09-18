@@ -125,7 +125,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Add regions with different danger, patron, and gear profiles
 - [ ] Add seasonal content gates:
 - [x] Winter pass escorts
-- [ ] Spring goblin raids
+- [x] Spring goblin raids
 - [ ] Harvest protection
 - [x] Dry-season ruin delves
 - [ ] Add regional reputation and travel flavor
