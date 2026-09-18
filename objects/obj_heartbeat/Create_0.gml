@@ -422,6 +422,13 @@ load_world_content_xml = function() {
         var _txt = read_text_file(_paths[i]);
         if (_txt != "") {
             apply_world_content_xml(_txt);
+            // Load outfit content pack if available
+            var _outfit_path = working_directory + "datafiles/outfit_content.xml";
+            var _outfit_txt = read_text_file(_outfit_path);
+            if (_outfit_txt != "") {
+                apply_world_content_xml(_outfit_txt);
+                add_log("Outfit content pack loaded from XML");
+            }
             add_log("World content pack loaded from XML.");
             // Load example content pack if available
             var _example_path = working_directory + "datafiles/example_content.xml";
