@@ -854,6 +854,24 @@ function end_day() {
 
     state.debug_mission_scoring = true;
     state.debug_negotiation_scoring = true;
+    // Bardic rumor event
+    if (irandom(99) < 30) {
+        state.reputation += 5;
+        state.bardic_events_count = variable_struct_exists(state, "bardic_events_count") ? state.bardic_events_count + 1 : 1;
+        add_log("Tavern gossip: Bardic rumor boosts reputation");
+    }
+
+    // Herald notice event
+    if (irandom(99) < 20) {
+        state.market_intelligence = variable_struct_exists(state, "market_intelligence") ? state.market_intelligence + 1 : 1;
+        add_log("Herald notice: Market intelligence revealed");
+    }
+
+    // Tavern song event
+    if (irandom(99) < 25) {
+        state.reputation += 3;
+        add_log("Tavern song: Reputation enhanced by bardic tale");
+    }
     // Add reputation tracking
     if (!variable_struct_exists(state, "reputation")) {
         state.reputation = 0;
