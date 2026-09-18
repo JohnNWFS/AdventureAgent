@@ -66,7 +66,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Add pair and party chemistry modifiers
 - [x] Add personality conflict rules
 - [x] Add shared-history bonuses from prior successful jobs
-- [ ] Add mentor/protege relationships
+- [x] Add mentor/protege relationships
 - [ ] Add role-combo synergy notes in roster and staffing views
 
 ## 5. Patron Depth and Patron Negotiation

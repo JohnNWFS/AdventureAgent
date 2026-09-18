@@ -3363,6 +3363,33 @@ resolve_active_mission = function(_active) {
     var _shared_history_bonus = 0;
     var _compatible_personality = false;
     var _clash_detected = false;
+    var _mentor_protege_pairs = [];
+    var _mentor_protege_bonus = 0;
+
+    // Check for mentor/protege relationships
+    for (var i = 0; i < array_length(_party); i++) {
+        var _mbr1 = _party[i];
+        if (variable_struct_exists(_mbr1, "mentor_id")) {
+            var _mentor_idx = get_adv_index(_mbr1.mentor_id);
+            if (_mentor_idx >= 0) {
+                var _mentor = state.adventurers[_mentor_idx];
+                // Check if mentor is in the party
+                for (var j = 0; j < array_length(_party); j++) {
+                    if (_party[j].id == _mbr1.mentor_id) {
+                        // Found a mentor-protege pair
+                        array_push(_mentor_protege_pairs, [_mbr1.id, _mbr1.mentor_id]);
+                        _mentor_protege_bonus += 3;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    if (_mentor_protege_bonus > 0) {
+        _result.field_score_bonus += _mentor_protege_bonus;
+        add_log("Mentor-protege synergy: +" + string(_mentor_protege_bonus) + " field score");
+    }
 
     if (array_length(_party_job_histories) > 1) {
         // Check for shared history between pairs
