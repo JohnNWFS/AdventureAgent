@@ -268,6 +268,77 @@ function process_world_pulse() {
     }
     // Add elite magical talent as a possible rival specialty
     var _elite_magical_talent = false;
+    // Add prestige patron tracking
+    if (!variable_struct_exists(state, "reputation")) {
+        state.reputation = 0;
+    }
+
+    // Check for prestige patron events
+    var _prestige_patrons = [];
+    for (var p = 0; p < array_length(state.patrons); p++) {
+        var _patron = state.patrons[p];
+        if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "temple") {
+            array_push(_prestige_patrons, p);
+        }
+    }
+
+    if (array_length(_prestige_patrons) > 0) {
+        var _patron_pick = _prestige_patrons[irandom(array_length(_prestige_patrons) - 1)];
+        var _patron = state.patrons[_patron_pick];
+
+        // Increase reputation when prestige events occur
+        state.reputation += 10;
+
+        // Set patron to prestigious profile
+        if (!variable_struct_exists(_patron, "pay_profile")) {
+            _patron.pay_profile = "prestigious";
+        }
+
+        // Allow flexible staffing for prestigious patrons
+        if (!variable_struct_exists(_patron, "flexible_staffing_allowed")) {
+            _patron.flexible_staffing_allowed = true;
+        }
+
+        add_log("Prestige patron requests: Lady Merrow Vale now offers higher-quality contracts.");
+    }
+
+    // Check for sponsorship opportunities
+    if (!variable_struct_exists(state, "sponsorship_opportunities")) {
+        state.sponsorship_opportunities = [];
+    }
+
+    // Add Noble House of the Silver Crown sponsorship opportunity
+    var _sponsorship_exists = false;
+    for (var i = 0; i < array_length(state.sponsorship_opportunities); i++) {
+        if (state.sponsorship_opportunities[i] == "Noble House of the Silver Crown") {
+            _sponsorship_exists = true;
+            break;
+        }
+    }
+
+    if (!_sponsorship_exists) {
+        array_push(state.sponsorship_opportunities, "Noble House of the Silver Crown");
+        add_log("Sponsorship opportunity: Noble House of the Silver Crown offers premium contracts.");
+    }
+
+    // Check for ceremonial invitations
+    if (!variable_struct_exists(state, "ceremonial_invitations")) {
+        state.ceremonial_invitations = [];
+    }
+
+    // Add Guild of the Silver Flame ceremonial invitation
+    var _ceremony_exists = false;
+    for (var i = 0; i < array_length(state.ceremonial_invitations); i++) {
+        if (state.ceremonial_invitations[i] == "Guild of the Silver Flame") {
+            _ceremony_exists = true;
+            break;
+        }
+    }
+
+    if (!_ceremony_exists) {
+        array_push(state.ceremonial_invitations, "Guild of the Silver Flame");
+        add_log("Ceremonial invitation: Guild of the Silver Flame requests special service.");
+    }
     var _arcane_patrons = [];
     for (var p = 0; p < array_length(state.patrons); p++) {
         var _patron = state.patrons[p];
