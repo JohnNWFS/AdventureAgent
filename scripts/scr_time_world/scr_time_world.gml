@@ -171,6 +171,22 @@ function process_world_pulse() {
             }
         break;
     }
+    // Add elite magical talent as a possible rival specialty
+    var _elite_magical_talent = false;
+    var _arcane_patrons = [];
+    for (var p = 0; p < array_length(state.patrons); p++) {
+        var _patron = state.patrons[p];
+        if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "arcane_college") {
+            array_push(_arcane_patrons, p);
+        }
+    }
+    if (array_length(_arcane_patrons) > 0) {
+        _elite_magical_talent = true;
+    }
+
+    if (_elite_magical_talent && irandom(99) < 25) {
+        add_log("World pulse: Rival agencies are aggressively courting elite magical talent.");
+    }
 }
 
 function process_rival_offer() {
@@ -220,6 +236,16 @@ function process_rival_offer() {
     }
 
     var _org = _organizations[irandom(array_length(_organizations) - 1)];
+    // Check if the selected organization has elite magical talent
+    var _has_elite_magical_talent = false;
+    if (_org == "Arcane Order of the Silver Flame") {
+        _has_elite_magical_talent = true;
+    }
+
+    if (_has_elite_magical_talent) {
+        add_log("Rival agency: Arcane Order of the Silver Flame");
+        state.rival_activity = "Rival agents were seen at the arcane district.";
+    }
 
     add_log("Rival offer from " + _org + "; " + _adventurer.name + " accepted a rival agency offer.");
 
