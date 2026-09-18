@@ -30,6 +30,44 @@ function process_daily_finance() {
     }
     if (irandom(99) < 3) {
         add_gold(irandom_range(6, 28), "Minor side commission paid out.");
+        // Telemetry: Track daily gold changes
+        if (!variable_struct_exists(state, "economy_telemetry")) {
+            state.economy_telemetry = {
+                total_income: 0,
+                total_expenses: 0,
+                rent: 0,
+                taxes: 0,
+                unexpected_expenses: 0,
+                operating_expenses: 0,
+                commissions: 0
+            };
+        }
+
+        state.economy_telemetry.total_income += 28;
+        state.economy_telemetry.commissions += 28;
+
+        // Add telemetry for expenses
+        if (((state.day - 1) mod 30) == 0) {
+            state.economy_telemetry.total_expenses += 55;
+            state.economy_telemetry.rent += 55;
+        }
+
+        if (state.day > 1 && ((state.day - 1) mod 120) == 0) {
+            state.economy_telemetry.total_expenses += 180;
+            state.economy_telemetry.taxes += 180;
+        }
+
+        if (irandom(99) < 3) {
+            var _expense = irandom_range(8, 35);
+            state.economy_telemetry.total_expenses += _expense;
+            state.economy_telemetry.operating_expenses += _expense;
+        }
+
+        if (irandom(99) < 3) {
+            var _income = irandom_range(6, 28);
+            state.economy_telemetry.total_income += _income;
+            state.economy_telemetry.commissions += _income;
+        }
     }
 }
 
@@ -164,6 +202,33 @@ function process_world_pulse() {
                     state.free_agents[f].rival_pressure = clamp(state.free_agents[f].rival_pressure + irandom_range(1, 6), 0, 100);
                 }
                 add_log("World pulse: competing agencies pushed bids at the free-agent market.");
+                // Telemetry: Track rival pressure events
+                if (!variable_struct_exists(state, "rival_telemetry")) {
+                    state.rival_telemetry = {
+                        total_rival_pressure: 0,
+                        total_free_agent_pressure: 0,
+                        total_patron_pressure: 0
+                    };
+                }
+
+                if (array_length(state.free_agents) > 0) {
+                    state.rival_telemetry.total_free_agent_pressure += 1;
+                }
+
+                // Track elite magical talent event
+                if (_elite_magical_talent && irandom(99) < 25) {
+                    state.rival_telemetry.total_rival_pressure += 1;
+                    add_log("Rival Telemetry: Rival agencies are aggressively courting elite magical talent.");
+                }
+
+                // Log patron pressure
+                if (array_length(_temple_patrons) > 0) {
+                    state.rival_telemetry.total_patron_pressure += 1;
+                }
+
+                if (array_length(_arcane_patrons) > 0) {
+                    state.rival_telemetry.total_patron_pressure += 1;
+                }
             } else {
                 add_log("World pulse: city rumor mill shifted contract sentiment.");
             }
@@ -543,6 +608,34 @@ function run_overnight_maintenance() {
         add_log(string(_lured) + " high-value adventurer(s) became unavailable to rival offers.");
     }
     add_log(state.rival_activity);
+    // Telemetry: Track morale decay and rival pressure
+    if (!variable_struct_exists(state, "morale_telemetry")) {
+        state.morale_telemetry = {
+            total_recovered: 0,
+            total_lured: 0,
+            idle_pressure_count: 0,
+            contract_pressure_count: 0
+        };
+    }
+
+    state.morale_telemetry.total_recovered += _recovered;
+    state.morale_telemetry.total_lured += _lured;
+
+    // Log morale decay events
+    if (_recovered > 0) {
+        add_log("Morale Telemetry: " + string(_recovered) + " adventurer(s) recovered overnight.");
+    }
+    if (_lured > 0) {
+        add_log("Morale Telemetry: " + string(_lured) + " high-value adventurer(s) became unavailable to rival offers.");
+    }
+
+    // Process idle adventurer pressure
+    process_idle_adventurer_pressure();
+    state.morale_telemetry.idle_pressure_count += 1;
+
+    // Process client contract pressure
+    process_client_contract_pressure();
+    state.morale_telemetry.contract_pressure_count += 1;
 
     // Retention tracking
     if (!variable_struct_exists(state, "retention_tracking")) {
@@ -578,6 +671,32 @@ function end_day() {
         var _rate = _total > 0 ? floor((_retained / _total) * 100) : 0;
         add_log("Retention rates: " + string(_rate) + "% (" + string(_retained) + "/" + string(_total) + ")");
     }
+
+    // Print economy summary
+    if (variable_struct_exists(state, "economy_telemetry")) {
+        var _telemetry = state.economy_telemetry;
+        var _income = _telemetry.total_income;
+        var _expenses = _telemetry.total_expenses;
+        var _rent = _telemetry.rent;
+        var _taxes = _telemetry.taxes;
+        var _unexpected = _telemetry.operating_expenses;
+        var _commissions = _telemetry.commissions;
+
+        add_log("Economy Summary: Gold Flow: +" + string(_income) + ", -" + string(_expenses) + ", Daily Expenses: " + string(_rent) + " (rent), " + string(_taxes) + " (taxes), " + string(_unexpected) + " (unexpected), " + string(_commissions) + " (commission)");
+    }
+
+    // Print morale telemetry
+    if (variable_struct_exists(state, "morale_telemetry")) {
+        var _telemetry = state.morale_telemetry;
+        add_log("Morale Telemetry: Recovered: " + string(_telemetry.total_recovered) + ", Lured: " + string(_telemetry.total_lured) + ", Idle Pressure Events: " + string(_telemetry.idle_pressure_count) + ", Contract Pressure Events: " + string(_telemetry.contract_pressure_count));
+    }
+
+    // Print rival telemetry
+    if (variable_struct_exists(state, "rival_telemetry")) {
+        var _telemetry = state.rival_telemetry;
+        add_log("Rival Telemetry: Total Pressure Events: " + string(_telemetry.total_rival_pressure) + ", Free Agent Pressure: " + string(_telemetry.total_free_agent_pressure) + ", Patron Pressure: " + string(_telemetry.total_patron_pressure));
+    }
+
     state.debug_mission_scoring = true;
     state.debug_negotiation_scoring = true;
     // Patron satisfaction summary

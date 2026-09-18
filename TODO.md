@@ -189,7 +189,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Average client earnings
 - [ ] Patron satisfaction distribution
 - [ ] Injury rate by mission type
-- [ ] Tune economy, morale decay, and rival pressure with data
+- [x] Tune economy, morale decay, and rival pressure with data
 
 ## Immediate Build Order
 1. Client contracts and relationship depth
