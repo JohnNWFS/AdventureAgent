@@ -79,7 +79,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Staffing cap flexibility
 - [ ] Add patron memory of prior wins, failures, and late deliveries
 - [ ] Expand patron classes:
-- [ ] Abbots
+- [x] Abbots
 - [ ] Castellans
 - [ ] Guild factors
 - [ ] Harbor masters
