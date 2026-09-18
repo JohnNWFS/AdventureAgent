@@ -132,7 +132,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 
 ## 11. Expanded Adventure Debriefs and Post-Contract Fallout
 - [x] Add post-mission debrief choices
-- [ ] Add defend-team / blame-conditions / accept-loss / dispute-outcome branches
+- [x] Add defend-team / blame-conditions / accept-loss / dispute-outcome branches
 - [ ] Add patron reaction consequences after debriefs
 - [ ] Add client reaction consequences after debriefs
 

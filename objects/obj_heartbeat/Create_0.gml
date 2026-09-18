@@ -3193,6 +3193,41 @@ resolve_active_mission = function(_active) {
     ];
 
     add_log("Mission team returned: " + _mission.title + ". Report delivered to desk.");
+    _result.debrief_choices_available = true;
+    _result.debrief_options = [
+        {
+            text: "Share victory celebration with team (+2 morale, +1 trust)",
+            effect: function(_adv_id) {
+                change_adventurer_morale(_adv_id, 2, "debrief celebration");
+                change_adventurer_trust(_adv_id, 1, "debrief celebration");
+                add_log("Debrief options available: Share victory celebration with team (+2 morale, +1 trust)");
+            }
+        },
+        {
+            text: "Defend team from blame (lose 1 trust, gain 1 morale)",
+            effect: function(_adv_id) {
+                change_adventurer_morale(_adv_id, 1, "debrief blame defense");
+                change_adventurer_trust(_adv_id, -1, "debrief blame defense");
+                add_log("Debrief options available: Defend team from blame (lose 1 trust, gain 1 morale)");
+            }
+        },
+        {
+            text: "Accept loss gracefully (lose 2 morale, gain 1 trust)",
+            effect: function(_adv_id) {
+                change_adventurer_morale(_adv_id, -2, "debrief loss acceptance");
+                change_adventurer_trust(_adv_id, 1, "debrief loss acceptance");
+                add_log("Debrief options available: Accept loss gracefully (lose 2 morale, gain 1 trust)");
+            }
+        },
+        {
+            text: "Dispute outcome (lose 2 trust, gain 1 morale)",
+            effect: function(_adv_id) {
+                change_adventurer_morale(_adv_id, 1, "debrief outcome dispute");
+                change_adventurer_trust(_adv_id, -2, "debrief outcome dispute");
+                add_log("Debrief options available: Dispute outcome (lose 2 trust, gain 1 morale)");
+            }
+        }
+    ];
     array_push(state.pending_reports, _result);
 
     var _can_open = !is_struct(state.last_result) ||
