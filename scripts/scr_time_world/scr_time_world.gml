@@ -314,6 +314,11 @@ function process_world_pulse() {
     if (array_length(_prestige_patrons) > 0) {
         var _patron_pick = _prestige_patrons[irandom(array_length(_prestige_patrons) - 1)];
         var _patron = state.patrons[_patron_pick];
+        // Add temple healing service
+        if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "temple") {
+            _patron.temple_healing_available = true;
+            add_log("Injury treatment: Temple of the Sacred Flame");
+        }
 
         // Increase reputation when prestige events occur
         state.reputation += 10;
@@ -877,6 +882,20 @@ function end_day() {
     // Print reputation summary
     add_log("Agency reputation: " + string(state.reputation));
     add_log("Fame level: " + string(state.reputation));
+    // Apply temple healing to injured adventurers
+    for (var i = 0; i < array_length(state.adventurers); i++) {
+        var _adv = state.adventurers[i];
+        if (variable_struct_exists(_adv, "injured") && _adv.injured) {
+            for (var p = 0; p < array_length(state.patrons); p++) {
+                var _patron = state.patrons[p];
+                if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "temple" && variable_struct_exists(_patron, "temple_healing_available") && _patron.temple_healing_available) {
+                    _adv.injured = false;
+                    add_log("Healing service provided by Temple");
+                    break;
+                }
+            }
+        }
+    }
 
     // Check for prestige patron events
     var _prestige_patrons = [];

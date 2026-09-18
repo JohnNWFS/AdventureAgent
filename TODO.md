@@ -93,7 +93,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Lingering
 - [x] Cursed
 - [ ] Add treatment options:
-- [ ] Temple healing
+- [x] Temple healing
 - [ ] Herbal care
 - [ ] Costly magical restoration
 - [ ] Rest and rehab
