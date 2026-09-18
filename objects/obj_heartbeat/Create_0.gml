@@ -3197,6 +3197,41 @@ start_mission = function() {
                 change_adventurer_trust(state.adventurers[_idx].id, 1, "agency followed through on promised work");
             }
             array_push(_party_ids, _party[i].id);
+            // Check for personality conflicts in the party
+            var _conflict_detected = false;
+            var _conflict_text = "";
+            for (var i = 0; i < array_length(_party_ids); i++) {
+                var _id1 = _party_ids[i];
+                var _idx1 = get_adv_index(_id1);
+                if (_idx1 >= 0) {
+                    var _adv1 = state.adventurers[_idx1];
+                    for (var j = i + 1; j < array_length(_party_ids); j++) {
+                        var _id2 = _party_ids[j];
+                        var _idx2 = get_adv_index(_id2);
+                        if (_idx2 >= 0) {
+                            var _adv2 = state.adventurers[_idx2];
+                            // Simple conflict check based on personality traits
+                            if (variable_struct_exists(_adv1, "negotiation_style") &&
+                                variable_struct_exists(_adv2, "negotiation_style") &&
+                                _adv1.negotiation_style == _adv2.negotiation_style) {
+                                _conflict_detected = true;
+                                _conflict_text = "Party personality conflict detected: Adventurer personalities clash";
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (_conflict_detected) break;
+            }
+
+            if (_conflict_detected) {
+                add_log(_conflict_text);
+                state.party_conflict_detected = true;
+                state.party_conflict_resolution = "Conflict resolution required";
+            } else {
+                state.party_conflict_detected = false;
+                state.party_conflict_resolution = "";
+            }
         }
     }
 

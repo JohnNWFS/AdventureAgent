@@ -64,7 +64,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 
 ## 4. Party Chemistry and Personality Synergy
 - [ ] Add pair and party chemistry modifiers
-- [ ] Add personality conflict rules
+- [x] Add personality conflict rules
 - [ ] Add shared-history bonuses from prior successful jobs
 - [ ] Add mentor/protege relationships
 - [ ] Add role-combo synergy notes in roster and staffing views
