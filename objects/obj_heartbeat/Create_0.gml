@@ -3225,6 +3225,73 @@ resolve_active_mission = function(_active) {
         }
     }
 
+    // Track party member job histories for chemistry
+    var _party_job_histories = [];
+    for (var i = 0; i < array_length(_party); i++) {
+        var _mbr = _party[i];
+        if (variable_struct_exists(_mbr, "successful_missions")) {
+            array_push(_party_job_histories, _mbr.successful_missions);
+        } else {
+            array_push(_party_job_histories, []);
+        }
+    }
+
+    // Calculate shared history bonuses
+    var _shared_history_bonus = 0;
+    var _compatible_personality = false;
+    var _clash_detected = false;
+
+    if (array_length(_party_job_histories) > 1) {
+        // Check for shared history between pairs
+        for (var i = 0; i < array_length(_party_job_histories); i++) {
+            for (var j = i + 1; j < array_length(_party_job_histories); j++) {
+                var _hist1 = _party_job_histories[i];
+                var _hist2 = _party_job_histories[j];
+
+                // Count shared missions
+                var _shared_count = 0;
+                for (var k = 0; k < array_length(_hist1); k++) {
+                    for (var l = 0; l < array_length(_hist2); l++) {
+                        if (_hist1[k] == _hist2[l]) {
+                            _shared_count++;
+                            break;
+                        }
+                    }
+                }
+
+                // Apply bonus based on shared history
+                if (_shared_count >= 2) {
+                    _shared_history_bonus += 4;
+                    _compatible_personality = true;
+                } else if (_shared_count == 1) {
+                    _shared_history_bonus += 2;
+                } else if (_shared_count == 0) {
+                    // Check for personality clash
+                    var _mbr1 = _party[i];
+                    var _mbr2 = _party[j];
+                    if (variable_struct_exists(_mbr1, "personality") && variable_struct_exists(_mbr2, "personality")) {
+                        if (_mbr1.personality == "reckless" && _mbr2.personality == "cautious") {
+                            _clash_detected = true;
+                        } else if (_mbr1.personality == "cautious" && _mbr2.personality == "reckless") {
+                            _clash_detected = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Apply shared history bonus to mission result
+    if (_shared_history_bonus > 0) {
+        _result.field_score_bonus += _shared_history_bonus;
+        add_log("Party chemistry: Compatible personalities detected");
+        add_log("Party synergy bonus: +" + string(_shared_history_bonus) + " field score");
+    }
+
+    if (_clash_detected) {
+        add_log("Personality clash detected: Adventurer personalities clash");
+    }
+
     _result.acknowledged = false;
     _result.mission_title = _mission.title;
     _result.party_names = _party_names;
