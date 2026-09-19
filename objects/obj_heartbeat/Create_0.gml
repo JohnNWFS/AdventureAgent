@@ -1946,6 +1946,15 @@ process_client_contract_pressure = function() {
         }
 
         if (_a.contract_days_remaining <= 0 && _a.idle_days >= 3) {
+        if (variable_struct_exists(_a, "city_id") && _a.city_id != home_city_id()) {
+            _a.remote_city_days = variable_struct_exists(_a, "remote_city_days") ? _a.remote_city_days + 1 : 1;
+            if (_a.remote_city_days >= 4) {
+                change_adventurer_morale(_a.id, -1, "away from home too long");
+                add_log(_a.name + " has been away from home for " + string(_a.remote_city_days) + " days");
+            }
+        } else {
+            _a.remote_city_days = 0;
+        }
             change_adventurer_morale(_a.id, -1, "contract expired and idle");
             _risk += 5;
         }
