@@ -104,7 +104,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Add named rival agencies with strategy profiles
 - [ ] Add rival specialties:
 - [x] Elite magical talent
-- [ ] Noble patronage
+- [x] Noble patronage
 - [x] High-risk mercenary work
 - [x] Cheap underbidding
 - [ ] Add direct competition on patrons and recruits
