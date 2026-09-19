@@ -2499,6 +2499,26 @@ unlock_patron_contracts = function(_patron_index) {
                     }
                 }
                 state.contracts[i].unlocked = true;
+                // Apply hazard premium for patron risk profile
+                if (variable_struct_exists(_patron, "risk_profile")) {
+                    var _risk_profile = _patron.risk_profile;
+                    var _hazard_premium = 0;
+                    if (_risk_profile == "high") {
+                        _hazard_premium = 20;
+                    } else if (_risk_profile == "moderate") {
+                        _hazard_premium = 15;
+                    } else if (_risk_profile == "low") {
+                        _hazard_premium = 5;
+                    }
+                    state.contracts[i].mission.reward += _hazard_premium;
+                    add_log("Hazard premium " + string(_hazard_premium) + "g");
+                }
+                // Show patron risk profile
+                if (variable_struct_exists(_patron, "risk_profile")) {
+                    add_log("Patron risk profile: " + _patron.risk_profile);
+                }
+                // Show adjusted contract reward
+                add_log("Contract reward adjusted for hazard: " + string(state.contracts[i].mission.reward) + "g");
                 _unlocked_any = true;
                 add_log("Contract unlocked: " + state.contracts[i].mission.title + " (expires in " + format_duration_hours(max(1, state.contracts[i].expires_hour - state.absolute_hour)) + ").");
             }

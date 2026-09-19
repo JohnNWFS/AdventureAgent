@@ -73,7 +73,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Add patron satisfaction tracking
 - [x] Add patron payment reliability and dispute likelihood
 - [ ] Add pre-launch negotiation for:
-- [ ] Hazard premium
+- [x] Hazard premium
 - [x] Urgency premium
 - [x] Secrecy premium
 - [x] Staffing cap flexibility
