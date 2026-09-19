@@ -832,6 +832,7 @@ build_adventurer_card = function(_adv_index, _type_name) {
         title: _a.name,
         subtitle: _a.role + ((_type_name == "prospect") ? " prospect" : " client"),
         status: string_upper(_a.status),
+        location: get_adventurer_location_text(_a),
         summary: (_type_name == "prospect")
             ? ("Negotiation style " + string_upper(_a.negotiation_style) + ". " + _a.style_blurb)
             : ("Morale " + string(_a.morale) + ", trust " + string(_a.trust) + ", ambition " + _a.ambition + "."),
@@ -4520,6 +4521,23 @@ process_command = function(_raw) {
     }
 
     rebuild_buttons();
+};
+
+get_adventurer_location_text = function(_a) {
+    var _city_id = adventurer_city_id(_a);
+    if (_city_id == -1) {
+        return "On the road";
+    } else {
+        var _city_name = city_name(_city_id);
+        var _traveling_to = "";
+        if (variable_struct_exists(_a, "traveling_to_city_id")) {
+            var _dest_id = _a.traveling_to_city_id;
+            if (_dest_id != -1) {
+                _traveling_to = ", traveling to " + city_name(_dest_id);
+            }
+        }
+        return "Based in " + _city_name + _traveling_to;
+    }
 };
 
 layout = {
