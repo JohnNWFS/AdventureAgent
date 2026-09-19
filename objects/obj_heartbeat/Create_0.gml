@@ -424,6 +424,13 @@ load_world_content_xml = function() {
         var _txt = read_text_file(_paths[i]);
         if (_txt != "") {
             apply_world_content_xml(_txt);
+            // Load city content pack if available
+            var _city_path = working_directory + "datafiles/city_content.xml";
+            var _city_txt = read_text_file(_city_path);
+            if (_city_txt != "") {
+                apply_world_content_xml(_city_txt);
+                add_log("City content pack loaded from XML");
+            }
             // Load location content pack if available
             var _location_path = working_directory + "datafiles/location_content.xml";
             var _location_txt = read_text_file(_location_path);
