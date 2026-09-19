@@ -151,6 +151,18 @@ function process_world_pulse() {
         }
     }
     add_log("Seasonal content: Dry-Season Ruin Delve");
+    // Add city rumors to the world pulse
+    var _city_rumors = [
+        { id: 1, name: "Eastmarch Hold", theme: "frontier", description: "A frontier fort town. Poor patrons, dangerous work, and hazard pay for those who survive it." },
+        { id: 2, name: "Vellanor", theme: "canal trade", description: "A canal city of trade houses and guild factors. Rich contracts and sharp negotiators." },
+        { id: 3, name: "Saint Caldur", theme: "temple", description: "A temple city of abbeys and archives. Wealthy patrons who prize secrecy and reputation." }
+    ];
+
+    for (var i = 0; i < array_length(_city_rumors); i++) {
+        var _rumor = _city_rumors[i];
+        mark_city_known(_rumor.id, _rumor.description);
+        add_log("Word of " + _rumor.name + " (" + _rumor.theme + "): " + _rumor.description);
+    }
     add_log("Winter's grip tightens the ruins' hold.");
     add_log("Ruin Delve contracts available.");
         var _escort_mission = {
