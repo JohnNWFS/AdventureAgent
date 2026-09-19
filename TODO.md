@@ -220,7 +220,7 @@ contract_city_id, city_name); never hand-build city, contract, or patron structs
 - [x] Morale pressure for clients left far from home too long
 - [x] Recruit local free agents in the city where your staged clients are
 - [ ] Stage 4 - Branch offices and relocation:
-- [ ] Open a branch office in a known city once prestige allows (setup cost and daily upkeep)
+- [x] Open a branch office in a known city once prestige allows (setup cost and daily upkeep)
 - [ ] Branch delegation policies instead of duplicate micromanagement
 - [ ] Relocate the agency headquarters (change home_city_id) as a fresh start; clients decide whether to follow
 - [ ] Cities in XML content packs (names, themes, descriptions)

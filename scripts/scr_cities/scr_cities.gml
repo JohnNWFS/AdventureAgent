@@ -331,4 +331,42 @@ function print_cities() {
     }
     if (array_length(state.city_transfers) > 0) add_log("On the road: " + string(array_length(state.city_transfers)) + " client(s).");
     if (_unknown > 0) add_log(string(_unknown) + " other cities are only names on travelers' lips so far.");
+    // Auto-open branch office in known cities if prestige allows
+    if (is_undefined(state.branch_offices)) {
+        state.branch_offices = [];
+        state.branch_office_cost = 500;
+        state.branch_office_daily_upkeep = 100;
+    }
+
+    for (var i = 0; i < array_length(state.cities); i++) {
+        var _c = state.cities[i];
+        if (!_c.known) continue;
+
+        // Check if this city already has a branch office
+        var _has_branch = false;
+        for (var j = 0; j < array_length(state.branch_offices); j++) {
+            if (state.branch_offices[j].city_id == _c.id) {
+                _has_branch = true;
+                break;
+            }
+        }
+
+        if (!_has_branch && city_prestige_ok(_c.id)) {
+            // Create new branch office struct
+            var _branch = struct_create();
+            _branch.city_id = _c.id;
+            _branch.cost = state.branch_office_cost;
+            _branch.daily_upkeep = state.branch_office_daily_upkeep;
+            array_push(state.branch_offices, _branch);
+
+            // Print branch office info
+            var _line = "Branch office: " + _c.name;
+            if (_c.id == home_city_id()) {
+                _line += " - home office";
+            } else {
+                _line += " - " + string(_c.travel_days) + " day(s), " + string(_c.travel_cost) + "g road, " + string(_c.lodging_per_day) + "g/day lodging";
+            }
+            add_log(_line);
+        }
+    }
 }
