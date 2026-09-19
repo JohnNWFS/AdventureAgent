@@ -218,7 +218,7 @@ contract_city_id, city_name); never hand-build city, contract, or patron structs
 - [x] Adventurer cards show where the client is based and any travel in progress
 - [x] Local patrons for each city (use add_city_patron); new-city patrons start with lower satisfaction and less trust
 - [x] Morale pressure for clients left far from home too long
-- [ ] Recruit local free agents in the city where your staged clients are
+- [x] Recruit local free agents in the city where your staged clients are
 - [ ] Stage 4 - Branch offices and relocation:
 - [ ] Open a branch office in a known city once prestige allows (setup cost and daily upkeep)
 - [ ] Branch delegation policies instead of duplicate micromanagement

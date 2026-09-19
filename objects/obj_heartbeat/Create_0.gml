@@ -3682,6 +3682,12 @@ start_mission = function() {
     var _round_trip = _one_way * 2;
     // Party members based in another city travel to the job and pay road and lodging costs.
     var _trip = city_mission_trip(_mission, _party, _round_trip);
+    // Check if mission is in a different city and set local recruitment opportunity
+    if (_trip.city_id != home_city_id()) {
+        state.local_recruitment_opportunity = true;
+        state.city_recruitment_target = _trip.city_id;
+        add_log("Local recruitment opportunity in " + city_name(_trip.city_id) + ": Recruit local talent in " + city_name(_trip.city_id) + ".");
+    }
     if (_trip.cost > state.gold) {
         add_log("Travel and lodging for this party cost " + string(_trip.cost) + "g; the agency cannot cover it.");
         return;
