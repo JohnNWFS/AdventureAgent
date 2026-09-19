@@ -1208,6 +1208,45 @@ function end_day() {
         }
     }
     add_log("Fame level: " + string(state.reputation));
+    // Initialize city danger levels if not exists
+    for (var i = 0; i < array_length(state.cities); i++) {
+        var _city = state.cities[i];
+        if (!variable_struct_exists(_city, "danger")) {
+            _city.danger = 0;
+        }
+    }
+
+    // Set danger level for known cities
+    var _home_city = home_city_id();
+    for (var i = 0; i < array_length(state.cities); i++) {
+        var _city = state.cities[i];
+        if (_city.known && _city.id != _home_city) {
+            // Set danger level based on city type
+            if (_city.name == "Eastmarch Hold") {
+                _city.danger = 20;
+            } else if (_city.name == "Vellanor") {
+                _city.danger = 10;
+            } else if (_city.name == "Saint Caldur") {
+                _city.danger = 5;
+            }
+        }
+    }
+
+    // Apply danger modifier to mission risk and injury chance
+    for (var i = 0; i < array_length(state.contracts); i++) {
+        var _contract = state.contracts[i];
+        if (variable_struct_exists(_contract, "mission") && variable_struct_exists(_contract.mission, "risk")) {
+            var _city_id = mission_city_id(_contract.mission);
+            var _city = get_city(_city_id);
+            if (!is_undefined(_city) && variable_struct_exists(_city, "danger")) {
+                var _danger_modifier = _city.danger / 100;
+                _contract.mission.risk = max(1, _contract.mission.risk + (_contract.mission.risk * _danger_modifier));
+
+                // Add log for danger modifier
+                add_log("City danger modifier: " + string(_city.danger) + "%");
+            }
+        }
+    }
     // Unlock city contracts based on reputation
     for (var i = 0; i < array_length(state.cities); i++) {
         var _city = state.cities[i];

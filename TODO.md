@@ -211,7 +211,7 @@ contract_city_id, city_name); never hand-build city, contract, or patron structs
 - [ ] Stage 2 - Expeditions:
 - [x] Known cities send contracts once agency reputation reaches the city's prestige_required (use add_city_contract)
 - [x] Each city's contracts follow its theme (frontier hazard work, canal trade escorts, temple archive recoveries)
-- [ ] City danger raises mission risk and injury chance for missions in that city
+- [x] City danger raises mission risk and injury chance for missions in that city
 - [x] Post-mission choice for an away party: stay staged in that city or travel home (start_city_transfer)
 - [ ] Stage 3 - Outposts:
 - [x] Mission board and party selection show which city each contract and adventurer is in
