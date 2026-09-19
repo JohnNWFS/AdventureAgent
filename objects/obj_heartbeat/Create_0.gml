@@ -438,6 +438,13 @@ load_world_content_xml = function() {
                 add_log("Outfit content pack loaded from XML");
             }
             add_log("World content pack loaded from XML.");
+            // Load patron content pack if available
+            var _patron_path = working_directory + "datafiles/patron_content.xml";
+            var _patron_txt = read_text_file(_patron_path);
+            if (_patron_txt != "") {
+                apply_world_content_xml(_patron_txt);
+                add_log("Patron content pack loaded from XML");
+            }
             // Load relic content pack if available
             var _relic_path = working_directory + "datafiles/relic_content.xml";
             var _relic_txt = read_text_file(_relic_path);

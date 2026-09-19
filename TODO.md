@@ -155,7 +155,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 ## 14. World Customization and XML Content Packs
 - [x] Add XML-driven content packs for:
 - [x] Adventurer names
-- [ ] Patron names and titles
+- [x] Patron names and titles
 - [x] Place names
 - [ ] Weapons
 - [x] Outfits
