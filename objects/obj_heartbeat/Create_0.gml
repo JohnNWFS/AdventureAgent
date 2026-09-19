@@ -3874,6 +3874,10 @@ print_missions = function() {
         var _m = state.missions[i];
         var _expires_in = max(0, _m.expires_hour - state.absolute_hour);
         add_log(string(i + 1) + ") " + _m.title + " [Patron: " + _m.patron_name + ", Diff " + string(_m.difficulty) + ", Reward " + string(_m.reward) + "g, Expires in " + format_duration_hours(_expires_in) + "]");
+        var _city_id = contract_city_id(_m);
+        if (_city_id >= 0) {
+            add_log("     City: " + city_name(_city_id));
+        }
     }
 };
 
@@ -3886,6 +3890,10 @@ print_adventurers = function() {
             _idle_text = " | Idle " + string(_a.idle_days) + "d";
         }
         add_log(string(i + 1) + ") " + _a.name + " (" + _a.role + ") C" + string(_a.combat) + " M" + string(_a.magic) + " S" + string(_a.stealth) + " D" + string(_a.diplomacy) + " R" + string(_a.reliability) + " | Purse " + string(_a.purse_gold) + "g | " + string(_a.adventure_rate) + "g/day | Comm " + string(round(_a.commission_rate * 100)) + "% [" + string_upper(_a.status) + "]" + _idle_text);
+        var _city_id = adventurer_city_id(_a);
+        if (_city_id >= 0) {
+            add_log("     City: " + city_name(_city_id));
+        }
     }
 };
 

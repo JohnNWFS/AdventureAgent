@@ -214,7 +214,7 @@ contract_city_id, city_name); never hand-build city, contract, or patron structs
 - [ ] City danger raises mission risk and injury chance for missions in that city
 - [x] Post-mission choice for an away party: stay staged in that city or travel home (start_city_transfer)
 - [ ] Stage 3 - Outposts:
-- [ ] Mission board and party selection show which city each contract and adventurer is in
+- [x] Mission board and party selection show which city each contract and adventurer is in
 - [x] Adventurer cards show where the client is based and any travel in progress
 - [x] Local patrons for each city (use add_city_patron); new-city patrons start with lower satisfaction and less trust
 - [x] Morale pressure for clients left far from home too long
