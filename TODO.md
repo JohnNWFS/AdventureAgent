@@ -222,7 +222,7 @@ contract_city_id, city_name); never hand-build city, contract, or patron structs
 - [ ] Stage 4 - Branch offices and relocation:
 - [x] Open a branch office in a known city once prestige allows (setup cost and daily upkeep)
 - [ ] Branch delegation policies instead of duplicate micromanagement
-- [ ] Relocate the agency headquarters (change home_city_id) as a fresh start; clients decide whether to follow
+- [x] Relocate the agency headquarters (change home_city_id) as a fresh start; clients decide whether to follow
 - [ ] Cities in XML content packs (names, themes, descriptions)
 
 ## Immediate Build Order

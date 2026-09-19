@@ -179,6 +179,20 @@ function process_world_pulse() {
             seasonal: true
         };
         array_push(state.contracts, _escort_mission);
+        // Add relocation decision logic
+        if (state.day == 2 && !variable_struct_exists(state, "relocation_decision_made")) {
+            state.relocation_decision_made = true;
+            state.home_city_id = 2; // Relocate to Vellanor
+
+            // Update adventurers' city_id to match new headquarters
+            for (var i = 0; i < array_length(state.adventurers); i++) {
+                state.adventurers[i].city_id = 2;
+            }
+
+            add_log("Agency headquarters relocated to Vellanor");
+            add_log("Clients may choose to follow or remain");
+            add_log("Relocation decision pending");
+        }
         add_log("Seasonal content: Winter Pass Escorts");
     }
 
