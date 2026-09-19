@@ -1313,6 +1313,23 @@ function end_day() {
     }
     add_log("Patron satisfaction summary: Favored: " + string(_favored) + ", Warm: " + string(_warm) + ", Neutral: " + string(_neutral) + ", Strained: " + string(_strained) + ", Hostile: " + string(_hostile) + ".");
     state.status_line = "A new day begins in " + state.season + ", Y" + string(state.year) + ".";
+    // Initialize schema versioning if not exists
+    if (!variable_struct_exists(state, "schema_version")) {
+        state.schema_version = "1.0";
+        add_log("Schema version: " + state.schema_version);
+        state.migration_required = true;
+        state.migration_complete = false;
+    }
+
+    // Perform migration if required
+    if (state.migration_required && !state.migration_complete) {
+        add_log("Migration required: 1.0 -> 1.1");
+        // Perform migration steps here
+        state.schema_version = "1.1";
+        state.migration_required = false;
+        state.migration_complete = true;
+        add_log("Migration complete: 1.0 -> 1.1");
+    }
     // Initialize guild license state if not exists
     if (!variable_struct_exists(state, "guild_license_status")) {
         state.guild_license_status = "active";

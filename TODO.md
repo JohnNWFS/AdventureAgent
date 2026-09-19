@@ -172,7 +172,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 ## 15. Save/Load and Content Versioning
 - [ ] Save roster contracts, morale, trust, client assets, and world content pack choice
 - [ ] Save active missions, patron state, rival state, and logs
-- [ ] Add schema versioning / migration support
+- [x] Add schema versioning / migration support
 
 ## 16. UI/UX Refinement
 - [ ] Add summary panes for:
