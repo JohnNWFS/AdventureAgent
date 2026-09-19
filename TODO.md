@@ -206,7 +206,7 @@ contract_city_id, city_name); never hand-build city, contract, or patron structs
 - [ ] Stage 1 - Rumors:
 - [x] Correspondence and field reports mention other cities; call mark_city_known the first time each is heard of
 - [x] Patron gossip about other cities during patron research and contract review
-- [ ] Rival news from other cities (a rival agency expands there, a city event changes its demand)
+- [x] Rival news from other cities (a rival agency expands there, a city event changes its demand)
 - [ ] Bardic and herald notices carry the agency's fame to known cities
 - [ ] Stage 2 - Expeditions:
 - [x] Known cities send contracts once agency reputation reaches the city's prestige_required (use add_city_contract)

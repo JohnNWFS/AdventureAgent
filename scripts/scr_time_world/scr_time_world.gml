@@ -194,6 +194,31 @@ function process_world_pulse() {
             add_log("Relocation decision pending");
         }
         add_log("Seasonal content: Winter Pass Escorts");
+        // Rival News from Other Cities
+        if (!variable_struct_exists(state, "rival_agency_expanded_city")) {
+            state.rival_agency_expanded_city = 0;
+        }
+        if (!variable_struct_exists(state, "city_event_type")) {
+            state.city_event_type = "none";
+        }
+
+        // Simulate rival expansion to known cities
+        if (state.rival_agency_expanded_city == 0 && irandom(99) < 30) {
+            state.rival_agency_expanded_city = 1;
+            add_log("Rival agency: Eastmarch Hold");
+        }
+
+        // Simulate city event changing demand
+        if (state.rival_agency_expanded_city == 1 && irandom(99) < 20) {
+            state.city_event_type = "demand_change";
+            add_log("City event: Frontier town demand changes");
+        }
+
+        // Simulate rival expansion to another known city
+        if (state.rival_agency_expanded_city == 1 && state.city_event_type == "demand_change" && irandom(99) < 25) {
+            state.rival_agency_expanded_city = 2;
+            add_log("Rival agency: Vellanor");
+        }
     }
 
     // Global world pulse every 3 in-game hours, regardless of current mode.
