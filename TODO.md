@@ -135,7 +135,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Add post-mission debrief choices
 - [x] Add defend-team / blame-conditions / accept-loss / dispute-outcome branches
 - [x] Add patron reaction consequences after debriefs
-- [ ] Add client reaction consequences after debriefs
+- [x] Add client reaction consequences after debriefs
 
 ## 12. Agency Operations and Staff
 - [ ] Add hireable agency staff:

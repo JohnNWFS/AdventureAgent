@@ -3665,6 +3665,55 @@ resolve_active_mission = function(_active) {
         state.adventurers[_inj_idx].injury_tier = "minor";
         add_log("Injury tier: minor");
     }
+    // Patron reaction consequences after debrief
+    var _patron = state.patrons[_active.contract_index];
+    if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "temple") {
+        // Improve patron relationship based on debrief choice
+        if (variable_struct_exists(_result, "debrief_choice") && _result.debrief_choice == "Share victory celebration with team (+2 morale, +1 trust)") {
+            _patron.satisfaction = clamp(_patron.satisfaction + 5, 0, 100);
+            _patron.future_work_opportunities = variable_struct_exists(_patron, "future_work_opportunities") ? _patron.future_work_opportunities + 1 : 2;
+            _patron.relationship_improvement = variable_struct_exists(_patron, "relationship_improvement") ? _patron.relationship_improvement + 1 : 1;
+            add_log("Patron relationship improved: Lady Merrow Vale now offers more contracts and higher satisfaction.");
+        } else if (variable_struct_exists(_result, "debrief_choice") && _result.debrief_choice == "Defend team from blame (lose 1 trust, gain 1 morale)") {
+            _patron.satisfaction = clamp(_patron.satisfaction - 3, 0, 100);
+            _patron.future_work_opportunities = variable_struct_exists(_patron, "future_work_opportunities") ? _patron.future_work_opportunities - 1 : 0;
+            _patron.relationship_improvement = variable_struct_exists(_patron, "relationship_improvement") ? _patron.relationship_improvement - 1 : -1;
+            add_log("Patron relationship worsened: Lady Merrow Vale now offers fewer contracts and lower satisfaction.");
+        } else if (variable_struct_exists(_result, "debrief_choice") && _result.debrief_choice == "Accept loss gracefully (lose 2 morale, gain 1 trust)") {
+            _patron.satisfaction = clamp(_patron.satisfaction + 2, 0, 100);
+            _patron.future_work_opportunities = variable_struct_exists(_patron, "future_work_opportunities") ? _patron.future_work_opportunities : 1;
+            _patron.relationship_improvement = variable_struct_exists(_patron, "relationship_improvement") ? _patron.relationship_improvement : 0;
+            add_log("Patron relationship unchanged: Lady Merrow Vale maintains current satisfaction level.");
+        } else if (variable_struct_exists(_result, "debrief_choice") && _result.debrief_choice == "Dispute outcome (lose 2 trust, gain 1 morale)") {
+            _patron.satisfaction = clamp(_patron.satisfaction - 4, 0, 100);
+            _patron.future_work_opportunities = variable_struct_exists(_patron, "future_work_opportunities") ? _patron.future_work_opportunities - 1 : 0;
+            _patron.relationship_improvement = variable_struct_exists(_patron, "relationship_improvement") ? _patron.relationship_improvement - 1 : -1;
+            add_log("Patron relationship worsened: Lady Merrow Vale now offers fewer contracts and lower satisfaction.");
+        }
+    } else {
+        // Apply consequences for non-temple patrons
+        if (variable_struct_exists(_result, "debrief_choice") && _result.debrief_choice == "Share victory celebration with team (+2 morale, +1 trust)") {
+            _patron.satisfaction = clamp(_patron.satisfaction + 3, 0, 100);
+            _patron.future_work_opportunities = variable_struct_exists(_patron, "future_work_opportunities") ? _patron.future_work_opportunities + 1 : 1;
+            _patron.relationship_improvement = variable_struct_exists(_patron, "relationship_improvement") ? _patron.relationship_improvement + 1 : 1;
+            add_log("Patron relationship improved: Lady Merrow Vale now offers more contracts and higher satisfaction.");
+        } else if (variable_struct_exists(_result, "debrief_choice") && _result.debrief_choice == "Defend team from blame (lose 1 trust, gain 1 morale)") {
+            _patron.satisfaction = clamp(_patron.satisfaction - 2, 0, 100);
+            _patron.future_work_opportunities = variable_struct_exists(_patron, "future_work_opportunities") ? _patron.future_work_opportunities - 1 : 0;
+            _patron.relationship_improvement = variable_struct_exists(_patron, "relationship_improvement") ? _patron.relationship_improvement - 1 : -1;
+            add_log("Patron relationship worsened: Lady Merrow Vale now offers fewer contracts and lower satisfaction.");
+        } else if (variable_struct_exists(_result, "debrief_choice") && _result.debrief_choice == "Accept loss gracefully (lose 2 morale, gain 1 trust)") {
+            _patron.satisfaction = clamp(_patron.satisfaction + 1, 0, 100);
+            _patron.future_work_opportunities = variable_struct_exists(_patron, "future_work_opportunities") ? _patron.future_work_opportunities : 1;
+            _patron.relationship_improvement = variable_struct_exists(_patron, "relationship_improvement") ? _patron.relationship_improvement : 0;
+            add_log("Patron relationship unchanged: Lady Merrow Vale maintains current satisfaction level.");
+        } else if (variable_struct_exists(_result, "debrief_choice") && _result.debrief_choice == "Dispute outcome (lose 2 trust, gain 1 morale)") {
+            _patron.satisfaction = clamp(_patron.satisfaction - 3, 0, 100);
+            _patron.future_work_opportunities = variable_struct_exists(_patron, "future_work_opportunities") ? _patron.future_work_opportunities - 1 : 0;
+            _patron.relationship_improvement = variable_struct_exists(_patron, "relationship_improvement") ? _patron.relationship_improvement - 1 : -1;
+            add_log("Patron relationship worsened: Lady Merrow Vale now offers fewer contracts and lower satisfaction.");
+        }
+    }
 };
 
 start_mission = function() {
