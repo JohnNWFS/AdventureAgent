@@ -1004,6 +1004,17 @@ function run_overnight_maintenance() {
         }
     }
     state.retention_tracking.retained_count = _retained;
+    // Apply herbal remedies treatment if available
+    if (variable_struct_exists(state, "herbal_care_available") && state.herbal_care_available) {
+        for (var i = 0; i < array_length(state.adventurers); i++) {
+            var _adv = state.adventurers[i];
+            if (variable_struct_exists(_adv, "injury_days") && _adv.injury_days > 0) {
+                _adv.injury_days = 0;
+                _adv.status = "available";
+                add_log("Healing service provided by Temple");
+            }
+        }
+    }
 }
 
 function end_day() {

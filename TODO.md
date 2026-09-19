@@ -98,7 +98,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Costly magical restoration
 - [ ] Rest and rehab
 - [x] Add long-term scars, stat penalties, or early retirement risks
-- [ ] Fix double escalation: resolve_active_mission raises the injury tier twice for one injury (once in the injury block, again after the report); keep one
+- [x] Fix double escalation: resolve_active_mission raises the injury tier twice for one injury (once in the injury block, again after the report); keep one
 
 ## 7. Rival Agencies with Distinct Identities
 - [x] Add named rival agencies with strategy profiles

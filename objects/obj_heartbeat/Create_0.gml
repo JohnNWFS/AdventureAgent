@@ -3731,6 +3731,11 @@ resolve_active_mission = function(_active) {
             add_log("Patron relationship worsened: Lady Merrow Vale now offers fewer contracts and lower satisfaction.");
         }
     }
+    // Add herbal remedies treatment option
+    if (!variable_struct_exists(state, "herbal_care_available")) {
+        state.herbal_care_available = true;
+        add_log("Injury treatment: Herbal remedies");
+    }
 };
 
 start_mission = function() {
