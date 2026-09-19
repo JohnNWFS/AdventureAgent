@@ -479,6 +479,15 @@ load_world_content_xml = function() {
                     add_log("Rival agencies XML content pack loaded");
                 }
                 add_log("Example XML content pack loaded");
+                // Load weapon content pack if available
+                var _weapon_path = working_directory + "datafiles/weapon_content.xml";
+                var _weapon_txt = read_text_file(_weapon_path);
+                if (_weapon_txt != "") {
+                    apply_world_content_xml(_weapon_txt);
+                    add_log("Weapon content pack loaded from XML");
+                } else {
+                    add_log("Gear weapon tag not found in XML");
+                }
                 // Load Tolkien-inspired content pack if available
                 var _tolkien_path = working_directory + "datafiles/tolkien_content.xml";
                 var _tolkien_txt = read_text_file(_tolkien_path);

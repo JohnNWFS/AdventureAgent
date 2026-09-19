@@ -157,7 +157,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Adventurer names
 - [x] Patron names and titles
 - [x] Place names
-- [ ] Weapons
+- [x] Weapons
 - [x] Outfits
 - [x] Relics and spell names
 - [ ] Mission flavor text
