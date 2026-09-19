@@ -210,7 +210,7 @@ contract_city_id, city_name); never hand-build city, contract, or patron structs
 - [ ] Bardic and herald notices carry the agency's fame to known cities
 - [ ] Stage 2 - Expeditions:
 - [x] Known cities send contracts once agency reputation reaches the city's prestige_required (use add_city_contract)
-- [ ] Each city's contracts follow its theme (frontier hazard work, canal trade escorts, temple archive recoveries)
+- [x] Each city's contracts follow its theme (frontier hazard work, canal trade escorts, temple archive recoveries)
 - [ ] City danger raises mission risk and injury chance for missions in that city
 - [x] Post-mission choice for an away party: stay staged in that city or travel home (start_city_transfer)
 - [ ] Stage 3 - Outposts:

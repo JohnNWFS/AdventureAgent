@@ -270,6 +270,37 @@ function add_city_contract(_city_id, _patron_id, _title, _description, _difficul
     var _wealth = is_undefined(_c) ? 1 : _c.patron_wealth;
     var _i = array_length(state.contracts);
     var _patron_name = "Open market";
+    // Apply city theme to contract
+    var _city = get_city(_city_id);
+    if (!is_undefined(_city) && variable_struct_exists(_city, "theme")) {
+        var _theme = _city.theme;
+        switch (_theme) {
+            case "Frontier":
+                _title = "Bandit Camp Assault";
+                _description = "Assault the bandit camp and eliminate the threat to travelers.";
+                _difficulty = clamp(_difficulty + 10, 10, 85);
+                _reward = round(_reward * 1.2);
+                _risk = clamp(_risk + 15, 10, 85);
+                add_log("Contract theme: Frontier town - Bandit Camp Assault");
+                break;
+            case "Canal":
+                _title = "Trade Route Escort";
+                _description = "Escort merchant caravans along the canal trade routes.";
+                _difficulty = clamp(_difficulty + 5, 10, 85);
+                _reward = round(_reward * 1.1);
+                _risk = clamp(_risk + 5, 10, 85);
+                add_log("Contract theme: Canal city - Trade Route Escort");
+                break;
+            case "Temple":
+                _title = "Sacred Archive Recovery";
+                _description = "Recover ancient texts from the sacred archives.";
+                _difficulty = clamp(_difficulty - 5, 10, 85);
+                _reward = round(_reward * 0.9);
+                _risk = clamp(_risk - 10, 10, 85);
+                add_log("Contract theme: Temple city - Sacred Archive Recovery");
+                break;
+        }
+    }
     var _pidx = get_patron_index(_patron_id);
     if (_pidx >= 0) _patron_name = state.patrons[_pidx].name;
     array_push(state.contracts, {
