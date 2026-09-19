@@ -1720,6 +1720,23 @@ log_patron_research_report = function(_patron_index) {
     // Special handling for temple patrons
     if (patron_is_temple(_patron_index)) {
         add_log("Special note: Temple of the Sacred Flame requires sacred service oaths and divine commitment.");
+        // City rumor logic for all patrons with city_id
+        if (variable_struct_exists(_p, "city_id") && _p.city_id != -1) {
+            var _city = get_city(_p.city_id);
+            if (variable_struct_exists(_city, "theme")) {
+                var _source_text = "A " + _city.theme + " " + (array_length(state.cities) > 1 ? "town" : "city") + ". ";
+                if (_city.theme == "frontier") {
+                    _source_text += "Poor patrons, dangerous work, and hazard pay for those who survive it.";
+                } else if (_city.theme == "canal trade") {
+                    _source_text += "A canal city of trade houses and guild factors. Rich contracts and sharp negotiators.";
+                } else if (_city.theme == "temple") {
+                    _source_text += "A temple city of abbeys and archives. Wealthy patrons who prize secrecy and reputation.";
+                } else {
+                    _source_text += "A city of interest.";
+                }
+                mark_city_known(_p.city_id, _source_text);
+            }
+        }
         if (variable_struct_exists(_p, "oath_vow")) {
             add_log("Oath vow: " + _p.oath_vow);
         }
