@@ -519,6 +519,13 @@ function process_world_pulse() {
         }
     }
     normalize_contracts();
+    // Add Cheap Underbidding rival agency specialty
+    if (irandom(99) < 20) {
+        state.rival_cheap_underbidding = true;
+        state.rival_activity = "Rival agents were seen at the tavern district.";
+        add_log("Rival agency: Cheap Underbidders");
+        add_log("Cheap underbidding offer");
+    }
 }
 
 function process_rival_offer() {

@@ -106,7 +106,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Elite magical talent
 - [ ] Noble patronage
 - [x] High-risk mercenary work
-- [ ] Cheap underbidding
+- [x] Cheap underbidding
 - [ ] Add direct competition on patrons and recruits
 - [ ] Add rumor, sabotage, and reputation warfare
 
