@@ -385,6 +385,7 @@ apply_world_content_xml = function(_text) {
     if (_text == "") return;
 
     var _map = [
+    ["mission_flavor_text", "mission_flavor_text"],
     ["patron_title_grim_mercenary", "patron_titles_grim_mercenary"],
     ["rival_agency", "rival_agencies"],
         ["adventurer_first", "adventurer_first"],
@@ -457,6 +458,13 @@ load_world_content_xml = function() {
             var _spell_txt = read_text_file(_spell_path);
             if (_spell_txt != "") {
                 apply_world_content_xml(_spell_txt);
+                // Load mission flavor content pack if available
+                var _mission_flavor_path = working_directory + "datafiles/mission_flavor_content.xml";
+                var _mission_flavor_txt = read_text_file(_mission_flavor_path);
+                if (_mission_flavor_txt != "") {
+                    apply_world_content_xml(_mission_flavor_txt);
+                    add_log("Mission flavor content pack loaded from XML");
+                }
                 add_log("Spell name content pack loaded from XML");
             }
             // Load rival agencies from XML if available
