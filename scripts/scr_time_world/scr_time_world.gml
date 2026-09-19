@@ -1121,6 +1121,32 @@ function end_day() {
 
     // Print reputation summary
     add_log("Agency reputation: " + string(state.reputation));
+    // Add local patrons for newly discovered cities
+    ensure_city_fields();
+    var _home_city = home_city_id();
+    for (var i = 0; i < array_length(state.cities); i++) {
+        var _city = state.cities[i];
+        if (_city.known && _city.id != _home_city) {
+            var _patron_exists = false;
+            for (var p = 0; p < array_length(state.patrons); p++) {
+                var _patron = state.patrons[p];
+                if (variable_struct_exists(_patron, "city_id") && _patron.city_id == _city.id) {
+                    _patron_exists = true;
+                    break;
+                }
+            }
+            if (!_patron_exists) {
+                // Add new patron for this city
+                add_city_patron(_city.id, "Merchant Guild of Vellanor", "business-oriented", "standard", "moderate", "Local merchant guild offering moderate contracts");
+                add_log("New city patron: Merchant Guild of Vellanor");
+
+                // Set initial satisfaction and trust for new city patron
+                var _new_patron_index = array_length(state.patrons) - 1;
+                state.patrons[_new_patron_index].satisfaction = 30;
+                state.patrons[_new_patron_index].trust = 25;
+            }
+        }
+    }
     add_log("Fame level: " + string(state.reputation));
     // Unlock city contracts based on reputation
     for (var i = 0; i < array_length(state.cities); i++) {
