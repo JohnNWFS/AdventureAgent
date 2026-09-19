@@ -1122,6 +1122,14 @@ function end_day() {
     // Print reputation summary
     add_log("Agency reputation: " + string(state.reputation));
     add_log("Fame level: " + string(state.reputation));
+    // Unlock city contracts based on reputation
+    for (var i = 0; i < array_length(state.cities); i++) {
+        var _city = state.cities[i];
+        if (variable_struct_exists(_city, "prestige_required") && state.reputation >= _city.prestige_required && !variable_struct_exists(_city, "known")) {
+            _city.known = true;
+            add_log("City contract available: " + _city.name);
+        }
+    }
     // Initialize patron satisfaction telemetry if not exists
     if (!variable_struct_exists(state, "patron_satisfaction_telemetry")) {
         state.patron_satisfaction_telemetry = {
