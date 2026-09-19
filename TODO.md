@@ -164,7 +164,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Rival agency names
 - [ ] Support base world + optional theme packs
 - [ ] Add example packs:
-- [ ] Generic medieval fantasy
+- [x] Generic medieval fantasy
 - [x] Tolkien-esque inspired naming and place flavor
 - [x] Grim mercenary variant
 - [x] Keep simulation math in code while externalizing flavor/content data

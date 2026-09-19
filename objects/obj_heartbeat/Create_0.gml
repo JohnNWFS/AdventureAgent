@@ -479,6 +479,13 @@ load_world_content_xml = function() {
                     add_log("Rival agencies XML content pack loaded");
                 }
                 add_log("Example XML content pack loaded");
+                // Load generic medieval fantasy content pack if available
+                var _fantasy_path = working_directory + "datafiles/fantasy_content.xml";
+                var _fantasy_txt = read_text_file(_fantasy_path);
+                if (_fantasy_txt != "") {
+                    apply_world_content_xml(_fantasy_txt);
+                    add_log("Generic medieval fantasy content pack loaded");
+                }
                 // Load weapon content pack if available
                 var _weapon_path = working_directory + "datafiles/weapon_content.xml";
                 var _weapon_txt = read_text_file(_weapon_path);
