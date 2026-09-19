@@ -1271,6 +1271,29 @@ function end_day() {
         add_log("Injury Telemetry: Mission type Recovery - " + string(_telemetry.recovery.injured) + "/" + string(_telemetry.recovery.total) + " injured");
         add_log("Injury Telemetry: Mission type Diplomatic - " + string(_telemetry.diplomatic.injured) + "/" + string(_telemetry.diplomatic.total) + " injured");
     }
+    // Check for party members in other cities and offer transfer option
+    var _city_transfers = [];
+    var _has_transfers = false;
+    var _home_city = home_city_id();
+    for (var i = 0; i < array_length(state.adventurers); i++) {
+        var _a = state.adventurers[i];
+        var _city_id = adventurer_city_id(_a);
+        if (_city_id != _home_city && _city_id != -1) {
+            _has_transfers = true;
+            array_push(_city_transfers, {
+                adventurer_index: i,
+                city_id: _city_id,
+                cost: 0
+            });
+        }
+    }
+    if (_has_transfers) {
+        state.city_transfers = _city_transfers;
+        add_log("Party members based in other cities: " + string(array_length(_city_transfers)));
+        add_log("Transfer to " + city_name(_home_city) + ": Cost: 0g");
+    } else {
+        add_log("Party members based in other cities: none");
+    }
 }
 
 // Some world-pulse contracts are pushed as flat {title, reward, risk, ...} records. Every contract reader
