@@ -80,7 +80,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Add patron memory of prior wins, failures, and late deliveries
 - [ ] Expand patron classes:
 - [x] Abbots
-- [ ] Castellans
+- [x] Castellans
 - [ ] Guild factors
 - [x] Harbor masters
 - [x] Frontier wardens

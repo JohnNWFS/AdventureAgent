@@ -1669,6 +1669,38 @@ function end_day() {
     } else {
         add_log("Party members based in other cities: none");
     }
+
+    // Add new contract type for Castellan patron
+    var _castellan_index = get_patron_index_by_name("Castellan Aldric");
+    if (_castellan_index >= 0) {
+        add_log("New patron class: Castellan");
+        // Add a new contract for the Castellan patron
+        var _contract = {
+            id: 1000,
+            title: "Castle Siege Defense",
+            patron_id: _castellan_index,
+            unlocked: true,
+            accepted: false,
+            expired: false,
+            expires_hour: 0,
+            ask_text: "Defend the castle walls against a siege assault.",
+            mission: {
+                id: 1000,
+                title: "Castle Siege Defense",
+                type: "Security",
+                difficulty: 5,
+                reward: 200,
+                duration_hours: 48,
+                risk: 80,
+                preferred_role: "Combat",
+                weights: { combat: 0.6, magic: 0.1, stealth: 0.1, diplomacy: 0.2 },
+                description: "A castle under siege requires skilled defenders to hold the walls.",
+                patron_name: "Castellan Aldric",
+                patron_max_party: 6
+            }
+        };
+        array_push(state.contracts, _contract);
+    }
 }
 
 // Some world-pulse contracts are pushed as flat {title, reward, risk, ...} records. Every contract reader
