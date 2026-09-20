@@ -82,7 +82,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Abbots
 - [ ] Castellans
 - [ ] Guild factors
-- [ ] Harbor masters
+- [x] Harbor masters
 - [x] Frontier wardens
 - [ ] Arcane colleges
 

@@ -725,6 +725,35 @@ function process_world_pulse() {
     } else if (state.rival_pressure_level >= 1 && irandom(99) < 20) {
         add_log("Rival agents were seen at the noble district.");
     }
+    // Add Harbor Master patron class
+    var _harbor_master_patrons = [];
+    for (var p = 0; p < array_length(state.patrons); p++) {
+        var _patron = state.patrons[p];
+        if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "harbor_master") {
+            array_push(_harbor_master_patrons, p);
+        }
+    }
+
+    if (array_length(_harbor_master_patrons) > 0) {
+        add_log("Harbor Master patron appears");
+    }
+
+    // Add maritime contract for Harbor Master
+    var _maritime_contract = {
+        title: "Maritime Trade Route Protection",
+        description: "Protect merchant vessels along the coastal trade routes.",
+        difficulty: 15,
+        reward: 200,
+        risk: 20,
+        location: "Coastal Waters",
+        expires_hour: state.absolute_hour + 48,
+        unlocked: true,
+        accepted: false,
+        expired: false,
+        seasonal: false
+    };
+    array_push(state.contracts, _maritime_contract);
+    add_log("Maritime contract available: Maritime Trade Route Protection");
 }
 
 function process_rival_offer() {
