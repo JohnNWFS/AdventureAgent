@@ -274,6 +274,30 @@ function process_world_pulse() {
                     state.rival_activity = "Rival agencies are aggressively courting proven talent.";
                 } else {
                     add_log("World pulse: Rival scouts approached your roster, but no one signed away.");
+                    // Add rumor and intelligence system
+                    if (!variable_struct_exists(state, "rumor_system_active")) {
+                        state.rumor_system_active = true;
+                        state.intelligence_telemetry = {
+                            total_rumor_sources: 0,
+                            total_intelligence_reports: 0
+                        };
+                        state.scouting_cost = 25;
+                        state.rumor_confidence_boost = 10;
+                    }
+
+                    // Add a rumor about contract reliability
+                    add_log("Rumor: Tavern gossip about contract reliability");
+
+                    // Add intelligence report with confidence
+                    var _intelligence_report = {
+                        source: "Reliable source",
+                        confidence: 75,
+                        expiry_hour: state.absolute_hour + 24
+                    };
+                    add_log("Intelligence: " + string(_intelligence_report.confidence) + "% confidence from " + _intelligence_report.source);
+
+                    // Add scouting cost for reliability boost
+                    add_log("Scouting cost: " + string(state.scouting_cost) + "g for " + string(state.rumor_confidence_boost) + "% reliability boost");
                 }
             }
         break;
