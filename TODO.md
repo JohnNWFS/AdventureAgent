@@ -140,7 +140,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 ## 12. Agency Operations and Staff
 - [ ] Add hireable agency staff:
 - [ ] Clerks
-- [ ] Scouts
+- [x] Scouts
 - [ ] Quartermasters
 - [ ] Healers
 - [ ] Negotiators

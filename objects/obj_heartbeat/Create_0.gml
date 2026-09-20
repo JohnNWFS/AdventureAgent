@@ -586,6 +586,17 @@ build_adventurer_profile = function(_name, _role, _combat, _magic, _stealth, _di
     if (is_undefined(_starting_gold)) _starting_gold = irandom_range(18, 70);
     if (is_undefined(_id)) _id = -1;
     var _term = choose(20, 30, 45);
+    if (variable_struct_exists(state, "scouts_available") && !state.scouts_available) {
+        state.scouts_available = true;
+        state.scouts_hired = 0;
+    }
+
+    // Add scout-specific role description
+    if (_role == "Scout") {
+        add_log("Scout: Rival agency intelligence");
+        add_log("Scout: City event awareness");
+        add_log("Scout: Specialized skills");
+    }
     return {
         id: _id,
         name: _name,
@@ -1221,6 +1232,7 @@ resolve_agency_gear_after_mission = function(_party_ids, _mission, _outcome) {
 
 generate_free_agent = function() {
     var _roles = ["Warrior", "Mage", "Rogue", "Bard", "Cleric", "Ranger"];
+    array_push(_roles, "Scout");
     var _r = _roles[irandom(array_length(_roles) - 1)];
     var _base = irandom_range(3, 7);
     return build_adventurer_profile(
