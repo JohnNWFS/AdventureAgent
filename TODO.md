@@ -108,7 +108,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] High-risk mercenary work
 - [x] Cheap underbidding
 - [ ] Add direct competition on patrons and recruits
-- [ ] Add rumor, sabotage, and reputation warfare
+- [x] Add rumor, sabotage, and reputation warfare
 
 ## 8. Fame, Prestige, and Marketability
 - [x] Add client fame and agency brand prestige

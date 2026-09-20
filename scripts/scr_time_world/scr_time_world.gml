@@ -619,6 +619,45 @@ function process_world_pulse() {
     // Add rival agency 'Mercenary Band of the Iron Fist'
     if (irandom(99) < 20) {
         add_log("Rival agency: Mercenary Band of the Iron Fist");
+        // Add rival agency 'Arcane Order of the Silver Flame'
+        if (irandom(99) < 25) {
+            add_log("Rival agency: Arcane Order of the Silver Flame");
+            state.rival_activity = "Rival agents were seen at the arcane district.";
+        }
+
+        // Add rival agency 'Lord Aldric's Tower'
+        if (irandom(99) < 20) {
+            add_log("Rival agency: Lord Aldric's Tower");
+            state.rival_activity = "Rival agents were seen at the noble district.";
+        }
+
+        // Add rumor, sabotage, and reputation warfare events
+        if (irandom(99) < 15) {
+            var _rumor_events = [
+                "Rival agencies are spreading rumors about your agency's reliability.",
+                "A rival agency has been spreading false information about your contracts.",
+                "Rival agents have been planting rumors about your reputation in the city."
+            ];
+            add_log(_rumor_events[irandom(array_length(_rumor_events) - 1)]);
+        }
+
+        if (irandom(99) < 10) {
+            var _sabotage_events = [
+                "A rival agency sabotaged one of your contracts.",
+                "Rival agents have been interfering with your mission preparations.",
+                "Your agency's reputation has been damaged by a rival's sabotage."
+            ];
+            add_log(_sabotage_events[irandom(array_length(_sabotage_events) - 1)]);
+        }
+
+        if (irandom(99) < 12) {
+            var _reputation_events = [
+                "Rival agencies are attacking your reputation in the city.",
+                "Your agency's standing has been questioned by rival organizations.",
+                "A rival agency has launched a reputation warfare campaign against you."
+            ];
+            add_log(_reputation_events[irandom(array_length(_reputation_events) - 1)]);
+        }
     }
     // Add rival threat summary
     if (!variable_struct_exists(state, "rival_pressure_level")) {
