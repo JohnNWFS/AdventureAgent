@@ -3931,6 +3931,42 @@ resolve_active_mission = function(_active) {
         event_log: _events,
         acknowledged: false
     };
+    // Add mission intervention options
+    if (!variable_struct_exists(_active, "intervention_options")) {
+        _active.intervention_options = [];
+        array_push(_active.intervention_options, {
+            text: "Reinforce party members (+10% field score)",
+            cost: 0,
+            effect: function() {
+                _result.field_score_bonus += 10;
+                add_log("Intervention: Party reinforced (+10% field score)");
+            }
+        });
+        array_push(_active.intervention_options, {
+            text: "Spend agency supplies (-50g)",
+            cost: 50,
+            effect: function() {
+                if (state.gold >= 50) {
+                    spend_gold(50);
+                    _result.field_score_bonus += 15;
+                    add_log("Intervention: Supplies spent (-50g, +15 field score)");
+                } else {
+                    add_log("Intervention: Not enough gold to spend supplies");
+                }
+            }
+        });
+        array_push(_active.intervention_options, {
+            text: "Authorize retreat (no reward)",
+            cost: 0,
+            effect: function() {
+                _result.outcome = "retreat";
+                _result.gold_earned = 0;
+                _result.reputation_delta = -3;
+                add_log("Intervention: Retreat authorized (no reward)");
+            }
+        });
+        add_log("Mission intervention options available");
+    }
 };
 
 start_mission = function() {
