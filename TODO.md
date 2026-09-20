@@ -141,7 +141,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Add hireable agency staff:
 - [ ] Clerks
 - [x] Scouts
-- [ ] Quartermasters
+- [x] Quartermasters
 - [ ] Healers
 - [ ] Negotiators
 - [x] Add office upgrade effects on recruitment, recovery, and patron trust

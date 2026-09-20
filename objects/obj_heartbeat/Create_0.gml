@@ -1232,6 +1232,7 @@ resolve_agency_gear_after_mission = function(_party_ids, _mission, _outcome) {
 
 generate_free_agent = function() {
     var _roles = ["Warrior", "Mage", "Rogue", "Bard", "Cleric", "Ranger"];
+    array_push(_roles, "Quartermaster");
     array_push(_roles, "Scout");
     var _r = _roles[irandom(array_length(_roles) - 1)];
     var _base = irandom_range(3, 7);
@@ -2844,6 +2845,23 @@ build_market_candidate = function() {
             _cand.style_blurb = "Hardline: aggressive demands, difficult close.";
         break;
     }
+
+    // Special handling for Quartermaster role
+    if (_cand.role == "Quartermaster") {
+        _cand.combat = 0;
+        _cand.magic = 0;
+        _cand.stealth = 0;
+        _cand.diplomacy = 8;
+        _cand.reliability = 90;
+        _cand.adventure_rate = 18;
+        _cand.style_blurb = "Quartermaster: Agency supply management";
+        _cand.pref_bonus_w = 1.0;
+        _cand.pref_rate_w = 1.2;
+        _cand.pref_comm_w = 1.4;
+        _cand.pref_rep_w = 1.1;
+        _cand.pref_rival_w = 1.0;
+    }
+
     return _cand;
 };
 
