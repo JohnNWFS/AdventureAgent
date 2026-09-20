@@ -1387,6 +1387,22 @@ function end_day() {
         }
     }
     add_log("Fame level: " + string(state.reputation));
+    // Add Clerk to adventurers if not already present
+    var _has_clerk = false;
+    for (var i = 0; i < array_length(state.adventurers); i++) {
+        if (state.adventurers[i].role == "Clerk") {
+            _has_clerk = true;
+            break;
+        }
+    }
+    if (!_has_clerk) {
+        var _clerk = build_adventurer_profile("Clerk", "Clerk", 0, 0, 0, 0, 50, 10, 10, 0.05, 10, -1);
+        _clerk.hireable = true;
+        array_push(state.adventurers, _clerk);
+        add_log("Clerk: Office operations support");
+        add_log("Clerk: Administrative assistance");
+        add_log("Clerk: Specialized skills");
+    }
     // Initialize history tracking if not exists
     if (!variable_struct_exists(state, "contract_history")) {
         state.contract_history = [];
