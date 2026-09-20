@@ -232,7 +232,7 @@ two systems that already exist over new meters. Backlog numbers in brackets.
 - [x] Assignment forecast before launch: broad fit, wage exposure, injury risk and missing capability, without exact numbers [4]
 - [ ] Morning briefing: one daily digest of deadlines, returning missions, injuries, rival moves and net finances [5]
 - [ ] Adventurer traits: six readable traits that each change a mission outcome and a relationship choice [7]
-- [ ] Patron fit: a patron or mission at odds with an adventurer's priorities moves their morale and trust, with the reason given [9]
+- [x] Patron fit: a patron or mission at odds with an adventurer's priorities moves their morale and trust, with the reason given [9]
 - [x] Mission incidents built from facts: reports use the real party, gear, delays and outcome [13]
 - [ ] Structured history ledger: filter missions, finances, relationship changes and rival incidents by day and cause [15]
 - [x] Campaign objective: a 30-day restoration goal with solvency warnings and optional endless play [16]

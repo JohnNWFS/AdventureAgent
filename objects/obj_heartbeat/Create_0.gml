@@ -1960,6 +1960,27 @@ process_client_contract_pressure = function() {
             if (_a.contract_days_remaining == 5) {
                 add_log(_a.name + "'s " + _a.representation_type + " expires in 5 day(s).");
             } else if (_a.contract_days_remaining == 0 && _a.last_charter_notice_day != state.day) {
+            // Check patron fit
+            var _patron = state.patrons[_a.patron_id];
+            if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "temple") {
+                if (_a.ambition == "higher pay") {
+                    change_adventurer_morale(_a.id, -1, "patron fit mismatch: temple patron doesn't offer high pay");
+                    change_adventurer_trust(_a.id, -1, "patron fit mismatch: temple patron doesn't offer high pay");
+                    add_log("Patron fit: " + _a.name + "'s ambition is higher pay");
+                }
+            }
+
+            // Check mission fit
+            if (variable_struct_exists(_a, "contract_mission_id")) {
+                var _mission = get_mission_by_id(_a.contract_mission_id);
+                if (variable_struct_exists(_mission, "risk")) {
+                    if (_a.risk_preference == "careful" && _mission.risk > 50) {
+                        change_adventurer_morale(_a.id, -1, "mission fit mismatch: risky mission for careful adventurer");
+                        change_adventurer_trust(_a.id, -1, "mission fit mismatch: risky mission for careful adventurer");
+                        add_log("Mission fit: " + _a.name + "'s risk preference is careful");
+                    }
+                }
+            }
                 _a.last_charter_notice_day = state.day;
                 add_log(_a.name + "'s charter has expired. They expect a renewal meeting or a release.");
             }
