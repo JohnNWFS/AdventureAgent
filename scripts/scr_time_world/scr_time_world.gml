@@ -997,6 +997,52 @@ function process_hour_tick() {
         state.pending_signing = undefined;
     }
     process_world_pulse();
+    // Initialize history ledger if not exists
+    if (!variable_struct_exists(state, "history_ledger")) {
+        state.history_ledger = [];
+    }
+
+    // Add mission completion to history ledger
+    for (var i = 0; i < array_length(state.active_missions); i++) {
+        var _active = state.active_missions[i];
+        if (_active.due_hour <= state.absolute_hour) {
+        var _entry = {
+            day: state.day,
+            type: "mission",
+            cause: "completed",
+            details: _active.mission.title
+        };
+        array_push(state.history_ledger, _entry);
+        add_log("History Ledger: Mission completed");
+        }
+    }
+
+    // Add financial transaction to history ledger
+    if (variable_struct_exists(state, "economy_telemetry")) {
+        var _telemetry = state.economy_telemetry;
+        if (_telemetry.total_income > 0 || _telemetry.total_expenses > 0) {
+            var _entry = {
+                day: state.day,
+                type: "finance",
+                cause: "transaction",
+                details: "Income: " + string(_telemetry.total_income) + ", Expenses: " + string(_telemetry.total_expenses)
+            };
+            array_push(state.history_ledger, _entry);
+            add_log("History Ledger: Financial transaction");
+        }
+    }
+
+    // Add rival activity to history ledger
+    if (variable_struct_exists(state, "rival_activity") && state.rival_activity != "") {
+        var _entry = {
+            day: state.day,
+            type: "rival",
+            cause: "activity",
+            details: state.rival_activity
+        };
+        array_push(state.history_ledger, _entry);
+        add_log("History Ledger: Rival activity");
+    }
     // Add fame system tracking
     if (!variable_struct_exists(state, "reputation")) {
         state.reputation = 0;
