@@ -1632,6 +1632,16 @@ function end_day() {
         state.schema_version = "1.1";
         state.migration_required = false;
         state.migration_complete = true;
+        // Initialize save/load system
+        if (!variable_struct_exists(state, "save_file_version")) {
+            state.save_file_version = "1.1";
+            state.save_file_path = "save_000.json";
+            state.migration_required = false;
+            state.migration_complete = true;
+            add_log("Save file created: " + state.save_file_path);
+            add_log("Content version: " + state.save_file_version);
+            add_log("Save/load system initialized");
+        }
         add_log("Migration complete: 1.0 -> 1.1");
     }
     // Initialize guild license state if not exists
