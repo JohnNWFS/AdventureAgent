@@ -586,6 +586,40 @@ function process_world_pulse() {
         add_log("Noble patronage contract available");
         add_log("Cheap underbidding offer");
     }
+    // Add Frontier Warden patron class
+    var _frontier_warden_patrons = [];
+    for (var p = 0; p < array_length(state.patrons); p++) {
+        var _patron = state.patrons[p];
+        if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "frontier_warden") {
+            array_push(_frontier_warden_patrons, p);
+        }
+    }
+
+    if (array_length(_frontier_warden_patrons) > 0) {
+        add_log("Frontier Warden patron appears");
+    }
+
+    // Add high-risk contract for Frontier Warden
+    var _frontier_warden_contract = {
+        title: "Bandit Camp Assault",
+        description: "Assault a heavily guarded bandit camp in the wilderness.",
+        difficulty: 35,
+        reward: 300,
+        risk: 70,
+        location: "Bandit Camp",
+        expires_hour: state.absolute_hour + 72,
+        unlocked: true,
+        accepted: false,
+        expired: false,
+        seasonal: false
+    };
+    array_push(state.contracts, _frontier_warden_contract);
+    add_log("High-risk contract: Bandit Camp Assault");
+
+    // Add rival agency 'Mercenary Band of the Iron Fist'
+    if (irandom(99) < 20) {
+        add_log("Rival agency: Mercenary Band of the Iron Fist");
+    }
 }
 
 function process_rival_offer() {

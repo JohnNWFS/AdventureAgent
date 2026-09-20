@@ -83,7 +83,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Castellans
 - [ ] Guild factors
 - [ ] Harbor masters
-- [ ] Frontier wardens
+- [x] Frontier wardens
 - [ ] Arcane colleges
 
 ## 6. Injury, Recovery, and Care
