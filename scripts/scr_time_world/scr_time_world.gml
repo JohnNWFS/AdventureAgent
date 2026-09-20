@@ -620,6 +620,37 @@ function process_world_pulse() {
     if (irandom(99) < 20) {
         add_log("Rival agency: Mercenary Band of the Iron Fist");
     }
+    // Add rival threat summary
+    if (!variable_struct_exists(state, "rival_pressure_level")) {
+        state.rival_pressure_level = 0;
+    }
+
+    // Calculate rival pressure level based on various factors
+    var _pressure = 0;
+    if (variable_struct_exists(state, "rival_cheap_underbidding") && state.rival_cheap_underbidding) _pressure += 1;
+    if (variable_struct_exists(state, "rival_noble_patronage") && state.rival_noble_patronage) _pressure += 1;
+    if (variable_struct_exists(state, "rival_agency_expanded_city") && state.rival_agency_expanded_city > 0) _pressure += 1;
+    if (variable_struct_exists(state, "rival_telemetry") && state.rival_telemetry.total_rival_pressure > 0) _pressure += 1;
+
+    state.rival_pressure_level = _pressure;
+
+    // Determine threat level
+    var _threat_level = "Low pressure";
+    if (state.rival_pressure_level >= 3) _threat_level = "High pressure";
+    else if (state.rival_pressure_level >= 2) _threat_level = "Moderate pressure";
+    else if (state.rival_pressure_level >= 1) _threat_level = "Low pressure";
+
+    add_log("Rival threat: " + _threat_level);
+    add_log(state.rival_activity);
+
+    // Add additional rival activity messages based on pressure level
+    if (state.rival_pressure_level >= 2 && irandom(99) < 30) {
+        add_log("Rival agencies are aggressively courting proven talent.");
+    } else if (state.rival_pressure_level >= 1 && irandom(99) < 20) {
+        add_log("Rival agents were seen at the tavern district.");
+    } else if (state.rival_pressure_level >= 1 && irandom(99) < 20) {
+        add_log("Rival agents were seen at the noble district.");
+    }
 }
 
 function process_rival_offer() {
