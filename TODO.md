@@ -81,7 +81,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [ ] Expand patron classes:
 - [x] Abbots
 - [x] Castellans
-- [ ] Guild factors
+- [x] Guild factors
 - [x] Harbor masters
 - [x] Frontier wardens
 - [ ] Arcane colleges

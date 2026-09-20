@@ -1703,6 +1703,37 @@ function end_day() {
     }
 
     // Add new contract type for Castellan patron
+    // Add new contract type for Guild factors patron
+    var _guild_factor_index = get_patron_index_by_name("Guild Factors");
+    if (_guild_factor_index >= 0) {
+        add_log("New patron class: Guild factors");
+        // Add a new contract for the Guild factors patron
+        var _contract = {
+            id: 1001,
+            title: "Trade Route Security",
+            patron_id: _guild_factor_index,
+            unlocked: true,
+            accepted: false,
+            expired: false,
+            expires_hour: 0,
+            ask_text: "Secure a trade route from bandits.",
+            mission: {
+                id: 1001,
+                title: "Trade Route Security",
+                type: "Security",
+                difficulty: 3,
+                reward: 150,
+                duration_hours: 36,
+                risk: 40,
+                preferred_role: "Combat",
+                weights: { combat: 0.7, magic: 0.1, stealth: 0.1, diplomacy: 0.1 },
+                description: "A trade route needs protection from bandits.",
+                patron_name: "Guild Factors",
+                patron_max_party: 4
+            }
+        };
+        array_push(state.contracts, _contract);
+    }
     var _castellan_index = get_patron_index_by_name("Castellan Aldric");
     if (_castellan_index >= 0) {
         add_log("New patron class: Castellan");
