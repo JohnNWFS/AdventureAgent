@@ -216,6 +216,12 @@ function process_world_pulse() {
 
         // Simulate rival expansion to another known city
         if (state.rival_agency_expanded_city == 1 && state.city_event_type == "demand_change" && irandom(99) < 25) {
+        state.rival_contract_available = true;
+        state.rival_contract_agency = "Temple of the Sacred Flame";
+        state.rival_contract_deadline = 24;
+        add_log("Rival contract: Temple of the Sacred Flame");
+        add_log("Deadline: 24 hours");
+        add_log("Offer: 150g reward, 30 risk");
             state.rival_agency_expanded_city = 2;
             add_log("Rival agency: Vellanor");
         }
