@@ -148,7 +148,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 
 ## 13. Law, Guild, and Politics
 - [x] Add guild license systems, dues, and inspections
-- [ ] Add contract disputes and arbitration
+- [x] Add contract disputes and arbitration
 - [x] Add blacklisting, sanctions, and noble favoritism
 - [x] Add civic / church / guild political factions
 

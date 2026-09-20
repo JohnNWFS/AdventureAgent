@@ -1104,6 +1104,38 @@ function run_overnight_maintenance() {
         add_log(string(_lured) + " high-value adventurer(s) became unavailable to rival offers.");
     }
     add_log(state.rival_activity);
+    // Check for contract disputes
+    for (var i = 0; i < array_length(state.contracts); i++) {
+        var _contract = state.contracts[i];
+        if (variable_struct_exists(_contract, "mission") && variable_struct_exists(_contract.mission, "title") && _contract.accepted && !_contract.expired) {
+            // 10% chance for a contract dispute to occur
+            if (irandom(99) < 10) {
+                var _patron_index = get_patron_index(_contract.patron_id);
+                if (_patron_index >= 0) {
+                    var _patron = state.patrons[_patron_index];
+
+                    // Mark patron with dispute
+                    if (!variable_struct_exists(_patron, "patron_dispute_count")) {
+                        _patron.patron_dispute_count = 0;
+                    }
+                    _patron.patron_dispute_count += 1;
+
+                    // Set arbitration pending
+                    _patron.arbitration_pending = true;
+
+                    // Log dispute
+                    add_log("Contract dispute: " + _contract.mission.title);
+                    add_log("Arbitration requested by " + _patron.name);
+
+                    // Reduce patron satisfaction
+                    _patron.satisfaction = clamp(_patron.satisfaction - 15, 0, 100);
+
+                    // Log resolution
+                    add_log("Dispute resolution: Patron satisfaction reduced");
+                }
+            }
+        }
+    }
     // Apply temple healing to injured adventurers
     for (var i = 0; i < array_length(state.adventurers); i++) {
         var _adv = state.adventurers[i];
