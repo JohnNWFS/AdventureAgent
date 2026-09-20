@@ -593,6 +593,12 @@ build_adventurer_profile = function(_name, _role, _combat, _magic, _stealth, _di
 
     // Add scout-specific role description
     if (_role == "Scout") {
+    // Add negotiator-specific role description
+    if (_role == "Negotiator") {
+        add_log("Negotiator: Office operations support");
+        add_log("Negotiator: Administrative assistance");
+        add_log("Negotiator: Specialized skills");
+    }
         add_log("Scout: Rival agency intelligence");
         add_log("Scout: City event awareness");
         add_log("Scout: Specialized skills");
@@ -1232,6 +1238,7 @@ resolve_agency_gear_after_mission = function(_party_ids, _mission, _outcome) {
 
 generate_free_agent = function() {
     var _roles = ["Warrior", "Mage", "Rogue", "Bard", "Cleric", "Ranger"];
+    array_push(_roles, "Negotiator");
     array_push(_roles, "Quartermaster");
     array_push(_roles, "Scout");
     var _r = _roles[irandom(array_length(_roles) - 1)];
