@@ -1296,6 +1296,24 @@ function end_day() {
 
     state.debug_mission_scoring = true;
     state.debug_negotiation_scoring = true;
+    // Initialize campaign tracking if not exists
+    if (!variable_struct_exists(state, "campaign_goal_days")) {
+        state.campaign_goal_days = 30;
+        state.campaign_start_day = 1;
+        state.campaign_progress = 0;
+        state.solvency_warning_threshold = 100;
+        state.endless_play_enabled = false;
+        add_log("Campaign goal: Restore agency to full strength in " + string(state.campaign_goal_days) + " days");
+    }
+
+    // Check for solvency warning
+    if (state.gold < state.solvency_warning_threshold) {
+        add_log("Solvency warning: Gold below " + string(state.solvency_warning_threshold) + "g threshold");
+    }
+
+    // Enable endless play mode
+    state.endless_play_enabled = true;
+    add_log("Endless play mode enabled")
     // Initialize regional content tracking if not exists
     if (!variable_struct_exists(state, "regional_content")) {
         state.regional_content = {};

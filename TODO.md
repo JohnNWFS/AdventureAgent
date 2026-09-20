@@ -235,7 +235,7 @@ two systems that already exist over new meters. Backlog numbers in brackets.
 - [ ] Patron fit: a patron or mission at odds with an adventurer's priorities moves their morale and trust, with the reason given [9]
 - [x] Mission incidents built from facts: reports use the real party, gear, delays and outcome [13]
 - [ ] Structured history ledger: filter missions, finances, relationship changes and rival incidents by day and cause [15]
-- [ ] Campaign objective: a 30-day restoration goal with solvency warnings and optional endless play [16]
+- [x] Campaign objective: a 30-day restoration goal with solvency warnings and optional endless play [16]
 - [x] Rival contract bids: a premium contract names a competing agency and a deadline; improve terms or walk away [17]
 - [ ] Actionable poach offers: a named rival bid with a deadline and choices to counter, promise work or release gracefully [18]
 - [ ] Pitching mode: choose one agency strength and cite prior work to win a patron; failure costs time [19]
