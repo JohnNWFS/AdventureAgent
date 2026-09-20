@@ -760,6 +760,35 @@ function process_world_pulse() {
     };
     array_push(state.contracts, _maritime_contract);
     add_log("Maritime contract available: Maritime Trade Route Protection");
+    // Check if seasonal crisis is already active
+    if (variable_struct_exists(state, "seasonal_crisis_active") && state.seasonal_crisis_active) {
+        // If crisis is active, don't add new seasonal content
+        return;
+    }
+
+    // Initialize seasonal crisis
+    state.seasonal_crisis_active = true;
+    state.seasonal_crisis_type = "goblin_raids";
+    state.seasonal_crisis_phase = "introduction";
+
+    // Add goblin raid contract
+    var _goblin_raid_contract = {
+        title: "Goblin Raids in Spring",
+        description: "Goblin raiders threaten the eastern villages.",
+        difficulty: 20,
+        reward: 120,
+        risk: 25,
+        location: "Eastern Villages",
+        expires_hour: state.absolute_hour + 48,
+        unlocked: true,
+        accepted: false,
+        expired: false,
+        seasonal: true
+    };
+    array_push(state.contracts, _goblin_raid_contract);
+    add_log("Seasonal content: Goblin Raids in Spring");
+    add_log("Goblin raiders threaten the eastern villages.");
+    add_log("Raid contracts available.");
 }
 
 function process_rival_offer() {

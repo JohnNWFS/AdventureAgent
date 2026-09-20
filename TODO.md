@@ -248,7 +248,7 @@ two systems that already exist over new meters. Backlog numbers in brackets.
 - [ ] Game House social layer: patrons, rivals and informants appear there; gambling stays optional [32]
 - [ ] Priority dashboard: at most five ranked issues, each with why it matters now and a direct action [33]
 - [ ] Agency doctrine: an identity such as honorable, elite or civic service that grants benefits and closes other options [35]
-- [ ] Campaign crisis arc: a seasonal threat that alters mission supply, patrons and rivals, with choices carried to its finale [37]
+- [x] Campaign crisis arc: a seasonal threat that alters mission supply, patrons and rivals, with choices carried to its finale [37]
 
 ## Immediate Build Order
 1. Client contracts and relationship depth
