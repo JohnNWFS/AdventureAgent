@@ -1140,6 +1140,12 @@ issue_agency_gear_to_adventurer = function(_item_name) {
     array_push(_a.issued_gear, _item_name);
     state.agency_inventory[_item_idx].stock -= 1;
     add_log(_item_name + " issued to " + _a.name + ".");
+    if (array_length(state.adventurers) > 0 && state.selected_adventurer_index >= 0) {
+        var _a = state.adventurers[state.selected_adventurer_index];
+        if (array_length(_a.issued_gear) == 0) {
+            add_log("Consumable items: Healing Kit, Ward Scroll, Lockpick Roll");
+        }
+    }
 };
 
 reclaim_agency_gear_from_adventurer = function(_item_name) {

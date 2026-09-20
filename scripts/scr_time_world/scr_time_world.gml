@@ -1764,6 +1764,27 @@ function end_day() {
         };
         array_push(state.contracts, _contract);
     }
+
+    // Initialize agency inventory with consumables
+    if (!variable_struct_exists(state, "agency_inventory")) {
+        state.agency_inventory = [];
+        array_push(state.agency_inventory, {
+            name: "Healing Kit",
+            kind: "consumable",
+            stock: 3
+        });
+        array_push(state.agency_inventory, {
+            name: "Ward Scroll",
+            kind: "consumable",
+            stock: 2
+        });
+        array_push(state.agency_inventory, {
+            name: "Lockpick Roll",
+            kind: "consumable",
+            stock: 2
+        });
+        add_log("Agency stores: Healing Kit x3, Ward Scroll x2, Lockpick Roll x2");
+    }
 }
 
 // Some world-pulse contracts are pushed as flat {title, reward, risk, ...} records. Every contract reader

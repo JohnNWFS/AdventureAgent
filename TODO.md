@@ -53,7 +53,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Ward scrolls
 - [x] Healing kits
 - [x] Add relic and magic-find categories
-- [ ] Add repair, replacement, and upgrade loops
+- [x] Add repair, replacement, and upgrade loops
 - [x] Add equipment impact on mission scoring and injury reduction
 - [ ] Medieval fantasy dressing:
 - [x] Rune-etched shields
