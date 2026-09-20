@@ -593,6 +593,11 @@ build_adventurer_profile = function(_name, _role, _combat, _magic, _stealth, _di
 
     // Add scout-specific role description
     if (_role == "Scout") {
+    if (_role == "Healer") {
+        add_log("Healer: Agency medical support");
+        add_log("Healer: Injury treatment");
+        add_log("Healer: Specialized skills");
+    }
     // Add negotiator-specific role description
     if (_role == "Negotiator") {
         add_log("Negotiator: Office operations support");
@@ -1241,6 +1246,7 @@ generate_free_agent = function() {
     array_push(_roles, "Negotiator");
     array_push(_roles, "Quartermaster");
     array_push(_roles, "Scout");
+    array_push(_roles, "Healer");
     var _r = _roles[irandom(array_length(_roles) - 1)];
     var _base = irandom_range(3, 7);
     return build_adventurer_profile(

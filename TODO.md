@@ -142,7 +142,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Clerks
 - [x] Scouts
 - [x] Quartermasters
-- [ ] Healers
+- [x] Healers
 - [x] Negotiators
 - [x] Add office upgrade effects on recruitment, recovery, and patron trust
 
