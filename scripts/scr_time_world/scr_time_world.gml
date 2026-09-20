@@ -586,6 +586,41 @@ function process_world_pulse() {
         add_log("Noble patronage contract available");
         add_log("Cheap underbidding offer");
     }
+
+    // Add rival agency 'Mercenary Band of the Iron Fist'
+    if (irandom(99) < 20) {
+        state.rival_mercenary_band = true;
+        state.rival_activity = "Rival agents were seen at the mercenary district.";
+        add_log("Rival agency: Mercenary Band of the Iron Fist");
+    }
+    // Add Cheap Underbidding rival agency specialty
+    if (irandom(99) < 20) {
+        state.rival_cheap_underbidding = true;
+        state.rival_activity = "Rival agents were seen at the tavern district.";
+        add_log("Rival agency: Cheap Underbidders");
+        // Add Noble House of the Silver Crown rival agency
+        state.rival_noble_patronage = true;
+        state.rival_activity = "Rival agents were seen at the noble district.";
+        add_log("Rival agency: Noble House of the Silver Crown");
+
+        // Add noble patronage contract
+        var _noble_contract = {
+            title: "Noble Patronage Contract",
+            description: "A prestigious contract from a noble house.",
+            difficulty: 25,
+            reward: 250,
+            risk: 15,
+            location: "Noble District",
+            expires_hour: state.absolute_hour + 48,
+            unlocked: true,
+            accepted: false,
+            expired: false,
+            seasonal: false
+        };
+        array_push(state.contracts, _noble_contract);
+        add_log("Noble patronage contract available");
+        add_log("Cheap underbidding offer");
+    }
     // Add Frontier Warden patron class
     var _frontier_warden_patrons = [];
     for (var p = 0; p < array_length(state.patrons); p++) {

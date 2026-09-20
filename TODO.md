@@ -107,7 +107,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Noble patronage
 - [x] High-risk mercenary work
 - [x] Cheap underbidding
-- [ ] Add direct competition on patrons and recruits
+- [x] Add direct competition on patrons and recruits
 - [x] Add rumor, sabotage, and reputation warfare
 
 ## 8. Fame, Prestige, and Marketability
