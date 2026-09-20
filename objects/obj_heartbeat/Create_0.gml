@@ -3733,6 +3733,38 @@ resolve_active_mission = function(_active) {
         }
     ];
     array_push(state.pending_reports, _result);
+    // Initialize relic disposition system
+    if (!variable_struct_exists(state, "relic_disposition_system")) {
+        state.relic_disposition_system = true;
+        state.relic_disposition_log = [];
+    }
+
+    // Process relic disposition for each adventurer
+    for (var f = 0; f < array_length(_active.party_ids); f++) {
+        var _adv_id = _active.party_ids[f];
+        var _idx = get_adv_index(_adv_id);
+        if (_idx >= 0) {
+            var _a = state.adventurers[_idx];
+            if (array_length(_a.notable_finds) > 0) {
+                // Set default relic disposition
+                _a.relic_disposition = "keep";
+                _a.relic_assignment_target = -1;
+
+                // Log relic disposition options
+                add_log("Relic disposition: Keep");
+                add_log("Relic disposition: Assign");
+                add_log("Relic disposition: Return");
+
+                // Add to disposition log
+                array_push(state.relic_disposition_log, {
+                    adventurer_id: _adv_id,
+                    finds: _a.notable_finds,
+                    disposition: _a.relic_disposition,
+                    assignment_target: _a.relic_assignment_target
+                });
+            }
+        }
+    }
 
     var _can_open = !is_struct(state.last_result) ||
                     !variable_struct_exists(state.last_result, "acknowledged") ||
