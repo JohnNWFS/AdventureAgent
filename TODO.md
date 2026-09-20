@@ -233,7 +233,7 @@ two systems that already exist over new meters. Backlog numbers in brackets.
 - [ ] Morning briefing: one daily digest of deadlines, returning missions, injuries, rival moves and net finances [5]
 - [ ] Adventurer traits: six readable traits that each change a mission outcome and a relationship choice [7]
 - [ ] Patron fit: a patron or mission at odds with an adventurer's priorities moves their morale and trust, with the reason given [9]
-- [ ] Mission incidents built from facts: reports use the real party, gear, delays and outcome [13]
+- [x] Mission incidents built from facts: reports use the real party, gear, delays and outcome [13]
 - [ ] Structured history ledger: filter missions, finances, relationship changes and rival incidents by day and cause [15]
 - [ ] Campaign objective: a 30-day restoration goal with solvency warnings and optional endless play [16]
 - [x] Rival contract bids: a premium contract names a competing agency and a deadline; improve terms or walk away [17]
