@@ -1393,6 +1393,37 @@ function end_day() {
 
     state.debug_mission_scoring = true;
     state.debug_negotiation_scoring = true;
+    // Show daily campaign digest
+    if (!variable_struct_exists(state, "campaign_digest_last_shown") || state.campaign_digest_last_shown != state.day) {
+        state.campaign_digest_last_shown = state.day;
+
+        // Initialize campaign summary if not exists
+        if (!variable_struct_exists(state, "campaign_summary")) {
+            state.campaign_summary = {
+                active_missions: 0,
+                completed_missions: 0,
+                rival_activity: "No visible rival movement today."
+            };
+        }
+
+        // Count active missions
+        var _active_missions = 0;
+        for (var i = 0; i < array_length(state.active_missions); i++) {
+            _active_missions += 1;
+        }
+
+        // Count completed missions (this would be tracked elsewhere in a full implementation)
+        var _completed_missions = 0;
+
+        // Update campaign summary
+        state.campaign_summary.active_missions = _active_missions;
+        state.campaign_summary.completed_missions = _completed_missions;
+
+        // Print campaign digest
+        add_log("Campaign Digest: Day " + string(state.day));
+        add_log("Missions: " + string(state.campaign_summary.active_missions) + " active, " + string(state.campaign_summary.completed_missions) + " completed");
+        add_log("Rival Activity: " + state.campaign_summary.rival_activity);
+    }
     // Initialize campaign tracking if not exists
     if (!variable_struct_exists(state, "campaign_goal_days")) {
         state.campaign_goal_days = 30;
