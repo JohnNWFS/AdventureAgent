@@ -3072,6 +3072,38 @@ resolve_pending_signing = function() {
     }
     if (array_length(state.free_agents) <= 0) state.selected_free_agent_index = -1;
     else state.selected_free_agent_index = clamp(state.selected_free_agent_index, 0, array_length(state.free_agents) - 1);
+    // Check for apprentice training initiation
+    for (var i = 0; i < array_length(state.adventurers); i++) {
+        var _a = state.adventurers[i];
+        if (variable_struct_exists(_a, "academy_affiliation") && _a.academy_affiliation == "none" && _a.status == "available") {
+            // 10% chance per hour to initiate training for a random available adventurer
+            if (irandom(99) < 10) {
+                var _training_focus = choose("combat", "magic", "stealth", "diplomacy");
+                var _growth_path = choose("squire", "acolyte", "hedge_apprentice", "warden");
+
+                _a.training_focus = _training_focus;
+                _a.growth_path = _growth_path;
+                _a.academy_affiliation = "guild_academy";
+
+                add_log("Apprentice program initiated for " + _a.name);
+            }
+        }
+    }
+
+    // Check for academy training completion
+    for (var i = 0; i < array_length(state.adventurers); i++) {
+        var _a = state.adventurers[i];
+        if (variable_struct_exists(_a, "academy_affiliation") && _a.academy_affiliation != "none" && _a.academy_affiliation != "") {
+            // Check if training is complete (simplified condition)
+            if (irandom(99) < 10) { // 10% chance per hour to complete training
+                _a.training_focus = "none";
+                _a.growth_path = "none";
+                _a.academy_affiliation = "none";
+                _a.training_complete = true;
+                add_log("Apprentice graduated: " + _a.name);
+            }
+        }
+    }
 };
 
 accept_counter_offer = function() {

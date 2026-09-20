@@ -117,7 +117,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Add endorsements, sponsorships, and ceremonial invitations
 
 ## 9. Apprentice and Academy Pipeline
-- [ ] Add low-cost prospects and trainees
+- [x] Add low-cost prospects and trainees
 - [x] Add in-house development track for squires, acolytes, hedge apprentices, and wardens-in-training
 - [x] Add training focus areas and growth paths
 - [x] Add graduation into represented clients
