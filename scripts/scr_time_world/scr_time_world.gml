@@ -973,6 +973,33 @@ function process_hour_tick() {
         state.pending_signing = undefined;
     }
     process_world_pulse();
+    // Add fame system tracking
+    if (!variable_struct_exists(state, "reputation")) {
+        state.reputation = 0;
+    }
+
+    // Update patron pay profiles based on reputation
+    for (var i = 0; i < array_length(state.patrons); i++) {
+        var _patron = state.patrons[i];
+
+        // Set patron to prestigious profile based on reputation
+        if (state.reputation >= 50 && !variable_struct_exists(_patron, "pay_profile")) {
+            _patron.pay_profile = "prestigious";
+        }
+
+        // Allow flexible staffing for prestigious patrons
+        if (state.reputation >= 50 && !variable_struct_exists(_patron, "flexible_staffing_allowed")) {
+            _patron.flexible_staffing_allowed = true;
+        }
+
+        // Adjust patron satisfaction based on reputation
+        if (state.reputation >= 50) {
+            _patron.satisfaction = clamp(_patron.satisfaction + 5, 0, 100);
+        }
+    }
+
+    // Print fame level summary
+    add_log("Fame level: " + string(state.reputation));
     // Check for academy training completion
     for (var i = 0; i < array_length(state.adventurers); i++) {
         var _a = state.adventurers[i];
