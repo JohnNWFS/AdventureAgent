@@ -225,6 +225,31 @@ contract_city_id, city_name); never hand-build city, contract, or patron structs
 - [x] Relocate the agency headquarters (change home_city_id) as a fresh start; clients decide whether to follow
 - [x] Cities in XML content packs (names, themes, descriptions)
 
+## 19. Campaign Depth (from the design backlog)
+Each item is one slice: a rule the player can feel, reported in one console line. Prefer connecting
+two systems that already exist over new meters. Backlog numbers in brackets.
+- [ ] Party-size opportunity cost: extra members raise wages and payout splits so a smaller expert team wins some contracts [3]
+- [ ] Assignment forecast before launch: broad fit, wage exposure, injury risk and missing capability, without exact numbers [4]
+- [ ] Morning briefing: one daily digest of deadlines, returning missions, injuries, rival moves and net finances [5]
+- [ ] Adventurer traits: six readable traits that each change a mission outcome and a relationship choice [7]
+- [ ] Patron fit: a patron or mission at odds with an adventurer's priorities moves their morale and trust, with the reason given [9]
+- [ ] Mission incidents built from facts: reports use the real party, gear, delays and outcome [13]
+- [ ] Structured history ledger: filter missions, finances, relationship changes and rival incidents by day and cause [15]
+- [ ] Campaign objective: a 30-day restoration goal with solvency warnings and optional endless play [16]
+- [ ] Rival contract bids: a premium contract names a competing agency and a deadline; improve terms or walk away [17]
+- [ ] Actionable poach offers: a named rival bid with a deadline and choices to counter, promise work or release gracefully [18]
+- [ ] Pitching mode: choose one agency strength and cite prior work to win a patron; failure costs time [19]
+- [ ] Rumor and intelligence economy: information carries source, confidence and expiry; research and scouting trade time and gold for reliability [20]
+- [ ] Mid-mission intervention: reinforce, spend supply, authorize retreat or stay the course, with the cost stated [21]
+- [ ] Relic disposition: assign, keep, return or sell notable finds; routine loot handles itself [24]
+- [ ] Branching office upgrades: recruitment, care or patron relations branches that create identity instead of a buy-everything ladder [26]
+- [ ] Fame with expectations: fame unlocks prestigious offers while raising wages, ambitions and poaching pressure [27]
+- [ ] Linked contract chains: an outcome unlocks an authored follow-up that tolerates refusal and branches on success or failure [31]
+- [ ] Game House social layer: patrons, rivals and informants appear there; gambling stays optional [32]
+- [ ] Priority dashboard: at most five ranked issues, each with why it matters now and a direct action [33]
+- [ ] Agency doctrine: an identity such as honorable, elite or civic service that grants benefits and closes other options [35]
+- [ ] Campaign crisis arc: a seasonal threat that alters mission supply, patrons and rivals, with choices carried to its finale [37]
+
 ## Immediate Build Order
 1. Client contracts and relationship depth
 2. Morale / usage pressure / defection risk
