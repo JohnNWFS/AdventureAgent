@@ -1358,6 +1358,44 @@ function end_day() {
         }
     }
     add_log("Fame level: " + string(state.reputation));
+    // Initialize history tracking if not exists
+    if (!variable_struct_exists(state, "contract_history")) {
+        state.contract_history = [];
+    }
+    if (!variable_struct_exists(state, "client_changes")) {
+        state.client_changes = [];
+    }
+    if (!variable_struct_exists(state, "rival_incidents")) {
+        state.rival_incidents = [];
+    }
+
+    // Log contract history
+    var _completed_contracts = 0;
+    for (var i = 0; i < array_length(state.contracts); i++) {
+        var _contract = state.contracts[i];
+        if (variable_struct_exists(_contract, "mission") && variable_struct_exists(_contract.mission, "title") && _contract.accepted && !_contract.expired) {
+            _completed_contracts += 1;
+        }
+    }
+    add_log("Contract History: " + string(_completed_contracts) + " completed");
+
+    // Log client changes
+    var _retained_clients = 0;
+    for (var i = 0; i < array_length(state.patrons); i++) {
+        var _patron = state.patrons[i];
+        if (variable_struct_exists(_patron, "satisfaction") && _patron.satisfaction >= 40) {
+            _retained_clients += 1;
+        }
+    }
+    add_log("Client Changes: " + string(_retained_clients) + " retained");
+
+    // Log rival incidents
+    var _active_rivals = 0;
+    if (variable_struct_exists(state, "rival_cheap_underbidding") && state.rival_cheap_underbidding) _active_rivals += 1;
+    if (variable_struct_exists(state, "rival_noble_patronage") && state.rival_noble_patronage) _active_rivals += 1;
+    if (variable_struct_exists(state, "rival_agency_expanded_city") && state.rival_agency_expanded_city > 0) _active_rivals += 1;
+    if (variable_struct_exists(state, "rival_mercenary_band") && state.rival_mercenary_band) _active_rivals += 1;
+    add_log("Rival Incidents: " + string(_active_rivals) + " active");
     // Initialize city danger levels if not exists
     for (var i = 0; i < array_length(state.cities); i++) {
         var _city = state.cities[i];
