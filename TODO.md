@@ -84,7 +84,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Guild factors
 - [x] Harbor masters
 - [x] Frontier wardens
-- [ ] Arcane colleges
+- [x] Arcane colleges
 
 ## 6. Injury, Recovery, and Care
 - [ ] Add injury tiers:

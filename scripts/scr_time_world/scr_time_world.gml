@@ -1703,6 +1703,37 @@ function end_day() {
     }
 
     // Add new contract type for Castellan patron
+    // Add new contract type for Arcane College patron
+    var _arcane_college_index = get_patron_index_by_name("Arcane College of the Silver Flame");
+    if (_arcane_college_index >= 0) {
+        add_log("New patron class: Arcane College");
+        // Add a new contract for the Arcane College patron
+        var _contract = {
+            id: 1002,
+            title: "Arcane Research",
+            patron_id: _arcane_college_index,
+            unlocked: true,
+            accepted: false,
+            expired: false,
+            expires_hour: 0,
+            ask_text: "Research rare magical components.",
+            mission: {
+                id: 1002,
+                title: "Arcane Research",
+                type: "Research",
+                difficulty: 4,
+                reward: 180,
+                duration_hours: 48,
+                risk: 30,
+                preferred_role: "Magic",
+                weights: { combat: 0.1, magic: 0.7, stealth: 0.1, diplomacy: 0.1 },
+                description: "Research rare magical components for the arcane college.",
+                patron_name: "Arcane College of the Silver Flame",
+                patron_max_party: 3
+            }
+        };
+        array_push(state.contracts, _contract);
+    }
     // Add new contract type for Guild factors patron
     var _guild_factor_index = get_patron_index_by_name("Guild Factors");
     if (_guild_factor_index >= 0) {
