@@ -3,6 +3,38 @@ function enter_game_house() {
     state.mode = MODE.GAME_HOUSE;
     state.game_house_view = "lobby";
     state.status_line = "At the Gilded Griffin Game House. Time and rivals keep moving.";
+    // Add social layer elements to game house
+    if (!variable_struct_exists(state, "game_house")) {
+        state.game_house = {};
+    }
+    if (!variable_struct_exists(state.game_house, "patrons_at_table")) {
+        state.game_house.patrons_at_table = [];
+    }
+    if (!variable_struct_exists(state.game_house, "rivals_at_table")) {
+        state.game_house.rivals_at_table = [];
+    }
+    if (!variable_struct_exists(state.game_house, "informants_at_table")) {
+        state.game_house.informants_at_table = [];
+    }
+
+    // Populate social elements
+    if (array_length(state.game_house.patrons_at_table) == 0) {
+        // Add a patron to the bar
+        array_push(state.game_house.patrons_at_table, "Lady Merrow Vale");
+        add_log("Patron: Lady Merrow Vale at the bar");
+    }
+
+    if (array_length(state.game_house.rivals_at_table) == 0) {
+        // Add a rival agency
+        state.game_house.rivals_at_table = ["Mercenary Band of the Iron Fist"];
+        add_log("Rival: Mercenary Band of the Iron Fist");
+    }
+
+    if (array_length(state.game_house.informants_at_table) == 0) {
+        // Add an informant
+        state.game_house.informants_at_table = ["Tavern gossip about contracts"];
+        add_log("Informant: Tavern gossip about contracts");
+    }
     add_log("You step into the Gilded Griffin Game House. The city clock and rival offices continue in the background.");
 }
 
