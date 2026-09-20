@@ -228,7 +228,7 @@ contract_city_id, city_name); never hand-build city, contract, or patron structs
 ## 19. Campaign Depth (from the design backlog)
 Each item is one slice: a rule the player can feel, reported in one console line. Prefer connecting
 two systems that already exist over new meters. Backlog numbers in brackets.
-- [ ] Party-size opportunity cost: extra members raise wages and payout splits so a smaller expert team wins some contracts [3]
+- [x] Party-size opportunity cost: extra members raise wages and payout splits so a smaller expert team wins some contracts [3]
 - [x] Assignment forecast before launch: broad fit, wage exposure, injury risk and missing capability, without exact numbers [4]
 - [x] Morning briefing: one daily digest of deadlines, returning missions, injuries, rival moves and net finances [5]
 - [ ] Adventurer traits: six readable traits that each change a mission outcome and a relationship choice [7]

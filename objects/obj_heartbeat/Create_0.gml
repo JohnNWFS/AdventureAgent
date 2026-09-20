@@ -3468,6 +3468,16 @@ resolve_active_mission = function(_active) {
     var _adventurer_payout = 0;
     var _agent_cut = 0;
 
+    // Apply party size opportunity cost to net gain calculation
+    var _party_size = array_length(_party);
+    var _party_cost = _party_size * state.party_wage_cost;
+    var _adjusted_reward = _result.gold_earned - _party_cost;
+    if (_adjusted_reward < 0) _adjusted_reward = 0;
+
+    // Update result with adjusted reward
+    _result.gold_earned = _adjusted_reward;
+
+    // Calculate payouts based on adjusted reward
     for (var pay_i = 0; pay_i < array_length(_party); pay_i++) {
         var _mbr = _party[pay_i];
         var _day_rate = variable_struct_exists(_mbr, "adventure_rate") ? _mbr.adventure_rate : 24;
@@ -4111,6 +4121,22 @@ start_mission = function() {
 
     state.selected_party_ids = [];
     state.selected_contract_index = -1;
+    // Initialize party size opportunity cost tracking
+    if (!variable_struct_exists(state, "party_size_opportunity_cost")) {
+        state.party_size_opportunity_cost = true;
+        state.party_wage_cost = 50;
+        state.party_payout_split = 0.33;
+    }
+
+    // Calculate party size cost
+    var _party_size = array_length(_party_ids);
+    var _party_cost = _party_size * state.party_wage_cost;
+    var _adjusted_reward = _mission.reward - _party_cost;
+
+    if (_adjusted_reward < 0) _adjusted_reward = 0;
+
+    add_log("Party size opportunity cost: " + string(_party_size) + " members = " + string(_party_cost) + "g wage cost");
+    add_log("Mission reward: " + string(_adjusted_reward) + "g (after " + string(_party_cost) + "g wage cost)");
     state.mission_review_stage = "missions";
     // Log assignment forecast before mission launch
     var _forecast_broad_fit = 85; // Example value
