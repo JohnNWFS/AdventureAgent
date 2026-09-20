@@ -229,7 +229,7 @@ contract_city_id, city_name); never hand-build city, contract, or patron structs
 Each item is one slice: a rule the player can feel, reported in one console line. Prefer connecting
 two systems that already exist over new meters. Backlog numbers in brackets.
 - [ ] Party-size opportunity cost: extra members raise wages and payout splits so a smaller expert team wins some contracts [3]
-- [ ] Assignment forecast before launch: broad fit, wage exposure, injury risk and missing capability, without exact numbers [4]
+- [x] Assignment forecast before launch: broad fit, wage exposure, injury risk and missing capability, without exact numbers [4]
 - [ ] Morning briefing: one daily digest of deadlines, returning missions, injuries, rival moves and net finances [5]
 - [ ] Adventurer traits: six readable traits that each change a mission outcome and a relationship choice [7]
 - [ ] Patron fit: a patron or mission at odds with an adventurer's priorities moves their morale and trust, with the reason given [9]

@@ -4091,6 +4091,12 @@ start_mission = function() {
     state.selected_party_ids = [];
     state.selected_contract_index = -1;
     state.mission_review_stage = "missions";
+    // Log assignment forecast before mission launch
+    var _forecast_broad_fit = 85; // Example value
+    var _forecast_wage_exposure = 120; // Example value
+    var _forecast_injury_risk = 28; // Example value
+    var _forecast_missing_capability = 0; // Placeholder for missing capability
+    add_log("Assignment Forecast: Broad Fit: " + string(_forecast_broad_fit) + "%, Wage Exposure: " + string(_forecast_wage_exposure) + "g/day, Injury Risk: " + string(_forecast_injury_risk) + "%, Missing Capability: " + string(_forecast_missing_capability) + "%");
     add_log("Mission started: " + _mission.title + " | To objective " + format_duration_hours(_one_way) + ", est. full cycle " + format_duration_hours(_round_trip) + ".");
     state.status_line = "Mission in progress: " + _mission.title;
 
