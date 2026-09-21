@@ -1470,6 +1470,15 @@ function end_day() {
 
     // Enable endless play mode
     state.endless_play_enabled = true;
+    // Initialize agency doctrine if not exists
+    if (!variable_struct_exists(state, "agency_doctrine")) {
+        state.agency_doctrine = "honorable";
+        state.doctrine_benefits = { reputation_gain: 5 };
+        state.doctrine_restrictions = ["elite_contracts"];
+        add_log("Agency doctrine: " + state.agency_doctrine);
+        add_log("Doctrine benefits: +" + string(state.doctrine_benefits.reputation_gain) + "% reputation gain");
+        add_log("Doctrine restrictions: Cannot take elite contracts");
+    }
     add_log("Endless play mode enabled")
     // Initialize regional content tracking if not exists
     if (!variable_struct_exists(state, "regional_content")) {

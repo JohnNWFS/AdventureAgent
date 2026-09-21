@@ -247,7 +247,7 @@ two systems that already exist over new meters. Backlog numbers in brackets.
 - [x] Linked contract chains: an outcome unlocks an authored follow-up that tolerates refusal and branches on success or failure [31]
 - [x] Game House social layer: patrons, rivals and informants appear there; gambling stays optional [32]
 - [ ] Priority dashboard: at most five ranked issues, each with why it matters now and a direct action [33]
-- [ ] Agency doctrine: an identity such as honorable, elite or civic service that grants benefits and closes other options [35]
+- [x] Agency doctrine: an identity such as honorable, elite or civic service that grants benefits and closes other options [35]
 - [x] Campaign crisis arc: a seasonal threat that alters mission supply, patrons and rivals, with choices carried to its finale [37]
 
 ## Immediate Build Order
