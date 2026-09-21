@@ -259,7 +259,7 @@ Same rules as section 19: one slice each, a rule the player feels, reported in o
 - [ ] Dynamic contract market: scarcity and rewards shift with season, crises and rival strategy [41]
 - [x] Retirement and legacy: a retiring veteran becomes staff, a mentor or a named contact based on their history [42]
 - [x] Insurance and liability: one seasonal policy decision that changes injury costs and dispute outcomes [43]
-- [ ] Scenario starts: seeded starts that vary debt, roster and rivals while reusing the same rules [44]
+- [x] Scenario starts: seeded starts that vary debt, roster and rivals while reusing the same rules [44]
 - [x] Multiple endings: evaluate solvency, reputation, patron network, roster loyalty and rival standing separately [45]
 - [x] Rival diplomacy: joint operations, lead trades and settlements anchored to remembered outcomes [39]
 - [ ] Factions and licenses: guild, church, civic and noble standing that opens work and creates conflicts [38]

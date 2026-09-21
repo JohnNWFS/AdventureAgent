@@ -1641,6 +1641,34 @@ function end_day() {
 
     // Enable endless play mode
     state.endless_play_enabled = true;
+    // Initialize seeded start conditions
+    if (!variable_struct_exists(state, "seeded_start_initialized")) {
+        state.seeded_start_initialized = true;
+
+        // Set random debt (0-150g)
+        state.gold_owed = irandom(150);
+
+        // Set random roster size (3-7 adventurers)
+        var _target_roster_size = irandom_range(3, 7);
+
+        // Ensure we have enough adventurers
+        while (array_length(state.adventurers) < _target_roster_size) {
+            var _new_adv = build_adventurer_profile("Adventurer", "Generic", 0, 0, 0, 0, 50, 10, 10, 0.05, 10, -1);
+            _new_adv.hireable = true;
+            array_push(state.adventurers, _new_adv);
+        }
+
+        // Set random rival presence
+        state.rival_cheap_underbidding = irandom(1) == 1;
+        state.rival_noble_patronage = irandom(1) == 1;
+
+        // Set random city expansion
+        state.rival_agency_expanded_city = irandom(1) == 1 ? 2 : 0; // 2 = Vellanor
+
+        // Print summary
+        var _rivals = (state.rival_cheap_underbidding ? 1 : 0) + (state.rival_noble_patronage ? 1 : 0) + (state.rival_agency_expanded_city > 0 ? 1 : 0);
+        add_log("Seeded start: Debt " + string(state.gold_owed) + "g, Roster " + string(array_length(state.adventurers)) + ", Rivals " + string(_rivals));
+    }
     // Initialize campaign evaluation if not exists
     if (!variable_struct_exists(state, "campaign_evaluation")) {
         state.campaign_evaluation = {
