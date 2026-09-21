@@ -2736,6 +2736,35 @@ grow_adventurer_from_mission = function(_adv_id, _difficulty) {
     }
 
     add_log(state.adventurers[_idx].name + " improved after mission success.");
+    if (adventurer_core_maxed(state.adventurers[_idx]) && state.adventurers[_idx].reliability >= 95) {
+        state.adventurers[_idx].status = "retired";
+        add_log("Veteran retired: " + state.adventurers[_idx].name);
+
+        // Initialize legacy systems if not exists
+        if (!variable_struct_exists(state, "retired_veterans")) {
+            state.retired_veterans = [];
+        }
+        if (!variable_struct_exists(state, "legacy_contacts")) {
+            state.legacy_contacts = [];
+        }
+        if (!variable_struct_exists(state, "mentor_veterans")) {
+            state.mentor_veterans = [];
+        }
+        if (!variable_struct_exists(state, "staff_veterans")) {
+            state.staff_veterans = [];
+        }
+
+        // Add to retired veterans
+        array_push(state.retired_veterans, state.adventurers[_idx]);
+
+        // Add to legacy contacts
+        array_push(state.legacy_contacts, state.adventurers[_idx]);
+        add_log("Legacy contact: " + state.adventurers[_idx].name);
+
+        // Add to mentors
+        array_push(state.mentor_veterans, state.adventurers[_idx]);
+        add_log("Mentor: " + state.adventurers[_idx].name);
+    }
 
     if (adventurer_core_maxed(state.adventurers[_idx]) && state.adventurers[_idx].reliability >= 95) {
         state.adventurers[_idx].status = "retired";
