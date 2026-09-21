@@ -1879,6 +1879,19 @@ function end_day() {
     state.recruitment_bonus = state.office_upgrade_level * 5;
     state.recovery_bonus = state.office_upgrade_level * 10;
     state.patron_trust_bonus = state.office_upgrade_level * 3;
+    // Branch office: Vellanor
+    if (state.office_upgrade_level >= 1 && !variable_struct_exists(state, "branch_offices")) {
+        state.branch_offices = [
+            {
+                city_id: 2,
+                cost: 500,
+                daily_upkeep: 100
+            }
+        ];
+        state.home_city_id = 2;
+        add_log("Branch office: Vellanor");
+        add_log("Agency headquarters relocated to Vellanor");
+    }
 
     add_log("Office upgrade: Recruitment bonus " + string(state.recruitment_bonus) + "%, Recovery rate +" + string(state.recovery_bonus) + "%, Patron trust +" + string(state.patron_trust_bonus) + "%");
 

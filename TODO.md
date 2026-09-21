@@ -242,7 +242,7 @@ two systems that already exist over new meters. Backlog numbers in brackets.
 - [x] Rumor and intelligence economy: information carries source, confidence and expiry; research and scouting trade time and gold for reliability [20]
 - [x] Mid-mission intervention: reinforce, spend supply, authorize retreat or stay the course, with the cost stated [21]
 - [x] Relic disposition: assign, keep, return or sell notable finds; routine loot handles itself [24]
-- [ ] Branching office upgrades: recruitment, care or patron relations branches that create identity instead of a buy-everything ladder [26]
+- [x] Branching office upgrades: recruitment, care or patron relations branches that create identity instead of a buy-everything ladder [26]
 - [x] Fame with expectations: fame unlocks prestigious offers while raising wages, ambitions and poaching pressure [27]
 - [x] Linked contract chains: an outcome unlocks an authored follow-up that tolerates refusal and branches on success or failure [31]
 - [x] Game House social layer: patrons, rivals and informants appear there; gambling stays optional [32]
