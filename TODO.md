@@ -253,7 +253,7 @@ two systems that already exist over new meters. Backlog numbers in brackets.
 ## 20. Later Campaign Systems (design backlog, second pass)
 Same rules as section 19: one slice each, a rule the player feels, reported in one console line.
 - [ ] Roster health summary: one console line per client with morale, trust and days idle when the roster opens [15]
-- [ ] Finance summary: gold, owed, weekly wage burn and last week's net, printed on request and at day end [15]
+- [x] Finance summary: gold, owed, weekly wage burn and last week's net, printed on request and at day end [15]
 - [ ] Gear procurement: a rotating market with batch repair priced by condition, no per-item clicking [23]
 - [ ] Seasonal operations: each season changes which mission families appear and one visible constraint [29]
 - [ ] Dynamic contract market: scarcity and rewards shift with season, crises and rival strategy [41]

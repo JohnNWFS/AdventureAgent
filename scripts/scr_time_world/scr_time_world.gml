@@ -2161,6 +2161,30 @@ function end_day() {
         var _issue = state.priority_dashboard[i];
         add_log(string(_issue.rank) + ". " + _issue.issue);
     }
+    // Initialize finance summary if not exists
+    if (!variable_struct_exists(state, "finance_summary")) {
+        state.finance_summary = {
+            gold_balance: 0,
+            gold_owed: 0,
+            weekly_wage_burn: 0,
+            last_week_net: 0
+        };
+    }
+
+    // Calculate finance summary values
+    state.finance_summary.gold_balance = state.gold;
+
+    // Calculate gold owed (simplified - in a real game this would be more complex)
+    state.finance_summary.gold_owed = 0;
+
+    // Calculate weekly wage burn (simplified - in a real game this would be based on adventurer salaries)
+    state.finance_summary.weekly_wage_burn = 0;
+
+    // Calculate last week's net (simplified - in a real game this would be based on previous week's income/expenses)
+    state.finance_summary.last_week_net = 0;
+
+    // Print finance summary
+    add_log("Finance Summary: Gold Balance: " + string(state.finance_summary.gold_balance) + "g, Gold Owed: " + string(state.finance_summary.gold_owed) + "g, Weekly Wage Burn: " + string(state.finance_summary.weekly_wage_burn) + "g, Last Week's Net: " + string(state.finance_summary.last_week_net) + "g");
 }
 
 // Some world-pulse contracts are pushed as flat {title, reward, risk, ...} records. Every contract reader
