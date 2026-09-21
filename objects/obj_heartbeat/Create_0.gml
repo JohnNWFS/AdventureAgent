@@ -2194,6 +2194,11 @@ open_adventurer_detail = function(_idx) {
     add_log("Representation: " + _a.representation_type + " | " + string(_a.contract_days_remaining) + "/" + string(_a.contract_term_days) + " day(s) remaining.");
     add_log("Relationship: morale " + string(_a.morale) + " | trust " + string(_a.trust) + " | expects work every " + string(_a.activity_expectation_days) + " day(s) | priority " + _a.ambition + " | risk " + _a.risk_preference + " | negotiation annoyance " + string(_a.renegotiation_annoyance) + " | defection risk " + string(_a.defection_risk) + ".");
     add_log("Personal purse: " + string(_a.purse_gold) + "g | Lifetime earnings " + string(_a.lifetime_earnings) + "g | Last mission payout " + string(_a.last_mission_payout) + "g.");
+    if (!state.adventurer_detail_tooltip_displayed) {
+        add_log("Morale: Player's perception of adventurer satisfaction");
+        add_log("Trust: Adventurer's confidence in the agency");
+        state.adventurer_detail_tooltip_displayed = true;
+    }
     add_log("Kit: " + array_join_text(_a.kit));
     add_log("Agency-issued gear: " + adventurer_issued_gear_text(_a) + ".");
     add_log("Arcana known: " + array_join_text(_a.found_magic));
@@ -2471,6 +2476,10 @@ select_contract_for_review = function(_contract_index) {
         return;
     }
     state.status_line = "Contract review: " + _contract.mission.title;
+    if (!state.contract_tooltip_displayed) {
+        add_log("Contract terms: Day rate, commission, charter duration");
+        state.contract_tooltip_displayed = true;
+    }
 };
 
 advance_to_party_assignment = function() {

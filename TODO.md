@@ -181,7 +181,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Rival threat
 - [ ] Agency finances
 - [x] Add history browser for contracts, client changes, and rival incidents
-- [ ] Add tooltips / glossary for morale, trust, and contract terms
+- [x] Add tooltips / glossary for morale, trust, and contract terms
 
 ## 17. Balancing and Debugging
 - [x] Add debug overlays for mission scoring and negotiation scoring
