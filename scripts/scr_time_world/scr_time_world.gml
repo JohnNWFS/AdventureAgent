@@ -967,6 +967,36 @@ function process_world_pulse() {
             add_log("Golem rampage contracts available.");
         }
     }
+    // Add rival diplomacy system
+    if (!variable_struct_exists(state, "rival_diplomacy_active")) {
+        state.rival_diplomacy_active = true;
+        state.rival_joint_operations = [];
+        state.rival_proposal_count = 0;
+    }
+
+    // Rival joint operation proposal
+    if (irandom(99) < 15 && state.rival_diplomacy_active && state.rival_proposal_count < 3) {
+        // Create a joint operation proposal
+        var _proposal = {
+            title: "Joint Operation: Temple of the Sacred Flame",
+            description: "A joint operation with the Temple of the Sacred Flame to address a growing threat.",
+            difficulty: 20,
+            reward: 250,
+            risk: 25,
+            location: "Temple District",
+            expires_hour: state.absolute_hour + 48,
+            unlocked: true,
+            accepted: false,
+            expired: false,
+            seasonal: false,
+            patron_name: "Temple of the Sacred Flame"
+        };
+
+        array_push(state.rival_joint_operations, _proposal);
+        state.rival_proposal_count += 1;
+        add_log("Rival diplomacy: Joint operation proposal");
+        add_log("Joint operation: Temple of the Sacred Flame");
+    }
 }
 
 function process_rival_offer() {
@@ -2016,6 +2046,50 @@ function end_day() {
             add_log("Save file created: " + state.save_file_path);
             add_log("Content version: " + state.save_file_version);
             add_log("Save/load system initialized");
+            // Add rival diplomacy system
+            if (!variable_struct_exists(state, "rival_diplomacy_active")) {
+                state.rival_diplomacy_active = true;
+                state.rival_joint_operations = [];
+                state.rival_proposal_count = 0;
+            }
+
+            // Process rival joint operation proposals
+            if (array_length(state.rival_joint_operations) > 0) {
+                for (var i = 0; i < array_length(state.rival_joint_operations); i++) {
+                    var _proposal = state.rival_joint_operations[i];
+                    if (!_proposal.accepted && !_proposal.expired) {
+                        // Add the proposal as a contract
+                        var _contract = {
+                            id: 1003 + i,
+                            title: _proposal.title,
+                            patron_id: get_patron_index_by_name(_proposal.patron_name),
+                            unlocked: true,
+                            accepted: false,
+                            expired: false,
+                            expires_hour: _proposal.expires_hour,
+                            ask_text: _proposal.description,
+                            mission: {
+                                id: 1003 + i,
+                                title: _proposal.title,
+                                type: "Joint Operation",
+                                difficulty: _proposal.difficulty,
+                                reward: _proposal.reward,
+                                duration_hours: 48,
+                                risk: _proposal.risk,
+                                preferred_role: "Diplomacy",
+                                weights: { combat: 0.2, magic: 0.2, stealth: 0.2, diplomacy: 0.4 },
+                                description: _proposal.description,
+                                patron_name: _proposal.patron_name,
+                                patron_max_party: 4
+                            }
+                        };
+                        array_push(state.contracts, _contract);
+                        add_log("Proposal accepted: " + _proposal.patron_name);
+                    }
+                }
+                // Clear the joint operations list
+                state.rival_joint_operations = [];
+            }
         }
         add_log("Migration complete: 1.0 -> 1.1");
     }
