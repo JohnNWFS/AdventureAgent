@@ -250,6 +250,22 @@ two systems that already exist over new meters. Backlog numbers in brackets.
 - [x] Agency doctrine: an identity such as honorable, elite or civic service that grants benefits and closes other options [35]
 - [x] Campaign crisis arc: a seasonal threat that alters mission supply, patrons and rivals, with choices carried to its finale [37]
 
+## 20. Later Campaign Systems (design backlog, second pass)
+Same rules as section 19: one slice each, a rule the player feels, reported in one console line.
+- [ ] Roster health summary: one console line per client with morale, trust and days idle when the roster opens [15]
+- [ ] Finance summary: gold, owed, weekly wage burn and last week's net, printed on request and at day end [15]
+- [ ] Gear procurement: a rotating market with batch repair priced by condition, no per-item clicking [23]
+- [ ] Seasonal operations: each season changes which mission families appear and one visible constraint [29]
+- [ ] Dynamic contract market: scarcity and rewards shift with season, crises and rival strategy [41]
+- [ ] Retirement and legacy: a retiring veteran becomes staff, a mentor or a named contact based on their history [42]
+- [ ] Insurance and liability: one seasonal policy decision that changes injury costs and dispute outcomes [43]
+- [ ] Scenario starts: seeded starts that vary debt, roster and rivals while reusing the same rules [44]
+- [ ] Multiple endings: evaluate solvency, reputation, patron network, roster loyalty and rival standing separately [45]
+- [ ] Rival diplomacy: joint operations, lead trades and settlements anchored to remembered outcomes [39]
+- [ ] Factions and licenses: guild, church, civic and noble standing that opens work and creates conflicts [38]
+- [ ] Apprentice academy: term-level recruiting and training with future value against present wage cost [36]
+- [ ] External content pass: move patrons, locations, incidents and relics into validated XML, formulas stay in code [34]
+
 ## Immediate Build Order
 1. Client contracts and relationship depth
 2. Morale / usage pressure / defection risk
