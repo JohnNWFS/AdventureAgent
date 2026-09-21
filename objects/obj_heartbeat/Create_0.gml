@@ -638,6 +638,7 @@ build_adventurer_profile = function(_name, _role, _combat, _magic, _stealth, _di
         renegotiation_annoyance: 0,
         last_renegotiation_day: 0,
         defection_risk: 0,
+        traits: [choose("Brave", "Loyal", "Careful", "Bold", "Diplomatic", "Reckless"), choose("Brave", "Loyal", "Careful", "Bold", "Diplomatic", "Reckless"), choose("Brave", "Loyal", "Careful", "Bold", "Diplomatic", "Reckless")],
         training_focus: "none",
         growth_path: "none",
         academy_affiliation: "none",
@@ -2204,6 +2205,7 @@ open_adventurer_detail = function(_idx) {
     add_log("Arcana known: " + array_join_text(_a.found_magic));
     add_log("Relics held: " + array_join_text(_a.found_relics));
     add_log("Field finds: " + array_join_text(_a.notable_finds));
+    add_log("Traits: " + array_join_text(_a.traits));
 };
 
 open_adventurer_renegotiation = function() {
