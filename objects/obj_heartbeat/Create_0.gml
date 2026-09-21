@@ -2476,7 +2476,7 @@ select_contract_for_review = function(_contract_index) {
         return;
     }
     state.status_line = "Contract review: " + _contract.mission.title;
-    if (!state.contract_tooltip_displayed) {
+    if (!variable_struct_exists(state, "contract_tooltip_displayed") || !state.contract_tooltip_displayed) {
         add_log("Contract terms: Day rate, commission, charter duration");
         state.contract_tooltip_displayed = true;
     }
@@ -3936,83 +3936,7 @@ resolve_active_mission = function(_active) {
         state.herbal_care_available = true;
         add_log("Injury treatment: Herbal remedies");
     }
-    var _margin = round(_score - _target);
-    if (state.debug_mission_scoring) {
-        add_log("DEBUG: Mission scoring details");
-        add_log("DEBUG: Party composition score: " + string(_raw_power));
-        add_log("DEBUG: Outcome probability: " + string(_margin));
-    }
 
-    var _outcome = "failure";
-    var _gold = 0;
-    var _rep = -2;
-
-    if (_margin >= 12) {
-        _outcome = "success";
-        _gold = _mission.reward;
-        _rep = 2;
-    } else if (_margin >= -8) {
-        _outcome = "partial";
-        _gold = floor(_mission.reward * 0.60);
-        _rep = 1;
-    } else {
-        _outcome = "failure";
-        _gold = choose(0, floor(_mission.reward * 0.15));
-        _rep = -2;
-    }
-
-    var _injury = false;
-    var _injured_id = -1;
-    var _injury_chance = 0;
-
-    if (_outcome == "failure") _injury_chance = 28 + _mission.risk;
-    else if (_outcome == "partial") _injury_chance = 10 + floor(_mission.risk * 0.5);
-    else _injury_chance = floor(_mission.risk * 0.2);
-
-    var _guard_total = 0;
-    for (var g = 0; g < array_length(_party); g++) {
-        _guard_total += adventurer_mission_injury_guard(_party[g]);
-    }
-    _injury_chance = max(0, _injury_chance - floor(_guard_total / max(1, array_length(_party))));
-
-    if (array_length(_party) > 0 && irandom(99) < _injury_chance) {
-        _injury = true;
-        _injured_id = _party[irandom(array_length(_party) - 1)].id;
-    }
-
-    var _events = [];
-    array_push(_events, "Mission brief: " + _mission.title);
-    array_push(_events, "Difficulty " + string(_mission.difficulty) + " / Risk " + string(_mission.risk) + "%");
-    array_push(_events, "Team score " + string(round(_score)) + " vs target " + string(round(_target)) + ".");
-    if (_guard_total > 0) array_push(_events, "Issued gear reduced injury pressure by " + string(floor(_guard_total / max(1, array_length(_party)))) + ".");
-    var _collection_total = 0;
-    for (var c = 0; c < array_length(_party); c++) {
-        _collection_total += adventurer_collection_bonus(_party[c], _mission);
-    }
-    if (_collection_total > 0) array_push(_events, "Client finds and relics added " + string(_collection_total) + " field score.");
-    if (_delay_hours > 0) {
-        array_push(_events, "Delays accumulated: " + format_duration_hours(_delay_hours) + " (efficiency penalty applied).);");
-    }
-
-    switch (_outcome) {
-        case "success": array_push(_events, "Outcome: SUCCESS. Patron terms fulfilled."); break;
-        case "partial": array_push(_events, "Outcome: PARTIAL SUCCESS. Concessions required."); break;
-        default: array_push(_events, "Outcome: FAILURE. Contract terms not met."); break;
-    }
-
-    if (_injury) array_push(_events, "An adventurer was injured during extraction.");
-    else array_push(_events, "No major injuries reported.");
-
-    return {
-        outcome: _outcome,
-        outcome_text: string_upper(_outcome),
-        gold_earned: _gold,
-        reputation_delta: _rep,
-        injury_happened: _injury,
-        injured_adv_id: _injured_id,
-        event_log: _events,
-        acknowledged: false
-    };
     // Add mission intervention options
     if (!variable_struct_exists(_active, "intervention_options")) {
         _active.intervention_options = [];
