@@ -1694,6 +1694,45 @@ function end_day() {
         add_log("Doctrine restrictions: Cannot take elite contracts");
     }
     add_log("Endless play mode enabled")
+    // Initialize gear market inventory if not exists
+    if (!variable_struct_exists(state, "gear_market_inventory")) {
+        state.gear_market_inventory = [
+            { name: "Dwarven Warhammer", stock: 2 },
+            { name: "Travel Cloak", stock: 3 },
+            { name: "Ward Scroll", stock: 1 },
+            { name: "Lockpick Roll", stock: 2 }
+        ];
+        add_log("Gear market: Dwarven Warhammer x2");
+        add_log("Gear market: Travel Cloak x3");
+    }
+
+    // Initialize gear repair system if not exists
+    if (!variable_struct_exists(state, "gear_repair_cost")) {
+        state.gear_repair_cost = 10;
+    }
+    if (!variable_struct_exists(state, "gear_repair_available")) {
+        state.gear_repair_available = true;
+    }
+
+    // Process gear repair for all adventurers
+    if (state.gear_repair_available) {
+        var _repair_count = 0;
+        for (var i = 0; i < array_length(state.adventurers); i++) {
+            var _adv = state.adventurers[i];
+            if (variable_struct_exists(_adv, "gear") && array_length(_adv.gear) > 0) {
+                for (var g = 0; g < array_length(_adv.gear); g++) {
+                    var _item = _adv.gear[g];
+                    if (variable_struct_exists(_item, "durability") && _item.durability < 100) {
+                        _item.durability = min(100, _item.durability + 20);
+                        _repair_count += 1;
+                    }
+                }
+            }
+        }
+        if (_repair_count > 0) {
+            add_log("Repair: " + string(_repair_count) + " items");
+        }
+    }
     // Initialize regional content tracking if not exists
     if (!variable_struct_exists(state, "regional_content")) {
         state.regional_content = {};

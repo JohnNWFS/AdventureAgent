@@ -254,7 +254,7 @@ two systems that already exist over new meters. Backlog numbers in brackets.
 Same rules as section 19: one slice each, a rule the player feels, reported in one console line.
 - [x] Roster health summary: one console line per client with morale, trust and days idle when the roster opens [15]
 - [x] Finance summary: gold, owed, weekly wage burn and last week's net, printed on request and at day end [15]
-- [ ] Gear procurement: a rotating market with batch repair priced by condition, no per-item clicking [23]
+- [x] Gear procurement: a rotating market with batch repair priced by condition, no per-item clicking [23]
 - [x] Seasonal operations: each season changes which mission families appear and one visible constraint [29]
 - [ ] Dynamic contract market: scarcity and rewards shift with season, crises and rival strategy [41]
 - [x] Retirement and legacy: a retiring veteran becomes staff, a mentor or a named contact based on their history [42]
