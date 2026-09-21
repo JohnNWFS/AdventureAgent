@@ -238,7 +238,7 @@ two systems that already exist over new meters. Backlog numbers in brackets.
 - [x] Campaign objective: a 30-day restoration goal with solvency warnings and optional endless play [16]
 - [x] Rival contract bids: a premium contract names a competing agency and a deadline; improve terms or walk away [17]
 - [x] Actionable poach offers: a named rival bid with a deadline and choices to counter, promise work or release gracefully [18]
-- [ ] Pitching mode: choose one agency strength and cite prior work to win a patron; failure costs time [19]
+- [x] Pitching mode: choose one agency strength and cite prior work to win a patron; failure costs time [19]
 - [x] Rumor and intelligence economy: information carries source, confidence and expiry; research and scouting trade time and gold for reliability [20]
 - [x] Mid-mission intervention: reinforce, spend supply, authorize retreat or stay the course, with the cost stated [21]
 - [x] Relic disposition: assign, keep, return or sell notable finds; routine loot handles itself [24]

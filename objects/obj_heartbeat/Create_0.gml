@@ -2592,6 +2592,11 @@ unlock_patron_contracts = function(_patron_index) {
 
     var _patron = state.patrons[_patron_index];
     state.selected_patron_index = _patron_index;
+    if (state.mode == MODE.PITCHING) {
+        add_log("Pitching mode active. Selecting agency strength to present.");
+        state.pitching_strength = "reputation";
+        state.pitching_failure_penalty = 24;
+    }
 
     add_log(_patron.name + " contacted you via " + _patron.contact + ".");
 
@@ -4933,6 +4938,7 @@ process_command = function(_raw) {
         case "COUNTER": office_activity_counteroffer(); break;
 
         case "MODE":
+        case "PITCHING": state.mode = MODE.PITCHING; add_log("Pitching mode: Agency strengths available"); add_log("Strength: Reputation"); add_log("Strength: Roster Quality"); break;
             if (array_length(_parts) > 1) {
                 var _m = _parts[1];
                 switch (_m) {
