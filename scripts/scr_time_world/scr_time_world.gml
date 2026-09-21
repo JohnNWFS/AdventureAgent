@@ -151,6 +151,62 @@ function process_world_pulse() {
         }
     }
     add_log("Seasonal content: Dry-Season Ruin Delve");
+    // Autumn harvest protection mission
+    if (state.season == "Autumn" && irandom(99) < 20) {
+        var _already_exists = false;
+        for (var i = 0; i < array_length(state.contracts); i++) {
+            if (state.contracts[i].title == "Harvest Protection") {
+                _already_exists = true;
+                break;
+            }
+        }
+        if (!_already_exists) {
+            var _harvest_contract = {
+                title: "Harvest Protection",
+                description: "Farmers seek protection from raiders.",
+                difficulty: 15,
+                reward: 180,
+                risk: 30,
+                location: "Eastern Farms",
+                expires_hour: state.absolute_hour + 48,
+                unlocked: true,
+                accepted: false,
+                expired: false,
+                seasonal: true
+            };
+            array_push(state.contracts, _harvest_contract);
+            add_log("Seasonal content: Harvest Protection");
+            add_log("Farmers seek protection from raiders.");
+            add_log("Harvest protection contracts available.");
+        }
+    }
+    // Winter pass escort mission check
+    if (state.season == "Winter" && irandom(99) < 10) {
+        var _already_exists = false;
+        for (var i = 0; i < array_length(state.contracts); i++) {
+            if (state.contracts[i].title == "Winter Pass Escorts") {
+                _already_exists = true;
+                break;
+            }
+        }
+        if (!_already_exists) {
+            var _escort_mission = {
+                title: "Winter Pass Escorts",
+                description: "Escort a noble caravan through the snow-covered passes.",
+                difficulty: 3,
+                reward: 150,
+                risk: 2,
+                location: "Snowy Passes",
+                expires_hour: state.absolute_hour + 48,
+                unlocked: true,
+                accepted: false,
+                expired: false,
+                seasonal: true
+            };
+            array_push(state.contracts, _escort_mission);
+            add_log("Seasonal content: Winter Pass Escorts");
+        }
+    }
     // Add city rumors to the world pulse
     var _city_rumors = [
         { id: 1, name: "Eastmarch Hold", theme: "frontier", description: "A frontier fort town. Poor patrons, dangerous work, and hazard pay for those who survive it." },
@@ -850,6 +906,65 @@ function process_world_pulse() {
 
             // Log the rival offer
             add_log("Rival offer from Mercenary Band of the Iron Fist");
+        }
+    }
+    // Spring goblin raid contract check
+    if (state.season == "Spring" && irandom(99) < 15) {
+        // Check if contract already exists
+        var _already_exists = false;
+        for (var i = 0; i < array_length(state.contracts); i++) {
+            if (state.contracts[i].title == "Goblin Raids in Spring") {
+                _already_exists = true;
+                break;
+            }
+        }
+        if (!_already_exists) {
+            var _goblin_raid_contract = {
+                title: "Goblin Raids in Spring",
+                description: "Goblin raiders threaten the eastern villages.",
+                difficulty: 20,
+                reward: 120,
+                risk: 25,
+                location: "Eastern Villages",
+                expires_hour: state.absolute_hour + 48,
+                unlocked: true,
+                accepted: false,
+                expired: false,
+                seasonal: true
+            };
+            array_push(state.contracts, _goblin_raid_contract);
+            add_log("Seasonal content: Goblin Raids in Spring");
+            add_log("Goblin raiders threaten the eastern villages.");
+            add_log("Raid contracts available.");
+        }
+    }
+    // Spring golem rampage mission
+    if (state.season == "Spring" && irandom(99) < 10) {
+        var _already_exists = false;
+        for (var i = 0; i < array_length(state.contracts); i++) {
+            if (state.contracts[i].title == "Spring Golem Rampage") {
+                _already_exists = true;
+                break;
+            }
+        }
+        if (!_already_exists) {
+            var _golem_contract = {
+                title: "Spring Golem Rampage",
+                description: "Ancient golems awakened by spring thaw threaten the city walls.",
+                difficulty: 25,
+                reward: 180,
+                risk: 35,
+                location: "City Walls",
+                expires_hour: state.absolute_hour + 48,
+                unlocked: true,
+                accepted: false,
+                expired: false,
+                seasonal: true
+            };
+            array_push(state.contracts, _golem_contract);
+            add_log("Seasonal content: Spring Golem Rampage");
+            add_log("Ancient golems awakened by spring thaw threaten the city walls.");
+            add_log("Golem rampage contracts available.");
         }
     }
 }
