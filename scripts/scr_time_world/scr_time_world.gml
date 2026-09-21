@@ -1496,6 +1496,21 @@ function end_day() {
 
     // Enable endless play mode
     state.endless_play_enabled = true;
+    // Initialize campaign evaluation if not exists
+    if (!variable_struct_exists(state, "campaign_evaluation")) {
+        state.campaign_evaluation = {
+            solvency: "OK",
+            reputation: 42,
+            patron_network: 8,
+            roster_loyalty: 0,
+            rival_standing: 0
+        };
+    }
+
+    // Print campaign evaluation summary
+    add_log("Campaign Status: " + state.campaign_evaluation.solvency);
+    add_log("Reputation: " + string(state.campaign_evaluation.reputation) + "/100");
+    add_log("Patron Network: " + string(state.campaign_evaluation.patron_network) + "/12");
     // Initialize agency doctrine if not exists
     if (!variable_struct_exists(state, "agency_doctrine")) {
         state.agency_doctrine = "honorable";
