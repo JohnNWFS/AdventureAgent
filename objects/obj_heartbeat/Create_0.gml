@@ -3764,6 +3764,48 @@ resolve_active_mission = function(_active) {
         }
     ];
     array_push(state.pending_reports, _result);
+    // Initialize contract chains system if not exists
+    if (!variable_struct_exists(state, "contract_chains")) {
+        state.contract_chains = [];
+    }
+
+    // Check if this mission has follow-up contracts
+    if (variable_struct_exists(_mission, "follow_up_contract_id") && _mission.follow_up_contract_id != -1) {
+        // Create contract chain entry
+        var _chain = {
+            mission_id: _mission.id,
+            follow_up_contract_id: _mission.follow_up_contract_id,
+            success_branch_id: _mission.chain_success_branch_id,
+            failure_branch_id: _mission.chain_failure_branch_id,
+            outcome: _result.outcome,
+            completed: true
+        };
+        array_push(state.contract_chains, _chain);
+
+        // Add follow-up contract based on outcome
+        if (_result.outcome == "success" && _mission.chain_success_branch_id != -1) {
+            // Find and unlock success branch contract
+            var _success_contract_idx = find_contract_index_by_id(_mission.chain_success_branch_id);
+            if (_success_contract_idx >= 0) {
+                state.contracts[_success_contract_idx].unlocked = true;
+                add_log("Follow-up contract available: " + state.contracts[_success_contract_idx].mission.title);
+            }
+        } else if (_result.outcome == "failure" && _mission.chain_failure_branch_id != -1) {
+            // Find and unlock failure branch contract
+            var _failure_contract_idx = find_contract_index_by_id(_mission.chain_failure_branch_id);
+            if (_failure_contract_idx >= 0) {
+                state.contracts[_failure_contract_idx].unlocked = true;
+                add_log("Follow-up contract available: " + state.contracts[_failure_contract_idx].mission.title);
+            }
+        }
+    }
+
+    // Add contract chain indicators
+    if (_result.outcome == "success") {
+        add_log("Contract chain: Success branch");
+    } else if (_result.outcome == "failure") {
+        add_log("Contract chain: Failure branch");
+    }
     // Initialize relic disposition system
     if (!variable_struct_exists(state, "relic_disposition_system")) {
         state.relic_disposition_system = true;
