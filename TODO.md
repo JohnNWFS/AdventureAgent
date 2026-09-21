@@ -258,7 +258,7 @@ Same rules as section 19: one slice each, a rule the player feels, reported in o
 - [ ] Seasonal operations: each season changes which mission families appear and one visible constraint [29]
 - [ ] Dynamic contract market: scarcity and rewards shift with season, crises and rival strategy [41]
 - [ ] Retirement and legacy: a retiring veteran becomes staff, a mentor or a named contact based on their history [42]
-- [ ] Insurance and liability: one seasonal policy decision that changes injury costs and dispute outcomes [43]
+- [x] Insurance and liability: one seasonal policy decision that changes injury costs and dispute outcomes [43]
 - [ ] Scenario starts: seeded starts that vary debt, roster and rivals while reusing the same rules [44]
 - [ ] Multiple endings: evaluate solvency, reputation, patron network, roster loyalty and rival standing separately [45]
 - [ ] Rival diplomacy: joint operations, lead trades and settlements anchored to remembered outcomes [39]

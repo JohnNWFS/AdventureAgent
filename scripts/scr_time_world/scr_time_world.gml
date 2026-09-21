@@ -792,6 +792,16 @@ function process_world_pulse() {
 
     // Initialize seasonal crisis
     state.seasonal_crisis_active = true;
+    // Initialize insurance policy
+    if (!variable_struct_exists(state, "insurance_policy_active")) {
+        state.insurance_policy_active = true;
+        state.insurance_coverage_level = 1;
+        state.injury_cost_reduction = 0.3;
+        state.dispute_resolution_bonus = 15;
+        add_log("Insurance policy: Injury cost reduction");
+        add_log("Dispute resolution: Insurance coverage");
+        add_log("Seasonal policy: Injury protection");
+    }
     state.seasonal_crisis_type = "goblin_raids";
     state.seasonal_crisis_phase = "introduction";
 
@@ -1288,6 +1298,12 @@ function run_overnight_maintenance() {
                     add_log("Contract dispute: " + _contract.mission.title);
                     add_log("Arbitration requested by " + _patron.name);
 
+                    // Apply insurance bonus to dispute resolution
+                    if (variable_struct_exists(state, "insurance_policy_active") && state.insurance_policy_active) {
+                        _patron.satisfaction = clamp(_patron.satisfaction + state.dispute_resolution_bonus, 0, 100);
+                        add_log("Dispute resolution: Insurance coverage");
+                    }
+
                     // Reduce patron satisfaction
                     _patron.satisfaction = clamp(_patron.satisfaction - 15, 0, 100);
 
@@ -1373,6 +1389,16 @@ function run_overnight_maintenance() {
                 _adv.injury_days = 0;
                 _adv.status = "available";
                 add_log("Healing service provided by Temple");
+            }
+        }
+    }
+    // Apply insurance policy to injury costs
+    if (variable_struct_exists(state, "insurance_policy_active") && state.insurance_policy_active) {
+        for (var i = 0; i < array_length(state.adventurers); i++) {
+            var _adv = state.adventurers[i];
+            if (variable_struct_exists(_adv, "injury_days") && _adv.injury_days > 0) {
+                // Reduce injury cost by insurance coverage
+                _adv.injury_days = max(0, ceil(_adv.injury_days * (1 - state.injury_cost_reduction)));
             }
         }
     }
