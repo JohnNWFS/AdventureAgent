@@ -176,7 +176,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 
 ## 16. UI/UX Refinement
 - [ ] Add summary panes for:
-- [ ] Current client morale/trust
+- [x] Current client morale/trust
 - [x] Patron satisfaction
 - [x] Rival threat
 - [ ] Agency finances

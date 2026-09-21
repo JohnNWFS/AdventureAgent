@@ -2201,6 +2201,24 @@ open_adventurer_detail = function(_idx) {
         state.adventurer_detail_tooltip_displayed = true;
     }
     add_log("Kit: " + array_join_text(_a.kit));
+    if (state.adventurer_view_stage == "detail") {
+        var _total_morale = 0;
+        var _total_trust = 0;
+        var _represented_count = 0;
+        for (var i = 0; i < array_length(state.adventurers); i++) {
+            var _adv = state.adventurers[i];
+            if (variable_struct_exists(_adv, "status") && _adv.status == "represented") {
+                if (variable_struct_exists(_adv, "morale")) _total_morale += _adv.morale;
+                if (variable_struct_exists(_adv, "trust")) _total_trust += _adv.trust;
+                _represented_count++;
+            }
+        }
+        if (_represented_count > 0) {
+            var _avg_morale = _total_morale / _represented_count;
+            var _avg_trust = _total_trust / _represented_count;
+            add_log("Morale/Trust Summary: Average morale " + string(_avg_morale) + ", Average trust " + string(_avg_trust) + ".");
+        }
+    }
     add_log("Agency-issued gear: " + adventurer_issued_gear_text(_a) + ".");
     add_log("Arcana known: " + array_join_text(_a.found_magic));
     add_log("Relics held: " + array_join_text(_a.found_relics));
