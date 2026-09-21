@@ -4156,6 +4156,9 @@ print_adventurers = function() {
             _idle_text = " | Idle " + string(_a.idle_days) + "d";
         }
         add_log(string(i + 1) + ") " + _a.name + " (" + _a.role + ") C" + string(_a.combat) + " M" + string(_a.magic) + " S" + string(_a.stealth) + " D" + string(_a.diplomacy) + " R" + string(_a.reliability) + " | Purse " + string(_a.purse_gold) + "g | " + string(_a.adventure_rate) + "g/day | Comm " + string(round(_a.commission_rate * 100)) + "% [" + string_upper(_a.status) + "]" + _idle_text);
+        var _morale = variable_struct_exists(_a, "morale") ? _a.morale : 0;
+        var _trust = variable_struct_exists(_a, "trust") ? _a.trust : 0;
+        add_log(_a.name + ": morale " + string(_morale) + ", trust " + string(_trust) + ", idle " + string(_a.idle_days) + "d");
         var _city_id = adventurer_city_id(_a);
         if (_city_id >= 0) {
             add_log("     City: " + city_name(_city_id));
