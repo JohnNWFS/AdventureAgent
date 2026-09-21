@@ -2058,6 +2058,109 @@ function end_day() {
         });
         add_log("Agency stores: Healing Kit x3, Ward Scroll x2, Lockpick Roll x2");
     }
+    // Initialize priority dashboard
+    if (!variable_struct_exists(state, "priority_dashboard")) {
+        state.priority_dashboard = [];
+    }
+
+    // Calculate priority issues
+    var _priority_issues = [];
+
+    // Check for rival pressure
+    var _rival_pressure = 0;
+    if (variable_struct_exists(state, "rival_telemetry")) {
+        _rival_pressure = state.rival_telemetry.total_rival_pressure +
+                          state.rival_telemetry.total_free_agent_pressure +
+                          state.rival_telemetry.total_patron_pressure;
+    }
+    if (_rival_pressure > 0) {
+        array_push(_priority_issues, {
+            rank: 1,
+            issue: "Rival Pressure",
+            reason: "Active rival activities detected in the city",
+            action: "Scout rival talent to counter their moves"
+        });
+    }
+
+    // Check for patron satisfaction
+    var _satisfied_patrons = 0;
+    var _total_patrons = array_length(state.patrons);
+    for (var i = 0; i < _total_patrons; i++) {
+        if (variable_struct_exists(state.patrons[i], "satisfaction") && state.patrons[i].satisfaction >= 40) {
+            _satisfied_patrons += 1;
+        }
+    }
+    var _patron_satisfaction_rate = _total_patrons > 0 ? floor((_satisfied_patrons / _total_patrons) * 100) : 0;
+    if (_patron_satisfaction_rate < 50) {
+        array_push(_priority_issues, {
+            rank: 2,
+            issue: "Patron Satisfaction",
+            reason: "Low patron satisfaction rate: " + string(_patron_satisfaction_rate) + "% satisfied patrons",
+            action: "Review patron contracts and improve service quality"
+        });
+    }
+
+    // Check for injury rates
+    var _injury_rate = 0;
+    if (variable_struct_exists(state, "injury_telemetry")) {
+        var _total_injuries = state.injury_telemetry.security.injured +
+                              state.injury_telemetry.recovery.injured +
+                              state.injury_telemetry.diplomatic.injured;
+        var _total_missions = state.injury_telemetry.security.total +
+                              state.injury_telemetry.recovery.total +
+                              state.injury_telemetry.diplomatic.total;
+        if (_total_missions > 0) {
+            _injury_rate = floor((_total_injuries / _total_missions) * 100);
+        }
+    }
+    if (_injury_rate > 20) {
+        array_push(_priority_issues, {
+            rank: 3,
+            issue: "High Injury Rate",
+            reason: "Injury rate of " + string(_injury_rate) + "% exceeds safe threshold",
+            action: "Improve adventurer gear or mission selection"
+        });
+    }
+
+    // Check for retention issues
+    var _retention_rate = 0;
+    if (variable_struct_exists(state, "retention_tracking")) {
+        var _total_hires = state.retention_tracking.total_hires;
+        var _retained = state.retention_tracking.retained_count;
+        if (_total_hires > 0) {
+            _retention_rate = floor((_retained / _total_hires) * 100);
+        }
+    }
+    if (_retention_rate < 60) {
+        array_push(_priority_issues, {
+            rank: 4,
+            issue: "Low Retention",
+            reason: "Retention rate of " + string(_retention_rate) + "% below target",
+            action: "Improve adventurer morale or offer better contracts"
+        });
+    }
+
+    // Check for financial stability
+    var _financial_health = "stable";
+    if (state.gold < state.solvency_warning_threshold) {
+        _financial_health = "critical";
+        array_push(_priority_issues, {
+            rank: 5,
+            issue: "Financial Instability",
+            reason: "Gold below solvency threshold of " + string(state.solvency_warning_threshold) + "g",
+            action: "Secure new contracts or reduce expenses"
+        });
+    }
+
+    // Store top 5 issues
+    state.priority_dashboard = _priority_issues;
+
+    // Print priority dashboard
+    add_log("Priority Dashboard");
+    for (var i = 0; i < min(5, array_length(state.priority_dashboard)); i++) {
+        var _issue = state.priority_dashboard[i];
+        add_log(string(_issue.rank) + ". " + _issue.issue);
+    }
 }
 
 // Some world-pulse contracts are pushed as flat {title, reward, risk, ...} records. Every contract reader
