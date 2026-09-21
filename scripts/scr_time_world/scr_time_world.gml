@@ -813,6 +813,35 @@ function process_world_pulse() {
     add_log("Seasonal content: Goblin Raids in Spring");
     add_log("Goblin raiders threaten the eastern villages.");
     add_log("Raid contracts available.");
+    // Add rival offer for available adventurers
+    if (array_length(state.adventurers) > 0) {
+        var _available_adventurers = [];
+        for (var i = 0; i < array_length(state.adventurers); i++) {
+            if (state.adventurers[i].status == "available") {
+                array_push(_available_adventurers, i);
+            }
+        }
+        if (array_length(_available_adventurers) > 0) {
+            var _target_index = _available_adventurers[irandom(array_length(_available_adventurers) - 1)];
+            var _adventurer = state.adventurers[_target_index];
+
+            // Create rival offer structure
+            var _rival_offer = {
+                adventurer_index: _target_index,
+                organization: "Mercenary Band of the Iron Fist",
+                deadline_hour: state.absolute_hour + 24,
+                offer_text: "Join our band for a lucrative contract with high risk and reward.",
+                reward: 250,
+                risk: 60
+            };
+
+            // Store the rival offer
+            state.pending_rival_offer = _rival_offer;
+
+            // Log the rival offer
+            add_log("Rival offer from Mercenary Band of the Iron Fist");
+        }
+    }
 }
 
 function process_rival_offer() {
