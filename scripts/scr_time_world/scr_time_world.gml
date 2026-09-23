@@ -997,6 +997,13 @@ function process_world_pulse() {
         add_log("Rival diplomacy: Joint operation proposal");
         add_log("Joint operation: Temple of the Sacred Flame");
     }
+    // Show rival agent on portrait stage during rival news
+    if (!variable_struct_exists(state, "stage")) {
+        state.stage = {};
+    }
+    state.stage.name = "Mercenary Band of the Iron Fist";
+    state.stage.subtitle = "rival agent";
+    add_log("Rival agent: Mercenary Band of the Iron Fist");
 }
 
 function process_rival_offer() {

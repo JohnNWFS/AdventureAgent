@@ -1839,6 +1839,13 @@ open_market_candidate = function(_idx) {
     add_log("Cost comparison: ask rate " + string(_fa.ask_rate) + "g/day vs roster avg " + string(_roster_rate) + "g/day (" + ((_rate_delta >= 0) ? "+" : "") + string(_rate_delta) + "g/day).");
     add_log("Ask bonus " + string(_fa.ask_bonus) + "g | Ask rate " + string(_fa.ask_rate) + "g/day | Minimum commission " + string(round(_fa.min_commission * 100)) + "%.");
     add_log("Negotiation style: " + string_upper(_fa.negotiation_style) + ". " + _fa.style_blurb);
+    // Show prospect on portrait stage during scouting
+    if (!variable_struct_exists(state, "stage")) {
+        state.stage = {};
+    }
+    state.stage.name = _fa.name;
+    state.stage.subtitle = "prospect";
+    add_log("Prospect: " + _fa.name);
     add_log("Why representation: " + market_representation_reason(_fa));
     add_log(_fa.name + ": " + market_style_line(_fa.negotiation_style, "target"));
 };
