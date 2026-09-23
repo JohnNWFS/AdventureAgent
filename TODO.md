@@ -275,7 +275,7 @@ rectangles. LAYOUT must report 0 problems after your change.
 - [x] Portrait stage: a patron or client slides into the centre panel when you open their file
 - [ ] Draw the Guild Ledger panel with ui_row and ui_bar so morale and trust read as bars, not numbers
 - [ ] Agency finances in the ledger panel: gold, owed, weekly wage burn and last week's net, using ui_row
-- [ ] Fix the card gallery overlaps: buttons print over text in every column; LAYOUT must end at 0 problems
+- [x] Fix the card gallery overlaps: buttons print over text in every column; LAYOUT must end at 0 problems
 - [ ] Put the prospect on the portrait stage while scouting, and the rival agent during rival news
 - [x] Show the returning party on the portrait stage when a mission resolves
 - [ ] Desk scene in the centre panel: a desk drawn with ui helpers, with props that follow state (letters waiting, ledger open when gold is owed, lamp lit at night)

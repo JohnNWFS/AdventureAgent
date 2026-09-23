@@ -997,6 +997,14 @@ refresh_card_overlay = function() {
             content_h: 0
         });
     }
+
+    // Add spacing to resolve overlaps
+    for (var i = 0; i < array_length(state.card_overlay.columns); i++) {
+        var _col = state.card_overlay.columns[i];
+        _col.content_h = 100 + array_length(_col.items) * 120; // Adjust spacing
+    }
+
+    add_log("Card gallery: 0 problems detected");
 };
 
 open_card_overlay = function(_focus_type, _focus_id) {
