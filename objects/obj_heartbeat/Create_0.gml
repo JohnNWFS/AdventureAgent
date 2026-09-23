@@ -2188,6 +2188,7 @@ open_adventurer_detail = function(_idx) {
     state.selected_adventurer_index = _idx;
 
     var _a = state.adventurers[_idx];
+    ui_stage_show("adventurer", _a.name, _a.role + " client");
     state.status_line = "Adventurer file: " + _a.name;
     add_log("Adventurer file: " + _a.name + " | " + _a.role + " | Age " + string(_a.age) + " [" + string_upper(_a.status) + "]");
     add_log("Stats: C" + string(_a.combat) + " M" + string(_a.magic) + " S" + string(_a.stealth) + " D" + string(_a.diplomacy) + " R" + string(_a.reliability) + ".");
@@ -2195,7 +2196,7 @@ open_adventurer_detail = function(_idx) {
     add_log("Representation: " + _a.representation_type + " | " + string(_a.contract_days_remaining) + "/" + string(_a.contract_term_days) + " day(s) remaining.");
     add_log("Relationship: morale " + string(_a.morale) + " | trust " + string(_a.trust) + " | expects work every " + string(_a.activity_expectation_days) + " day(s) | priority " + _a.ambition + " | risk " + _a.risk_preference + " | negotiation annoyance " + string(_a.renegotiation_annoyance) + " | defection risk " + string(_a.defection_risk) + ".");
     add_log("Personal purse: " + string(_a.purse_gold) + "g | Lifetime earnings " + string(_a.lifetime_earnings) + "g | Last mission payout " + string(_a.last_mission_payout) + "g.");
-    if (!state.adventurer_detail_tooltip_displayed) {
+    if (!variable_struct_exists(state, "adventurer_detail_tooltip_displayed") || !state.adventurer_detail_tooltip_displayed) {
         add_log("Morale: Player's perception of adventurer satisfaction");
         add_log("Trust: Adventurer's confidence in the agency");
         state.adventurer_detail_tooltip_displayed = true;
@@ -2448,6 +2449,7 @@ release_adventurer_client = function() {
 };
 
 open_contracting_patron_list = function() {
+    ui_stage_clear();
     state.mode = MODE.CONTRACTING;
     state.contracting_stage = "patrons";
     state.selected_patron_index = -1;
@@ -2469,6 +2471,7 @@ open_mission_board = function() {
 
 open_patron_contracts = function(_patron_index) {
     unlock_patron_contracts(_patron_index);
+    ui_stage_show("patron", state.patrons[_patron_index].name, "Patron");
     state.mode = MODE.CONTRACTING;
     state.contracting_stage = "contracts";
     state.selected_contract_index = -1;
@@ -4793,7 +4796,7 @@ process_command = function(_raw) {
 
     switch (_cmd) {
         case "HELP":
-            add_log("Commands: HELP, CARDS, MARKET, TARGET <n>, BONUS <g>, RATE <g>, COMM <pct>, OFFER, ACCEPTCOUNTER, DECLINECOUNTER, PATRONS, PATRON <n>, MISSIONS, ADVENTURERS, START, NEXTDAY, MISSION <n>, PARTY <n>, CITIES, TRANSFER <n> <city>, CASINO, WAGER <g>, GAME <CRAPS|WHEEL|DRAGON21>, ROLL, SPIN, DEAL, HIT, STAND, RESEARCH, RECRUIT, SCOUT, COUNTER, SIMULATE, DICE, MODE <name>");
+            add_log("Commands: HELP, CARDS, MARKET, TARGET <n>, BONUS <g>, RATE <g>, COMM <pct>, OFFER, ACCEPTCOUNTER, DECLINECOUNTER, PATRONS, PATRON <n>, MISSIONS, ADVENTURERS, START, NEXTDAY, MISSION <n>, PARTY <n>, CITIES, TRANSFER <n> <city>, LAYOUT, CASINO, WAGER <g>, GAME <CRAPS|WHEEL|DRAGON21>, ROLL, SPIN, DEAL, HIT, STAND, RESEARCH, RECRUIT, SCOUT, COUNTER, SIMULATE, DICE, MODE <name>");
             add_log("New patron type: Temple of the Sacred Flame; Oath-based contract; Sacred service");
         break;
 
@@ -4811,6 +4814,10 @@ process_command = function(_raw) {
 
         case "CITIES":
             print_cities();
+        break;
+
+        case "LAYOUT":
+            ui_layout_report();
         break;
 
         case "TRANSFER":

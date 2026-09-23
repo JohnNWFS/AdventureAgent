@@ -28,6 +28,7 @@
     {"id":{"name":"scr_game_house","path":"scripts/scr_game_house/scr_game_house.yy",},},
     {"id":{"name":"scr_text_ui","path":"scripts/scr_text_ui/scr_text_ui.yy",},},
     {"id":{"name":"scr_time_world","path":"scripts/scr_time_world/scr_time_world.yy",},},
+    {"id":{"name":"scr_ui","path":"scripts/scr_ui/scr_ui.yy",},},
   ],
   "resourceType":"GMProject",
   "resourceVersion":"2.0",

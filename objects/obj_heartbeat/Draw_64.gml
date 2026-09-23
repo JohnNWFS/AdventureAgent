@@ -1,4 +1,6 @@
 /// Polished UI shell + mission panels + hybrid console
+ui_frame_begin();
+ui_stage_step();
 draw_set_font(fnt_ui_console);
 var _gw = display_get_gui_width();
 var _gh = display_get_gui_height();
@@ -171,6 +173,7 @@ var _right_x1 = _right_x2 - _right_w;
 
 var _center_x1 = _left_x2 + _pad;
 var _center_x2 = _right_x1 - _pad;
+var _stage_reserve = ui_stage_width();
 
 var _console_x1 = _pad;
 var _action_w = 220;
@@ -189,15 +192,7 @@ draw_rectangle_color(0, 0, _gw, _gh, _bg_top, _bg_top, _bg_bot, _bg_bot, false);
 
 // Utility panel function
 var draw_panel = function(_x1, _y1, _x2, _y2, _title, _c1, _c2) {
-    draw_rectangle_color(_x1, _y1, _x2, _y2, _c1, _c1, _c2, _c2, false);
-    draw_set_color(make_color_rgb(78, 93, 120));
-    draw_rectangle(_x1, _y1, _x2, _y2, true);
-
-    draw_set_color(make_color_rgb(36, 45, 63));
-    draw_rectangle(_x1 + 1, _y1 + 1, _x2 - 1, _y1 + 24, false);
-
-    draw_set_color(c_white);
-    draw_text(_x1 + 8, _y1 + 5, _title);
+    return ui_panel(_x1, _y1, _x2, _y2, _title, _c1, _c2);
 };
 
 // Header
@@ -231,6 +226,7 @@ if (!_show_result_card) {
 }
 
 draw_set_color(c_white);
+ui_stage_draw({ x1: _center_x1, y1: _content_y1, x2: _center_x2, y2: _content_y2, title: "Center Stage - Office Desk" });
 draw_text(_center_x1 + 30, _content_y1 + 36, "Desk / Agent View");
 draw_text(_center_x1 + 30, _content_y1 + 58, "Visitors and letters appear here.");
 if (!_show_result_card) {
@@ -246,28 +242,28 @@ if (state.mode == MODE.BUYING) {
         draw_text_ext(_center_x1 + 30, _content_y1 + 122,
             _fa.name + " (" + _fa.role + ") | Age " + string(_fa.age) + " | Profile " + string(_fa.profile_score) +
             " | Rival pressure " + string(_fa.rival_pressure) + " | Style " + string_upper(_fa.negotiation_style),
-            18, _center_x2 - _center_x1 - 60);
+            18, _center_x2 - _center_x1 - 60 - _stage_reserve);
         draw_text_ext(_center_x1 + 30, _content_y1 + 154,
             "Asks: bonus " + string(_fa.ask_bonus) + "g, rate " + string(_fa.ask_rate) + "g/day, max commission " + string(round(_fa.min_commission * 100)) + "%.",
-            18, _center_x2 - _center_x1 - 60);
+            18, _center_x2 - _center_x1 - 60 - _stage_reserve);
         draw_text_ext(_center_x1 + 30, _content_y1 + 186,
             "Your offer: bonus " + string(state.offer_bonus) + "g, rate adj " + string(state.offer_rate_delta) + "g/day, commission " + string(round(state.offer_commission * 100)) + "%.",
-            18, _center_x2 - _center_x1 - 60);
+            18, _center_x2 - _center_x1 - 60 - _stage_reserve);
         draw_text_ext(_center_x1 + 30, _content_y1 + 202,
             "Read: " + _fa.style_blurb,
-            18, _center_x2 - _center_x1 - 60);
+            18, _center_x2 - _center_x1 - 60 - _stage_reserve);
     } else {
-        draw_text_ext(_center_x1 + 30, _content_y1 + 122, "No free agents listed. Refresh market to source candidates.", 18, _center_x2 - _center_x1 - 60);
+        draw_text_ext(_center_x1 + 30, _content_y1 + 122, "No free agents listed. Refresh market to source candidates.", 18, _center_x2 - _center_x1 - 60 - _stage_reserve);
     }
     if (is_struct(state.pending_signing)) {
         if (variable_struct_exists(state.pending_signing, "stage") && state.pending_signing.stage == "counter") {
             draw_text_ext(_center_x1 + 30, _content_y1 + 218,
                 "Counteroffer: bonus " + string(state.pending_signing.counter_bonus) + "g, rate " + string(state.pending_signing.counter_rate) + "g/day, commission " + string(round(state.pending_signing.counter_commission * 100)) + "%. Deadline " + format_duration_hours(max(0, state.pending_signing.counter_deadline - state.absolute_hour)) + ".",
-                18, _center_x2 - _center_x1 - 60);
+                18, _center_x2 - _center_x1 - 60 - _stage_reserve);
         } else {
             draw_text_ext(_center_x1 + 30, _content_y1 + 218,
                 "Pending decision for " + state.pending_signing.candidate.name + " (ETA " + format_duration_hours(max(0, state.pending_signing.due_hour - state.absolute_hour)) + ").",
-                18, _center_x2 - _center_x1 - 60);
+                18, _center_x2 - _center_x1 - 60 - _stage_reserve);
         }
     }
 } else if (state.mode == MODE.ADVENTURERS) {
@@ -276,18 +272,18 @@ if (state.mode == MODE.BUYING) {
         var _adv = state.adventurers[state.selected_adventurer_index];
         draw_text_ext(_center_x1 + 30, _content_y1 + 122,
             _adv.name + " (" + _adv.role + ") | Age " + string(_adv.age) + " | Morale " + string(_adv.morale) + " | Trust " + string(_adv.trust),
-            18, _center_x2 - _center_x1 - 60);
+            18, _center_x2 - _center_x1 - 60 - _stage_reserve);
 
         if (state.adventurer_view_stage == "renegotiate") {
             draw_text_ext(_center_x1 + 30, _content_y1 + 156,
                 "Renegotiation draft: " + string(state.renegotiation_rate_offer) + "g/day | Agency commission " + string(round(state.renegotiation_commission_offer * 100)) + "% | " + string(state.renegotiation_term_offer) + "-day charter.",
-                18, _center_x2 - _center_x1 - 60);
+                18, _center_x2 - _center_x1 - 60 - _stage_reserve);
             draw_text_ext(_center_x1 + 30, _content_y1 + 190,
                 "Current terms: " + string(_adv.adventure_rate) + "g/day | Agency commission " + string(round(_adv.commission_rate * 100)) + "% | " + string(_adv.contract_term_days) + "-day charter.",
-                18, _center_x2 - _center_x1 - 60);
+                18, _center_x2 - _center_x1 - 60 - _stage_reserve);
             draw_text_ext(_center_x1 + 30, _content_y1 + 224,
                 "Client profile: wants " + _adv.ambition + ", prefers " + _adv.risk_preference + " work, expects a contract every " + string(_adv.activity_expectation_days) + " day(s), and current negotiation annoyance is " + string(_adv.renegotiation_annoyance) + ".",
-                18, _center_x2 - _center_x1 - 60);
+                18, _center_x2 - _center_x1 - 60 - _stage_reserve);
         } else if (state.adventurer_view_stage == "loadout") {
             var _stock_text = "";
             for (var gi = 0; gi < array_length(state.agency_inventory); gi++) {
@@ -297,13 +293,13 @@ if (state.mode == MODE.BUYING) {
             }
             draw_text_ext(_center_x1 + 30, _content_y1 + 156,
                 "Personal kit: " + array_join_text(_adv.kit),
-                18, _center_x2 - _center_x1 - 60);
+                18, _center_x2 - _center_x1 - 60 - _stage_reserve);
             draw_text_ext(_center_x1 + 30, _content_y1 + 190,
                 "Agency-issued gear: " + adventurer_issued_gear_text(_adv) + ".",
-                18, _center_x2 - _center_x1 - 60);
+                18, _center_x2 - _center_x1 - 60 - _stage_reserve);
             draw_text_ext(_center_x1 + 30, _content_y1 + 224,
                 "Stores: " + _stock_text,
-                18, _center_x2 - _center_x1 - 60);
+                18, _center_x2 - _center_x1 - 60 - _stage_reserve);
         } else if (state.adventurer_view_stage == "retention") {
             var _promise_text = (_adv.promised_work_by_day > 0)
                 ? ("Promise active until day " + string(_adv.promised_work_by_day) + ".")
@@ -313,35 +309,35 @@ if (state.mode == MODE.BUYING) {
                 : "They are not openly shopping the market right now.";
             draw_text_ext(_center_x1 + 30, _content_y1 + 156,
                 "Retention concerns: defection risk " + string(_adv.defection_risk) + " | annoyance " + string(_adv.renegotiation_annoyance) + " | " + _promise_text,
-                18, _center_x2 - _center_x1 - 60);
+                18, _center_x2 - _center_x1 - 60 - _stage_reserve);
             draw_text_ext(_center_x1 + 30, _content_y1 + 190,
                 "Charter state: " + string(_adv.contract_days_remaining) + " day(s) remaining at " + string(_adv.adventure_rate) + "g/day. " + _warning_text,
-                18, _center_x2 - _center_x1 - 60);
+                18, _center_x2 - _center_x1 - 60 - _stage_reserve);
             draw_text_ext(_center_x1 + 30, _content_y1 + 224,
                 "Interventions: promise near-term work, pay a loyalty purse, renew the charter, or release the client.",
-                18, _center_x2 - _center_x1 - 60);
+                18, _center_x2 - _center_x1 - 60 - _stage_reserve);
         } else {
             draw_text_ext(_center_x1 + 30, _content_y1 + 156,
                 "Representation: " + _adv.representation_type + " | " + string(_adv.contract_days_remaining) + "/" + string(_adv.contract_term_days) + " day(s) remaining.",
-                18, _center_x2 - _center_x1 - 60);
+                18, _center_x2 - _center_x1 - 60 - _stage_reserve);
             draw_text_ext(_center_x1 + 30, _content_y1 + 190,
                 "Terms: " + string(_adv.adventure_rate) + "g/day | Agency commission " + string(round(_adv.commission_rate * 100)) + "% | Priority " + _adv.ambition + ".",
-                18, _center_x2 - _center_x1 - 60);
+                18, _center_x2 - _center_x1 - 60 - _stage_reserve);
             draw_text_ext(_center_x1 + 30, _content_y1 + 224,
                 "Assets: Purse " + string(_adv.purse_gold) + "g | Defection risk " + string(_adv.defection_risk) + " | Arcana " + array_join_text(_adv.found_magic) + " | Relics " + array_join_text(_adv.found_relics) + ".",
-                18, _center_x2 - _center_x1 - 60);
+                18, _center_x2 - _center_x1 - 60 - _stage_reserve);
         }
     } else {
         draw_text_ext(_center_x1 + 30, _content_y1 + 122,
             "Select an adventurer to review their contract, purse, equipment, and relationship state.",
-            18, _center_x2 - _center_x1 - 60);
+            18, _center_x2 - _center_x1 - 60 - _stage_reserve);
     }
 } else if (state.mode == MODE.GAME_HOUSE) {
     draw_text(_center_x1 + 30, _content_y1 + 100, "Gilded Griffin Game House");
     if (state.game_house_view == "lobby") {
         draw_text_ext(_center_x1 + 30, _content_y1 + 122,
             "Pick a table to sit down. While you are here, missions keep moving and rivals keep negotiating in the background.",
-            18, _center_x2 - _center_x1 - 60);
+            18, _center_x2 - _center_x1 - 60 - _stage_reserve);
         draw_text(_center_x1 + 30, _content_y1 + 170, "Available tables");
         draw_text(_center_x1 + 30, _content_y1 + 194, "1) Street Craps");
         draw_text(_center_x1 + 30, _content_y1 + 216, "2) Wyrm Wheel");
@@ -350,7 +346,7 @@ if (state.mode == MODE.BUYING) {
     } else {
         draw_text_ext(_center_x1 + 30, _content_y1 + 122,
             "The house is loud, smoky, and expensive. Every move burns time while missions, patrons, and rivals continue to evolve.",
-            18, _center_x2 - _center_x1 - 60);
+            18, _center_x2 - _center_x1 - 60 - _stage_reserve);
         draw_text(_center_x1 + 30, _content_y1 + 170, "Table: " + state.game_house_game + "    Wager: " + string(state.game_house_wager) + "g");
 
         if (state.game_house_game == "CRAPS") {
@@ -358,12 +354,12 @@ if (state.mode == MODE.BUYING) {
             draw_text(_center_x1 + 30, _content_y1 + 198, "Street Craps");
             draw_text(_center_x1 + 30, _content_y1 + 220, "Phase: " + _cr_phase);
             draw_text(_center_x1 + 30, _content_y1 + 242, "Last roll: " + string(state.game_house.craps_last_roll));
-            draw_text_ext(_center_x1 + 30, _content_y1 + 266, "Natural (7/11) wins on come-out. 2/3/12 loses. Point repeats to win; 7 before point loses.", 18, _center_x2 - _center_x1 - 60);
+            draw_text_ext(_center_x1 + 30, _content_y1 + 266, "Natural (7/11) wins on come-out. 2/3/12 loses. Point repeats to win; 7 before point loses.", 18, _center_x2 - _center_x1 - 60 - _stage_reserve);
         } else if (state.game_house_game == "WHEEL") {
             draw_text(_center_x1 + 30, _content_y1 + 198, "Wyrm Wheel");
             draw_text(_center_x1 + 30, _content_y1 + 220, "Current bet: " + state.game_house.wheel_bet);
             draw_text(_center_x1 + 30, _content_y1 + 242, "Last spin: " + string(state.game_house.wheel_last_number) + " (" + state.game_house.wheel_last_color + ")");
-            draw_text_ext(_center_x1 + 30, _content_y1 + 266, "Color/parity bets pay 1:1. Dozens (1-12, 13-24, 25-36) pay 2:1.", 18, _center_x2 - _center_x1 - 60);
+            draw_text_ext(_center_x1 + 30, _content_y1 + 266, "Color/parity bets pay 1:1. Dozens (1-12, 13-24, 25-36) pay 2:1.", 18, _center_x2 - _center_x1 - 60 - _stage_reserve);
         } else {
             var _pt = card_hand_total(state.game_house.cards_player);
             var _dt = card_hand_total(state.game_house.cards_dealer);
@@ -384,16 +380,18 @@ if (state.mode == MODE.BUYING) {
     draw_text(_center_x1 + 30, _content_y1 + 100, "Selected Mission");
     if (_has_selected_mission) {
         var _mission = state.missions[state.selected_mission_index];
-        draw_text_ext(_center_x1 + 30, _content_y1 + 122,
-            _mission.title + " (" + _mission.type + ") | Patron " + _mission.patron_name +
+        var _mission_line = _mission.title + " (" + _mission.type + ") | Patron " + _mission.patron_name +
             " | Diff " + string(_mission.difficulty) + " | Reward " + string(_mission.reward) + "g" +
-            " | ETA " + format_duration_hours(_mission.duration_hours) + " | Expires in " + format_duration_hours(max(0, _mission.expires_hour - state.absolute_hour)),
-            18, _center_x2 - _center_x1 - 60);
-        draw_text_ext(_center_x1 + 30, _content_y1 + 156, _mission.description, 18, _center_x2 - _center_x1 - 60);
+            " | ETA " + format_duration_hours(_mission.duration_hours) + " | Expires in " + format_duration_hours(max(0, _mission.expires_hour - state.absolute_hour));
+        var _mission_w = _center_x2 - _center_x1 - 60 - _stage_reserve;
+        draw_text_ext(_center_x1 + 30, _content_y1 + 122, _mission_line, 18, _mission_w);
+        // The summary wraps to two or three lines depending on the portrait; start the description below it.
+        var _desc_y = _content_y1 + 122 + max(34, string_height_ext(_mission_line, 18, _mission_w) + 8);
+        draw_text_ext(_center_x1 + 30, _desc_y, _mission.description, 18, _mission_w);
     } else {
         draw_text_ext(_center_x1 + 30, _content_y1 + 122,
             "No mission selected yet. Open Patron Requests, read an ask, then review unlocked contracts.",
-            18, _center_x2 - _center_x1 - 60);
+            18, _center_x2 - _center_x1 - 60 - _stage_reserve);
     }
 }
 

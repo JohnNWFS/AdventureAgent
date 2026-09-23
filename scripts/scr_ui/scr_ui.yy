@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_ui",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_ui",
+  "parent":{
+    "name":"AdventureAgent",
+    "path":"AdventureAgent.yyp",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
