@@ -2089,6 +2089,23 @@ function end_day() {
     }
     add_log("Patron satisfaction summary: Favored: " + string(_favored) + ", Warm: " + string(_warm) + ", Neutral: " + string(_neutral) + ", Strained: " + string(_strained) + ", Hostile: " + string(_hostile) + ".");
     state.status_line = "A new day begins in " + state.season + ", Y" + string(state.year) + ".";
+    // Initialize agent pose tracking if not exists
+    if (!variable_struct_exists(state, "agent_pose")) {
+        state.agent_pose = "idle";
+        state.last_agent_pose_update = 0;
+    }
+
+    // Update agent pose based on game mode
+    if (state.mode == "CONTRACTING") {
+        state.agent_pose = "reading patron letters";
+    } else if (state.mode == "PLANNING") {
+        state.agent_pose = "at wall map";
+    } else if (state.mode == "MISSION") {
+        state.agent_pose = "counting coin";
+    }
+
+    // Log agent pose
+    add_log("Agent " + state.agent_pose);
     // Initialize schema versioning if not exists
     if (!variable_struct_exists(state, "schema_version")) {
         state.schema_version = "1.0";
