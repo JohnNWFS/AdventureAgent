@@ -3783,6 +3783,11 @@ resolve_active_mission = function(_active) {
     ];
 
     add_log("Mission team returned: " + _mission.title + ". Report delivered to desk.");
+    // Display returning party on portrait stage
+    state.stage.name = _mission.title;
+    state.stage.subtitle = _party_names;
+    state.stage.slide = 1;
+    add_log("Party members: " + _party_names);
     // Patron reaction consequences after debrief
     var _patron = state.patrons[_active.contract_index];
     if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "temple") {
