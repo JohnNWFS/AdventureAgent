@@ -273,7 +273,7 @@ rectangles. LAYOUT must report 0 problems after your change.
 - [x] Shared theme, panel and row helpers callable from anywhere
 - [x] LAYOUT command: panels, overlaps and overflowing text as console lines
 - [x] Portrait stage: a patron or client slides into the centre panel when you open their file
-- [ ] Draw the Guild Ledger panel with ui_row and ui_bar so morale and trust read as bars, not numbers
+- [x] Draw the Guild Ledger panel with ui_row and ui_bar so morale and trust read as bars, not numbers
 - [ ] Agency finances in the ledger panel: gold, owed, weekly wage burn and last week's net, using ui_row
 - [x] Fix the card gallery overlaps: buttons print over text in every column; LAYOUT must end at 0 problems
 - [x] Put the prospect on the portrait stage while scouting, and the rival agent during rival news

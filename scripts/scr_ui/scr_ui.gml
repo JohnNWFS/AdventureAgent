@@ -58,6 +58,21 @@ function ui_panel(_x1, _y1, _x2, _y2, _title, _c1, _c2) {
     draw_set_color(c_white);
     draw_text(_x1 + 8, _y1 + 5, _title);
     ui_record_rect(_title, _x1, _y1, _x2, _y2);
+    // Add Guild Ledger panel data
+    if (_title == "Guild Ledger") {
+        var _t = ui_theme();
+        var _y = _y1 + _t.title_h + 8;
+
+        // Draw morale bar
+        _y = ui_bar({title: "Guild Ledger"}, _x1 + 10, _y, 150, state.adventurers[0].morale, "Morale");
+
+        // Draw trust bar
+        _y = ui_bar({title: "Guild Ledger"}, _x1 + 10, _y, 150, state.adventurers[0].trust, "Trust");
+
+        // Draw available adventurers
+        var _available = array_length(state.adventurers);
+        _y = ui_row({title: "Guild Ledger"}, _x1 + 10, _y, "Available adventurers", _available);
+    }
     return { x1: _x1, y1: _y1, x2: _x2, y2: _y2, title: _title, y: _y1 + _t.title_h + 8 };
 }
 
