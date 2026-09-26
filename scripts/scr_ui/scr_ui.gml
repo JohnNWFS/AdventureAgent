@@ -103,8 +103,21 @@ function ui_bar(_panel, _x, _y, _w, _value, _label) {
 /// centre panel and stays until someone else takes the chair. Art drops into ui_portrait_art()
 /// later; until then each figure is a silhouette built from its own name, so faces stay stable.
 
+/// Make sure the stage struct has every field, whatever wrote to it. Features set state.stage
+/// directly instead of calling ui_stage_show, and a missing `slide` crashed the draw event.
+function ui_stage_ensure() {
+    if (!variable_struct_exists(state, "stage") || !is_struct(state.stage)) {
+        state.stage = { kind: "", name: "", subtitle: "", slide: 0 };
+        return;
+    }
+    if (!variable_struct_exists(state.stage, "kind")) state.stage.kind = "";
+    if (!variable_struct_exists(state.stage, "name")) state.stage.name = "";
+    if (!variable_struct_exists(state.stage, "subtitle")) state.stage.subtitle = "";
+    if (!variable_struct_exists(state.stage, "slide")) state.stage.slide = 0;
+}
+
 function ui_stage_show(_kind, _name, _subtitle) {
-    if (!variable_struct_exists(state, "stage")) state.stage = { kind: "", name: "", subtitle: "", slide: 0 };
+    ui_stage_ensure();
     if (state.stage.name == _name && state.stage.kind == _kind) return;
     state.stage.kind = _kind;
     state.stage.name = _name;
@@ -113,6 +126,7 @@ function ui_stage_show(_kind, _name, _subtitle) {
 }
 
 function ui_stage_clear() {
+    ui_stage_ensure();
     if (variable_struct_exists(state, "stage")) {
         state.stage.kind = "";
         state.stage.name = "";
@@ -123,7 +137,7 @@ function ui_stage_clear() {
 
 /// Advance the slide. Called once per drawn frame; 0.14 per frame is roughly a third of a second.
 function ui_stage_step() {
-    if (!variable_struct_exists(state, "stage")) return;
+    ui_stage_ensure();
     if (state.stage.name == "") return;
     state.stage.slide = min(1, state.stage.slide + 0.14);
 }
@@ -173,14 +187,16 @@ function ui_portrait_figure(_x1, _y1, _x2, _y2, _name, _kind) {
 
 /// How much of a panel's right edge the portrait occupies, so text can wrap short of it.
 function ui_stage_width() {
-    if (!variable_struct_exists(state, "stage") || state.stage.name == "") return 0;
+    ui_stage_ensure();
+    if (state.stage.name == "") return 0;
     return 210;
 }
 
 
 /// Draw whoever is on stage, sliding in from the right edge of the given panel.
 function ui_stage_draw(_panel) {
-    if (!variable_struct_exists(state, "stage") || state.stage.name == "") return;
+    ui_stage_ensure();
+    if (state.stage.name == "") return;
     var _w = 190;
     var _h = 210;
     var _slide = state.stage.slide;

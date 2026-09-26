@@ -1840,11 +1840,7 @@ open_market_candidate = function(_idx) {
     add_log("Ask bonus " + string(_fa.ask_bonus) + "g | Ask rate " + string(_fa.ask_rate) + "g/day | Minimum commission " + string(round(_fa.min_commission * 100)) + "%.");
     add_log("Negotiation style: " + string_upper(_fa.negotiation_style) + ". " + _fa.style_blurb);
     // Show prospect on portrait stage during scouting
-    if (!variable_struct_exists(state, "stage")) {
-        state.stage = {};
-    }
-    state.stage.name = _fa.name;
-    state.stage.subtitle = "prospect";
+    ui_stage_show("prospect", _fa.name, "prospect");
     add_log("Prospect: " + _fa.name);
     add_log("Why representation: " + market_representation_reason(_fa));
     add_log(_fa.name + ": " + market_style_line(_fa.negotiation_style, "target"));
@@ -3799,9 +3795,7 @@ resolve_active_mission = function(_active) {
 
     add_log("Mission team returned: " + _mission.title + ". Report delivered to desk.");
     // Display returning party on portrait stage
-    state.stage.name = _mission.title;
-    state.stage.subtitle = _party_names;
-    state.stage.slide = 1;
+    ui_stage_show("party", _mission.title, _party_names);
     add_log("Party members: " + _party_names);
     // Patron reaction consequences after debrief
     var _patron = state.patrons[_active.contract_index];
