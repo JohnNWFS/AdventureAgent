@@ -279,7 +279,7 @@ rectangles. LAYOUT must report 0 problems after your change.
 - [x] Put the prospect on the portrait stage while scouting, and the rival agent during rival news
 - [x] Show the returning party on the portrait stage when a mission resolves
 - [x] Ink-and-wash portraits for the cast, generated locally and loaded from datafiles/portraits
-- [ ] Portraits in the card gallery: fill each card's Portrait / Illustration placeholder with ui_portrait_art
+- [x] Portraits in the card gallery: fill each card's Portrait / Illustration placeholder with ui_portrait_art
 - [ ] Portrait for the free-agent prospect being scouted and for rival agents in the news
 - [ ] Desk scene in the centre panel: a desk drawn with ui helpers, with props that follow state (letters waiting, ledger open when gold is owed, lamp lit at night)
 - [x] Agent poses by mode: reading letters in contracting, at the wall map during a mission, counting coin at day end

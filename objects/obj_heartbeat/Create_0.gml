@@ -767,6 +767,7 @@ build_patron_card = function(_patron_index) {
     var _p = state.patrons[_patron_index];
     var _open_requests = count_patron_open_requests(_patron_index);
     var _worked = _p.jobs_completed + _p.jobs_partial + _p.jobs_failed;
+    _p.portrait_art = ui_portrait_art(_p.name);
 
     var _subtitle = string_upper(_p.personality) + " patron";
     if (patron_is_temple(_patron_index)) {
@@ -803,6 +804,7 @@ build_contract_card = function(_contract_index) {
     var _c = state.contracts[_contract_index];
     var _m = _c.mission;
     var _state = "Locked";
+    _c.mission.portrait_art = ui_portrait_art(_c.mission.patron_name);
     if (_c.accepted) _state = "Accepted";
     else if (_c.expired || state.absolute_hour >= _c.expires_hour) _state = "Expired";
     else if (_c.unlocked) _state = "Open";
@@ -838,6 +840,7 @@ build_location_card = function(_contract_index) {
     if (_contract_index < 0 || _contract_index >= array_length(state.contracts)) return undefined;
     var _c = state.contracts[_contract_index];
     var _m = _c.mission;
+    _m.portrait_art = ui_portrait_art(_m.patron_name);
     return {
         type: "location",
         id: _contract_index,
