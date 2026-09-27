@@ -58,10 +58,11 @@ function ui_panel(_x1, _y1, _x2, _y2, _title, _c1, _c2) {
     draw_set_color(c_white);
     draw_text(_x1 + 8, _y1 + 5, _title);
     ui_record_rect(_title, _x1, _y1, _x2, _y2);
-    // Add Guild Ledger panel data
-    if (_title == "Guild Ledger") {
-        var _t = ui_theme();
-        var _y = _y1 + _t.title_h + 8;
+    // The ledger's own lines are drawn by the shell from the top; these sit under them.
+    if (_title == "Guild Ledger" && array_length(state.adventurers) > 0) {
+        var _y = _y1 + 244;
+        draw_set_color(ui_theme().dim);
+        draw_text(_x1 + 10, _y - 20, "First client: " + state.adventurers[0].name);
 
         // Draw morale bar
         _y = ui_bar({title: "Guild Ledger"}, _x1 + 10, _y, 150, state.adventurers[0].morale, "Morale");
@@ -69,9 +70,6 @@ function ui_panel(_x1, _y1, _x2, _y2, _title, _c1, _c2) {
         // Draw trust bar
         _y = ui_bar({title: "Guild Ledger"}, _x1 + 10, _y, 150, state.adventurers[0].trust, "Trust");
 
-        // Draw available adventurers
-        var _available = array_length(state.adventurers);
-        _y = ui_row({title: "Guild Ledger"}, _x1 + 10, _y, "Available adventurers", _available);
     }
     return { x1: _x1, y1: _y1, x2: _x2, y2: _y2, title: _title, y: _y1 + _t.title_h + 8 };
 }
@@ -164,7 +162,33 @@ function ui_name_hue(_name) {
     return _sum mod 360;
 }
 
-/// The placeholder figure: head, shoulders, and a plaque. Replaced by sprite art later.
+/// A character's portrait file, loaded once and kept. -1 when that character has no art yet,
+/// so new art appears by dropping a file into datafiles/portraits with no code change.
+function ui_portrait_art(_name) {
+    if (!variable_global_exists("ui_portraits")) global.ui_portraits = ds_map_create();
+    var _slug = string_lower(_name);
+    var _clean = "";
+    for (var i = 1; i <= string_length(_slug); i++) {
+        var _ch = string_char_at(_slug, i);
+        if (string_pos(_ch, "abcdefghijklmnopqrstuvwxyz0123456789") > 0) _clean += _ch;
+        else if (string_length(_clean) > 0 && string_char_at(_clean, string_length(_clean)) != "_") _clean += "_";
+    }
+    if (ds_map_exists(global.ui_portraits, _clean)) return global.ui_portraits[? _clean];
+    var _sprite = -1;
+    var _paths = [working_directory + "datafiles/portraits/" + _clean + ".png",
+                  working_directory + "portraits/" + _clean + ".png",
+                  "datafiles/portraits/" + _clean + ".png"];
+    for (var p = 0; p < array_length(_paths); p++) {
+        if (file_exists(_paths[p])) {
+            _sprite = sprite_add(_paths[p], 1, false, false, 0, 0);
+            break;
+        }
+    }
+    global.ui_portraits[? _clean] = _sprite;
+    return _sprite;
+}
+
+/// The figure: real art when this character has some, a silhouette when they do not.
 function ui_portrait_figure(_x1, _y1, _x2, _y2, _name, _kind) {
     var _t = ui_theme();
     var _hue = ui_name_hue(_name);
@@ -178,6 +202,22 @@ function ui_portrait_figure(_x1, _y1, _x2, _y2, _name, _kind) {
 
     draw_set_color(make_color_rgb(16, 21, 31));
     draw_rectangle(_x1, _y1, _x2, _y2, false);
+
+    var _art = ui_portrait_art(_name);
+    if (_art >= 0) {
+        draw_sprite_stretched(_art, 0, _x1 + 1, _y1 + 1, _w - 2, _fig_bottom - _y1 - 1);
+        draw_set_color(make_color_rgb(24, 30, 44));
+        draw_rectangle(_x1 + 1, _fig_bottom, _x2 - 1, _y2 - 1, false);
+        draw_set_color(_t.panel_edge);
+        draw_rectangle(_x1, _y1, _x2, _y2, true);
+        draw_set_halign(fa_center);
+        draw_set_color(_t.ink);
+        draw_text_ext(_cx, _fig_bottom + 6, _name, 16, _w - 12);
+        draw_set_color(_t.dim);
+        draw_text(_cx, _fig_bottom + 24, _kind);
+        draw_set_halign(fa_left);
+        return;
+    }
 
     // shoulders, clipped to the frame: an ellipse whose bottom sits on the plaque
     draw_set_color(_cloth);
@@ -204,7 +244,7 @@ function ui_portrait_figure(_x1, _y1, _x2, _y2, _name, _kind) {
 function ui_stage_width() {
     ui_stage_ensure();
     if (state.stage.name == "") return 0;
-    return 210;
+    return 232;
 }
 
 
@@ -212,8 +252,8 @@ function ui_stage_width() {
 function ui_stage_draw(_panel) {
     ui_stage_ensure();
     if (state.stage.name == "") return;
-    var _w = 190;
-    var _h = 210;
+    var _w = 210;
+    var _h = 300;
     var _slide = state.stage.slide;
     var _eased = 1 - power(1 - _slide, 3);
     var _x2 = _panel.x2 - 18 + round((1 - _eased) * (_w + 30));
