@@ -594,8 +594,10 @@ function process_world_pulse() {
         expired: false,
         seasonal: false
     };
-    array_push(state.contracts, _grim_mercenary_contract);
-    add_log("High-risk contract: Bandit Camp Assault");
+    if (!open_contract_titled("Bandit Camp Assault")) {      // one open copy at a time
+        array_push(state.contracts, _grim_mercenary_contract);
+        add_log("High-risk contract: Bandit Camp Assault");
+    }
     _grim_mercenary_patrons = [];
     for (var p = 0; p < array_length(state.patrons); p++) {
         var _patron = state.patrons[p];
@@ -734,8 +736,10 @@ function process_world_pulse() {
         expired: false,
         seasonal: false
     };
-    array_push(state.contracts, _frontier_warden_contract);
-    add_log("High-risk contract: Bandit Camp Assault");
+    if (!open_contract_titled("Bandit Camp Assault")) {      // one open copy at a time
+        array_push(state.contracts, _frontier_warden_contract);
+        add_log("High-risk contract: Bandit Camp Assault");
+    }
 
     // Add rival agency 'Mercenary Band of the Iron Fist'
     if (irandom(99) < 20) {
@@ -2507,6 +2511,20 @@ function end_day() {
 
 // Some world-pulse contracts are pushed as flat {title, reward, risk, ...} records. Every contract reader
 // expects the init_contracts shape (patron_id, ask_text, mission struct), so wrap flat ones in place.
+/// True while a contract with this title is still on offer (not taken, not expired).
+function open_contract_titled(_title) {
+    for (var i = 0; i < array_length(state.contracts); i++) {
+        var _c = state.contracts[i];
+        if (variable_struct_exists(_c, "title") && _c.title == _title
+                && !(variable_struct_exists(_c, "accepted") && _c.accepted)
+                && !(variable_struct_exists(_c, "expired") && _c.expired)
+                && !(variable_struct_exists(_c, "expires_hour") && state.absolute_hour >= _c.expires_hour)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function normalize_contracts() {
     for (var i = 0; i < array_length(state.contracts); i++) {
         var _c = state.contracts[i];
