@@ -1184,6 +1184,7 @@ function process_hour_tick() {
         state.pending_signing = undefined;
     }
     process_world_pulse();
+    normalize_contracts();      // the pulse pushes flat contracts after its own normalize; reading one crashed
     // Initialize history ledger if not exists
     if (!variable_struct_exists(state, "history_ledger")) {
         state.history_ledger = [];
@@ -2511,6 +2512,7 @@ function normalize_contracts() {
         var _c = state.contracts[i];
         if (variable_struct_exists(_c, "mission")) {
             if (!variable_struct_exists(_c, "title")) _c.title = _c.mission.title;
+            if (!variable_struct_exists(_c, "patron_id")) _c.patron_id = -1;
             continue;
         }
         var _title = variable_struct_exists(_c, "title") ? _c.title : "Open Contract";
