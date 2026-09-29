@@ -487,8 +487,8 @@ load_world_content_xml = function() {
             if (_example_txt != "") {
                 apply_world_content_xml(_example_txt);
                 // Load rival agency names from XML
-                var _rival_agency_path = working_directory + "datafiles/rival_agencies.xml";
-                var _rival_agency_txt = read_text_file(_rival_agency_path);
+                _rival_agency_path = working_directory + "datafiles/rival_agencies.xml";
+                _rival_agency_txt = read_text_file(_rival_agency_path);
                 if (_rival_agency_txt != "") {
                     apply_world_content_xml(_rival_agency_txt);
                     add_log("Rival agencies XML content pack loaded");
@@ -1153,7 +1153,7 @@ issue_agency_gear_to_adventurer = function(_item_name) {
     state.agency_inventory[_item_idx].stock -= 1;
     add_log(_item_name + " issued to " + _a.name + ".");
     if (array_length(state.adventurers) > 0 && state.selected_adventurer_index >= 0) {
-        var _a = state.adventurers[state.selected_adventurer_index];
+        _a = state.adventurers[state.selected_adventurer_index];
         if (array_length(_a.issued_gear) == 0) {
             add_log("Consumable items: Healing Kit, Ward Scroll, Lockpick Roll");
         }
@@ -2589,7 +2589,7 @@ finish_party_assignment = function() {
         var _patron = state.patrons[state.selected_patron_index];
         if (variable_struct_exists(_patron, "flexible_staffing_allowed") && _patron.flexible_staffing_allowed) {
             // Check if we're exceeding the patron's stated max party size
-            var _contract = get_selected_contract();
+            _contract = get_selected_contract();
             if (is_struct(_contract) && variable_struct_exists(_contract, "mission") && variable_struct_exists(_contract.mission, "patron_max_party")) {
                 var _patron_max = _contract.mission.patron_max_party;
                 var _party_size = array_length(selected_party());
@@ -3631,6 +3631,7 @@ resolve_active_mission = function(_active) {
         }
     }
 
+    var _inj_idx = -1;       // set below only when someone was injured
     if (_result.injury_happened) {
     // Update injury telemetry
     if (variable_struct_exists(state, "injury_telemetry")) {
@@ -3652,7 +3653,7 @@ resolve_active_mission = function(_active) {
             }
         }
     }
-        var _inj_idx = get_adv_index(_result.injured_adv_id);
+        _inj_idx = get_adv_index(_result.injured_adv_id);
         if (_inj_idx >= 0) {
         state.adventurers[_inj_idx].status = "injured";
         change_adventurer_morale(_result.injured_adv_id, -6, "injured on contract");
@@ -3957,7 +3958,7 @@ resolve_active_mission = function(_active) {
         add_log("Injury tier: minor");
     }
     // Patron reaction consequences after debrief
-    var _patron = state.patrons[_active.contract_index];
+    _patron = state.patrons[_active.contract_index];
     if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "temple") {
         // Improve patron relationship based on debrief choice
         if (variable_struct_exists(_result, "debrief_choice") && _result.debrief_choice == "Share victory celebration with team (+2 morale, +1 trust)") {
@@ -4104,12 +4105,12 @@ start_mission = function() {
             // Check for personality conflicts in the party
             var _conflict_detected = false;
             var _conflict_text = "";
-            for (var i = 0; i < array_length(_party_ids); i++) {
-                var _id1 = _party_ids[i];
+            for (var _k = 0; _k < array_length(_party_ids); _k++) {
+                var _id1 = _party_ids[_k];
                 var _idx1 = get_adv_index(_id1);
                 if (_idx1 >= 0) {
                     var _adv1 = state.adventurers[_idx1];
-                    for (var j = i + 1; j < array_length(_party_ids); j++) {
+                    for (var j = _k + 1; j < array_length(_party_ids); j++) {
                         var _id2 = _party_ids[j];
                         var _idx2 = get_adv_index(_id2);
                         if (_idx2 >= 0) {
@@ -4979,8 +4980,8 @@ process_command = function(_raw) {
         case "SCOUT": office_activity_scout_rival(); break;
         case "COUNTER": office_activity_counteroffer(); break;
 
-        case "MODE":
         case "PITCHING": state.mode = MODE.PITCHING; add_log("Pitching mode: Agency strengths available"); add_log("Strength: Reputation"); add_log("Strength: Roster Quality"); break;
+        case "MODE":
             if (array_length(_parts) > 1) {
                 var _m = _parts[1];
                 switch (_m) {

@@ -667,7 +667,7 @@ if (state.card_overlay.open) {
     var _overlay_y1 = 24;
     var _overlay_x2 = _gw - _overlay_pad;
     var _overlay_y2 = _gh - 24;
-    var _header_h = 72;
+    _header_h = 72;
     var _column_gap = 14;
     var _columns_y1 = _overlay_y1 + _header_h + 12;
     var _columns_y2 = _overlay_y2 - 16;

@@ -596,7 +596,7 @@ function process_world_pulse() {
     };
     array_push(state.contracts, _grim_mercenary_contract);
     add_log("High-risk contract: Bandit Camp Assault");
-    var _grim_mercenary_patrons = [];
+    _grim_mercenary_patrons = [];
     for (var p = 0; p < array_length(state.patrons); p++) {
         var _patron = state.patrons[p];
         if (variable_struct_exists(_patron, "patron_class") && _patron.patron_class == "grim_mercenary") {
@@ -919,7 +919,7 @@ function process_world_pulse() {
             }
         }
         if (!_already_exists) {
-            var _goblin_raid_contract = {
+            _goblin_raid_contract = {
                 title: "Goblin Raids in Spring",
                 description: "Goblin raiders threaten the eastern villages.",
                 difficulty: 20,
@@ -1119,7 +1119,7 @@ function process_rival_offer() {
     // Add log message for the general rival offer
     add_log("Rival offer from " + _org + "; " + _adventurer.name + " accepted a rival agency offer.");
     // Check if the selected organization has elite magical talent
-    var _has_elite_magical_talent = false;
+    _has_elite_magical_talent = false;
     if (_org == "Arcane Order of the Silver Flame") {
         _has_elite_magical_talent = true;
     }
@@ -1957,7 +1957,7 @@ function end_day() {
     }
 
     // Set danger level for known cities
-    var _home_city = home_city_id();
+    _home_city = home_city_id();
     for (var i = 0; i < array_length(state.cities); i++) {
         var _city = state.cities[i];
         if (_city.known && _city.id != _home_city) {
@@ -2081,7 +2081,7 @@ function end_day() {
         add_log("Prestige patron requests: Lady Merrow Vale now offers higher-quality contracts.");
     }
     // Patron satisfaction summary
-    var _favored = 0, _warm = 0, _neutral = 0, _strained = 0, _hostile = 0;
+    _favored = 0; _warm = 0; _neutral = 0; _strained = 0; _hostile = 0;
     for (var i = 0; i < array_length(state.patrons); i++) {
         var _satisfaction = state.patrons[i].satisfaction;
         if (_satisfaction >= 75) _favored++;
@@ -2240,7 +2240,7 @@ function end_day() {
     // Check for party members in other cities and offer transfer option
     var _city_transfers = [];
     var _has_transfers = false;
-    var _home_city = home_city_id();
+    _home_city = home_city_id();
     for (var i = 0; i < array_length(state.adventurers); i++) {
         var _a = state.adventurers[i];
         var _city_id = adventurer_city_id(_a);
