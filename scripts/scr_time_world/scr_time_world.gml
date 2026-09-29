@@ -419,7 +419,7 @@ function process_world_pulse() {
 
                 if (_elite_magical_talent && irandom(99) < 25) {
                     state.rival_telemetry.total_rival_pressure += 1;
-                    add_log("Rival Telemetry: Rival agencies are aggressively courting elite magical talent.");
+                    debug_log("Rival Telemetry: Rival agencies are aggressively courting elite magical talent.");
                 }
 
                 // Log patron pressure
@@ -1504,10 +1504,10 @@ function run_overnight_maintenance() {
 
     // Log morale decay events
     if (_recovered > 0) {
-        add_log("Morale Telemetry: " + string(_recovered) + " adventurer(s) recovered overnight.");
+        debug_log("Morale Telemetry: " + string(_recovered) + " adventurer(s) recovered overnight.");
     }
     if (_lured > 0) {
-        add_log("Morale Telemetry: " + string(_lured) + " high-value adventurer(s) became unavailable to rival offers.");
+        debug_log("Morale Telemetry: " + string(_lured) + " high-value adventurer(s) became unavailable to rival offers.");
     }
 
     // Process idle adventurer pressure
@@ -1590,17 +1590,15 @@ function end_day() {
     // Print morale telemetry
     if (variable_struct_exists(state, "morale_telemetry")) {
         var _telemetry = state.morale_telemetry;
-        add_log("Morale Telemetry: Recovered: " + string(_telemetry.total_recovered) + ", Lured: " + string(_telemetry.total_lured) + ", Idle Pressure Events: " + string(_telemetry.idle_pressure_count) + ", Contract Pressure Events: " + string(_telemetry.contract_pressure_count));
+        debug_log("Morale Telemetry: Recovered: " + string(_telemetry.total_recovered) + ", Lured: " + string(_telemetry.total_lured) + ", Idle Pressure Events: " + string(_telemetry.idle_pressure_count) + ", Contract Pressure Events: " + string(_telemetry.contract_pressure_count));
     }
 
     // Print rival telemetry
     if (variable_struct_exists(state, "rival_telemetry")) {
         var _telemetry = state.rival_telemetry;
-        add_log("Rival Telemetry: Total Pressure Events: " + string(_telemetry.total_rival_pressure) + ", Free Agent Pressure: " + string(_telemetry.total_free_agent_pressure) + ", Patron Pressure: " + string(_telemetry.total_patron_pressure));
+        debug_log("Rival Telemetry: Total Pressure Events: " + string(_telemetry.total_rival_pressure) + ", Free Agent Pressure: " + string(_telemetry.total_free_agent_pressure) + ", Patron Pressure: " + string(_telemetry.total_patron_pressure));
     }
 
-    state.debug_mission_scoring = true;
-    state.debug_negotiation_scoring = true;
     // Show daily campaign digest
     if (!variable_struct_exists(state, "campaign_digest_last_shown") || state.campaign_digest_last_shown != state.day) {
         state.campaign_digest_last_shown = state.day;
@@ -2238,9 +2236,9 @@ function end_day() {
     // Log injury telemetry
     if (variable_struct_exists(state, "injury_telemetry")) {
         var _telemetry = state.injury_telemetry;
-        add_log("Injury Telemetry: Mission type Security - " + string(_telemetry.security.injured) + "/" + string(_telemetry.security.total) + " injured");
-        add_log("Injury Telemetry: Mission type Recovery - " + string(_telemetry.recovery.injured) + "/" + string(_telemetry.recovery.total) + " injured");
-        add_log("Injury Telemetry: Mission type Diplomatic - " + string(_telemetry.diplomatic.injured) + "/" + string(_telemetry.diplomatic.total) + " injured");
+        debug_log("Injury Telemetry: Mission type Security - " + string(_telemetry.security.injured) + "/" + string(_telemetry.security.total) + " injured");
+        debug_log("Injury Telemetry: Mission type Recovery - " + string(_telemetry.recovery.injured) + "/" + string(_telemetry.recovery.total) + " injured");
+        debug_log("Injury Telemetry: Mission type Diplomatic - " + string(_telemetry.diplomatic.injured) + "/" + string(_telemetry.diplomatic.total) + " injured");
     }
     // Check for party members in other cities and offer transfer option
     var _city_transfers = [];

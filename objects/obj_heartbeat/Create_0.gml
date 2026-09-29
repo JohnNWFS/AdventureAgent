@@ -31,6 +31,7 @@ STAT_CAP = 12;
 
 state = {
     mode: MODE.PLANNING,
+    debug_mode: true,          // DEBUG toggles dev-only log lines (scoring, telemetry); on by default
 
     // Time simulation
     absolute_hour: 8, // Day 1, 08:00
@@ -291,6 +292,16 @@ add_log = function(_msg) {
         array_delete(state.logs, 0, 1);
     }
     state.log_scroll = 0;
+};
+
+/// Debug mode shows dev-only lines (mission scoring, telemetry) that normal play would hide.
+/// On by default; the DEBUG command toggles it. Saves without the field count as on.
+debug_on = function() {
+    return !variable_struct_exists(state, "debug_mode") || state.debug_mode;
+};
+
+debug_log = function(_msg) {
+    if (debug_on()) add_log(_msg);
 };
 
 check_game_over = function() {
@@ -3437,8 +3448,7 @@ simulate_mission = function(_mission, _party, _delay_hours) {
     var _delay_penalty = min(12, floor(_delay_hours / 6) * 2);
     var _score = (_raw_power * _rel_mod + _roll) - _delay_penalty;
     var _margin = round(_score - _target);
-    // Set at the end of the first end_day; a mission resolving before then read an unset field and crashed.
-    if (variable_struct_exists(state, "debug_mission_scoring") && state.debug_mission_scoring) {
+    if (debug_on()) {
         add_log("DEBUG: Mission scoring details");
         add_log("DEBUG: Party composition score: " + string(_raw_power));
         add_log("DEBUG: Outcome probability: " + string(_margin));
@@ -4815,7 +4825,7 @@ process_command = function(_raw) {
 
     switch (_cmd) {
         case "HELP":
-            add_log("Commands: HELP, CARDS, MARKET, TARGET <n>, BONUS <g>, RATE <g>, COMM <pct>, OFFER, ACCEPTCOUNTER, DECLINECOUNTER, PATRONS, PATRON <n>, MISSIONS, ADVENTURERS, START, NEXTDAY, MISSION <n>, PARTY <n>, CITIES, TRANSFER <n> <city>, LAYOUT, CASINO, WAGER <g>, GAME <CRAPS|WHEEL|DRAGON21>, ROLL, SPIN, DEAL, HIT, STAND, RESEARCH, RECRUIT, SCOUT, COUNTER, SIMULATE, DICE, MODE <name>");
+            add_log("Commands: HELP, CARDS, MARKET, TARGET <n>, BONUS <g>, RATE <g>, COMM <pct>, OFFER, ACCEPTCOUNTER, DECLINECOUNTER, PATRONS, PATRON <n>, MISSIONS, ADVENTURERS, START, NEXTDAY, MISSION <n>, PARTY <n>, CITIES, TRANSFER <n> <city>, LAYOUT, CASINO, WAGER <g>, GAME <CRAPS|WHEEL|DRAGON21>, ROLL, SPIN, DEAL, HIT, STAND, RESEARCH, RECRUIT, SCOUT, COUNTER, SIMULATE, DICE, MODE <name>, DEBUG [ON|OFF]");
             add_log("New patron type: Temple of the Sacred Flame; Oath-based contract; Sacred service");
         break;
 
@@ -4833,6 +4843,14 @@ process_command = function(_raw) {
 
         case "CITIES":
             print_cities();
+        break;
+
+        case "DEBUG":
+            // DEBUG or DEBUG MODE toggles; DEBUG ON / DEBUG OFF (or DEBUG MODE ON / OFF) set it.
+            var _debug_arg = _parts[array_length(_parts) - 1];
+            var _debug_want = (_debug_arg == "ON") ? true : ((_debug_arg == "OFF") ? false : !debug_on());
+            state.debug_mode = _debug_want;
+            add_log("Debug mode: " + (_debug_want ? "ON - scoring and telemetry lines shown." : "OFF - scoring and telemetry lines hidden."));
         break;
 
         case "LAYOUT":
