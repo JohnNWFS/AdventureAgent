@@ -58,6 +58,34 @@ function ui_panel(_x1, _y1, _x2, _y2, _title, _c1, _c2) {
     draw_set_color(c_white);
     draw_text(_x1 + 8, _y1 + 5, _title);
     ui_record_rect(_title, _x1, _y1, _x2, _y2);
+    // Desk scene UI
+    if (_title == "Planning Board") {
+        var _desk_msg = "Desk: ";
+        var _has_letters = false;
+        var _has_ledger = false;
+        var _is_night = (state.hour >= 18 || state.hour < 6);
+        var _has_gold_owed = (is_undefined(state.gold_owed) ? false : state.gold_owed > 0);
+
+        if (_has_gold_owed) {
+            _has_ledger = true;
+        }
+
+        if (_has_letters || _has_ledger || _is_night) {
+            var _desk_items = [];
+            if (_has_letters) {
+                array_push(_desk_items, "Letters waiting");
+            }
+            if (_has_ledger) {
+                array_push(_desk_items, "Ledger open");
+            }
+            if (_is_night) {
+                array_push(_desk_items, "Lamp lit");
+            }
+
+            _desk_msg += array_join_text(_desk_items, ", ");
+            add_log(_desk_msg);
+        }
+    }
     // The ledger's own lines are drawn by the shell from the top; these sit under them.
     if (_title == "Guild Ledger" && array_length(state.adventurers) > 0) {
         var _y = _y1 + 244;
