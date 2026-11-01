@@ -260,6 +260,51 @@ function ui_stage_draw(_panel) {
     var _x1 = _x2 - _w;
     var _y1 = _panel.y1 + 46;
     ui_portrait_figure(_x1, _y1, _x1 + _w, _y1 + _h, state.stage.name, state.stage.subtitle);
+    // Draw location strip across top of stage panel
+    var _strip_y = _y1 - 30;
+    var _strip_x = _x1;
+    var _strip_width = _w;
+
+    // Get mission locations
+    var _locations = [];
+    for (var i = 0; i < array_length(state.missions); i++) {
+        var _mission = state.missions[i];
+        if (variable_struct_exists(_mission, "location") && variable_struct_exists(_mission, "type")) {
+            array_push(_locations, {location: _mission.location, type: _mission.type});
+        }
+    }
+
+    // Draw strip background
+    draw_set_color(c_black);
+    draw_rectangle(_strip_x, _strip_y, _strip_x + _strip_width, _strip_y + 20, false);
+
+    // Draw location info
+    var _x_pos = _strip_x + 5;
+    var _text_color = c_white;
+    for (var i = 0; i < array_length(_locations); i++) {
+        var _loc = _locations[i];
+        var _text = "Location: " + _loc.location + " (" + _loc.type + ")";
+        draw_set_color(_text_color);
+        draw_text(_x_pos, _strip_y + 2, _text);
+        _x_pos += string_length(_text) * 8 + 10;
+        if (i < array_length(_locations) - 1) {
+            draw_text(_x_pos, _strip_y + 2, "-");
+            _x_pos += 10;
+        }
+    }
+
+    // Print to console for testing
+    if (array_length(_locations) > 0) {
+        var _log_text = "";
+        for (var i = 0; i < array_length(_locations); i++) {
+            var _loc = _locations[i];
+            _log_text += "Location: " + _loc.location + " (" + _loc.type + ")";
+            if (i < array_length(_locations) - 1) {
+                _log_text += " - ";
+            }
+        }
+        add_log(_log_text);
+    }
     ui_record_rect("Portrait: " + state.stage.name, _x1, _y1, _x1 + _w, _y1 + _h);
 }
 

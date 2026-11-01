@@ -283,7 +283,7 @@ rectangles. LAYOUT must report 0 problems after your change.
 - [x] Portrait for the free-agent prospect being scouted and for rival agents in the news
 - [ ] Desk scene in the centre panel: a desk drawn with ui helpers, with props that follow state (letters waiting, ledger open when gold is owed, lamp lit at night)
 - [x] Agent poses by mode: reading letters in contracting, at the wall map during a mission, counting coin at day end
-- [ ] Contract location strip across the top of the centre panel: road, ruin, chapel or harbour by mission type
+- [x] Contract location strip across the top of the centre panel: road, ruin, chapel or harbour by mission type
 - [ ] Mode-specific centre panel: the centre shows the current screen's content instead of the same four lines everywhere
 
 ## Immediate Build Order
