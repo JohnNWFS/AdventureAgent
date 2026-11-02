@@ -301,6 +301,24 @@ function ui_stage_draw(_panel) {
     var _x1 = _x2 - _w;
     var _y1 = _panel.y1 + 46;
     ui_portrait_figure(_x1, _y1, _x1 + _w, _y1 + _h, state.stage.name, state.stage.subtitle);
+    // Draw mode-specific content in centre panel
+    var _mode_text = "";
+    if (state.mode == "PLANNING") {
+        _mode_text = "Desk / Agent View: Visitors and letters appear here.";
+    } else if (state.mode == "MISSION") {
+        if (variable_struct_exists(state, "selected_mission") && variable_struct_exists(state.selected_mission, "title")) {
+            _mode_text = "Selected Mission: " + state.selected_mission.title;
+        } else {
+            _mode_text = "Selected Mission: None";
+        }
+    }
+
+    if (_mode_text != "") {
+        var _center_x = (_x1 + _x2) / 2;
+        var _center_y = _y1 + _h + 20;
+        draw_set_color(c_white);
+        draw_text(_center_x - string_length(_mode_text) * 4, _center_y, _mode_text);
+    }
     // Draw location strip across top of stage panel
     var _strip_y = _y1 - 30;
     var _strip_x = _x1;
