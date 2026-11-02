@@ -179,7 +179,7 @@ This backlog is ordered by gameplay impact for a medieval-ish fantasy adventurer
 - [x] Current client morale/trust
 - [x] Patron satisfaction
 - [x] Rival threat
-- [ ] Agency finances
+- [x] Agency finances
 - [x] Add history browser for contracts, client changes, and rival incidents
 - [x] Add tooltips / glossary for morale, trust, and contract terms
 

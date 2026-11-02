@@ -57,6 +57,19 @@ function ui_panel(_x1, _y1, _x2, _y2, _title, _c1, _c2) {
     draw_rectangle(_x1 + 1, _y1 + 1, _x2 - 1, _y1 + _t.title_h, false);
     draw_set_color(c_white);
     draw_text(_x1 + 8, _y1 + 5, _title);
+    // Finance summary pane
+    if (_title == "Planning Board" && variable_struct_exists(state, "finance_summary")) {
+        var _fs = state.finance_summary;
+        var _y = _y1 + 244;
+        draw_set_color(ui_theme().dim);
+        draw_text(_x1 + 10, _y, "Finance Summary:");
+        _y += 20;
+        draw_text(_x1 + 10, _y, "Gold Balance: " + string(_fs.gold_balance) + "g");
+        _y += 20;
+        draw_text(_x1 + 10, _y, "Weekly Wage Burn: " + string(_fs.weekly_wage_burn) + "g");
+        _y += 20;
+        draw_text(_x1 + 10, _y, "Last Week's Net: " + string(_fs.last_week_net) + "g");
+    }
     ui_record_rect(_title, _x1, _y1, _x2, _y2);
     // Desk scene UI
     if (_title == "Planning Board") {

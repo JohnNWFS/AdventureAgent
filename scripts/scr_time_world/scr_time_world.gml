@@ -2504,7 +2504,7 @@ function end_day() {
     state.finance_summary.last_week_net = 0;
 
     // Print finance summary
-    add_log("Finance Summary: Gold Balance: " + string(state.finance_summary.gold_balance) + "g, Gold Owed: " + string(state.finance_summary.gold_owed) + "g, Weekly Wage Burn: " + string(state.finance_summary.weekly_wage_burn) + "g, Last Week's Net: " + string(state.finance_summary.last_week_net) + "g");
+    add_log("Finance Summary: Gold Balance: " + string(state.finance_summary.gold_balance) + "g, Weekly Wage Burn: " + string(state.finance_summary.weekly_wage_burn) + "g, Last Week's Net: " + string(state.finance_summary.last_week_net) + "g");
 }
 
 // Some world-pulse contracts are pushed as flat {title, reward, risk, ...} records. Every contract reader
